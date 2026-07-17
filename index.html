@@ -317,13 +317,13 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <a class="vid" href="https://www.youtube.com/results?search_query=%EC%9D%B8%EC%9B%90%EC%88%98%20%EA%B2%8C%EC%9E%84%20%EC%88%A0%EC%9E%90%EB%A6%AC" target="_blank">📺 영상으로 배우기</a></div>
 
 <div class="g"><div class="g-top"><h3>🎧 연대별 노래 맞추기</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd tool">도구연계</span></div></div>
-<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · <b>90·00·10·20년대 유명곡 수십 곡 사전 등록</b></p>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · <b>90·00·10·20년대 유명곡 181곡 사전 등록</b></p>
 <div class="how"><ol>
 <li>도구 탭 <b>연대별 노래 맞추기</b>에서 연대 선택 (90/00/10/20년대 또는 전체)</li>
 <li><b>랜덤 곡 출제</b> → 화면 가린 채 유튜브가 <b>1·3·5초</b>만 자동재생 (스포 없음)</li>
-<li>재생이 끝나면 <b>답 타이머(기본 3초)</b> 시작 — 시간 안에 못 외치면 <b style="color:#ff5f8f">"땡!"</b></li>
-<li>먼저 제목(또는 가수) 외친 사람 승점 → <b>맞췄다!</b> 버튼으로 정답·영상 공개</li></ol></div>
-<p class="punish">⚡ 땡(시간초과) 라운드는 전원 or 최하 득점자 벌칙 · DJ 없이 셀프 진행</p>
+<li><b>시간제한 없이</b> 천천히 제목·가수 맞히기 (필요하면 🔁 다시 듣기)</li>
+<li>먼저 맞힌 사람 승점 → <b>👁 정답 보기</b>로 정답·영상 확인 후 ⏭ 다음 곡</li></ol></div>
+<p class="punish">⚡ 못 맞힌 사람/팀 벌칙 · DJ 없이 셀프 진행</p>
 <span class="golink" onclick="goTool('toolSong')">⚡ 연대별 노래 맞추기 열기 →</span>
 <span class="golink" style="background:linear-gradient(90deg,#ff5f8f,#ffb340)" onclick="goTool('toolIntro')">🎵 링크 직접 넣기 →</span></div>
 
@@ -618,9 +618,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 
 <div class="t-card" id="toolSong">
   <h3>🎧 연대별 노래 맞추기</h3>
-  <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 수십 곡 사전 등록 · 연대 골라 랜덤 출제 → 자동재생(스포 없음) → <b>3초 안에 정답!</b> 오버하면 <b style="color:var(--pink)">땡</b></p>
-  <p class="hint" style="background:rgba(79,195,255,.1);border:1px solid rgba(79,195,255,.3);border-radius:10px;padding:8px 10px;margin-bottom:10px">🔑 광고 없이·끊김 없이 들으려면 <b>같은 브라우저에서 유튜브에 로그인</b>해두세요 (프리미엄이면 자동 무광고). 앱이 그 로그인 상태로 재생해요.
-    <a href="https://www.youtube.com/account" target="_blank" style="display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:#101334;background:linear-gradient(90deg,#4fc3ff,#3ce8b0);padding:5px 12px;border-radius:999px;text-decoration:none">▶ 유튜브 로그인 열기</a></p>
+  <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 181곡 사전 등록 · 연대 골라 랜덤 출제 → 자동재생(스포 없음) → 시간제한 없이 천천히 맞히고 <b>👁 정답 보기</b>로 확인</p>
   <div class="dec-tabs" id="decTabs">
     <button class="dec on" data-d="all">🎲 전체</button>
     <button class="dec" data-d="1990s">90년대</button>
@@ -633,17 +631,11 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
     <label><input type="radio" name="songSec" value="3" checked><span>3초</span></label>
     <label><input type="radio" name="songSec" value="5"><span>5초</span></label>
   </div>
-  <div class="seg"><span class="seglabel">⏱ 답 제한</span>
-    <label><input type="radio" name="ansSec" value="3" checked><span>3초</span></label>
-    <label><input type="radio" name="ansSec" value="5"><span>5초</span></label>
-    <label><input type="radio" name="ansSec" value="10"><span>10초</span></label>
-  </div>
   <label class="snd-toggle" style="margin:4px 0 10px"><input type="checkbox" id="songRand"> 🎲 랜덤 구간 재생 (하드코어)</label>
   <button class="big-btn" onclick="songRoll()">🎲 랜덤 곡 출제 (재생)</button>
   <div class="result" id="songRes" style="font-size:clamp(16px,5vw,22px)">연대를 고르고 출제하세요 🎵</div>
-  <div class="ans-clock" id="ansClock" style="display:none">3.0</div>
   <div>
-    <button class="big-btn b2" id="songGot" style="display:none;font-size:14px;padding:11px 22px" onclick="songGot()">🙋 맞췄다! 정답 공개</button>
+    <button class="big-btn b2" id="songGot" style="display:none;font-size:15px;padding:12px 24px" onclick="songGot()">👁 정답 보기</button>
     <button class="big-btn b3" id="songReplay" style="display:none;font-size:13px;padding:10px 18px" onclick="songReplay()">🔁 다시 듣기</button>
     <button class="big-btn" id="songNext" style="display:none;font-size:14px;padding:11px 22px;background:linear-gradient(92deg,#a78bfa,#4fc3ff)" onclick="songRoll()">⏭ 다음 곡</button>
   </div>
@@ -1367,10 +1359,8 @@ const SONGS={
 /* SONGS_DATA_END */
 let songDecade="all",songCur=null,songBusy=false;
 let sgPlayer=null,sgCurId=null,sgStopT=0;
-let ansRAF=0,ansT0=0,ansDur=3000,ansRunning=false;
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function songSecVal(){return +document.querySelector('input[name="songSec"]:checked').value;}
-function ansSecVal(){return +document.querySelector('input[name="ansSec"]:checked').value;}
 function songPlayable(){
   const arr=songDecade==="all"
     ? Object.entries(SONGS).flatMap(([d,list])=>list.map(s=>({...s,d})))
@@ -1384,29 +1374,16 @@ document.querySelectorAll("#decTabs .dec").forEach(b=>b.onclick=()=>{
   $("songRes").textContent=(b.dataset.d==="all"?"전체":DEC_LABEL[b.dataset.d])+" · 재생가능 "+n+"곡 — 출제하세요 🎵";
   beep(700,.05,.15,"square");
 });
-/* 땡 버저 */
-function ddang(){
-  if(!sndOK())return;
-  try{const a=ac();
-  [0,0.18].forEach((w,i)=>{const o=a.createOscillator(),g=a.createGain();
-    o.type="square";o.frequency.setValueAtTime(i?300:380,a.currentTime+w);
-    o.frequency.exponentialRampToValueAtTime(i?150:200,a.currentTime+w+0.35);
-    g.gain.setValueAtTime(0.4,a.currentTime+w);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+w+0.4);
-    o.connect(g);g.connect(a.destination);o.start(a.currentTime+w);o.stop(a.currentTime+w+0.42);});
-  }catch(e){}
-}
 function songRoll(){
   if(songBusy)return;
   const pool=songPlayable();
   if(!pool.length){$("songRes").textContent="⚠️ 이 연대엔 재생 가능한 곡이 아직 없어요";return;}
-  stopAnsTimer();songBusy=true;
+  songBusy=true;
   songCur=pool[Math.floor(Math.random()*pool.length)];
   $("songAnsBox").style.display="none";$("songEmbed").innerHTML="";
   $("songGot").style.display="none";$("songReplay").style.display="none";$("songNext").style.display="none";
-  $("ansClock").style.display="none";
   $("songRes").textContent="⏳ 로딩 중...";
-  sgPlay(songCur.v,songSecVal(),startAnsTimer);
+  sgPlay(songCur.v,songSecVal(),afterPlay);
 }
 function sgFallback(id,sec,start,after){
   const h=$("sgHolder");
@@ -1438,52 +1415,25 @@ function sgPlay(id,sec,after){
     }
   },()=>{sgFallback(id,sec,start,after);});
 }
-function startAnsTimer(){
-  ansDur=ansSecVal()*1000;
-  $("ansClock").style.display="block";$("ansClock").className="ans-clock";
-  $("ansClock").textContent=(ansDur/1000).toFixed(1);
+/* 재생이 끝나면 — 시간제한 없이 정답 보기 대기 */
+function afterPlay(){
   $("songGot").style.display="inline-block";$("songReplay").style.display="inline-block";
-  $("songRes").textContent="🎤 정답을 외쳐라!";
-  songBusy=false;ansRunning=true;ansT0=performance.now();
-  let lastSec=Math.ceil(ansDur/1000);
-  beep(880,.08,.25,"square");
-  (function loop(){
-    if(!ansRunning)return;
-    const rem=ansDur-(performance.now()-ansT0);
-    if(rem<=0){ansTimeout();return;}
-    $("ansClock").textContent=(rem/1000).toFixed(1);
-    if(rem<=1000)$("ansClock").className="ans-clock danger";
-    const isec=Math.ceil(rem/1000);
-    if(isec<lastSec){lastSec=isec;beep(520,.05,.15,"square");}
-    ansRAF=requestAnimationFrame(loop);
-  })();
-}
-function stopAnsTimer(){ansRunning=false;cancelAnimationFrame(ansRAF);}
-function ansTimeout(){
-  stopAnsTimer();
-  $("ansClock").textContent="땡!";$("ansClock").className="ans-clock ddang";
-  ddang();
-  if(navigator.vibrate)navigator.vibrate([250,80,250]);
-  document.body.style.background="#5a1030";
-  setTimeout(()=>{document.body.style.background="";},350);
-  revealSong(false);
+  $("songRes").textContent="🎤 노래 맞혀보세요! (준비되면 👁 정답 보기)";
+  songBusy=false;beep(880,.08,.25,"square");
 }
 function songGot(){
   if(!songCur)return;
-  stopAnsTimer();$("ansClock").style.display="none";
-  winJingle();confetti();revealSong(true);
+  winJingle();confetti();revealSong();
 }
 function songReplay(){
   if(!songCur||songBusy)return;
-  stopAnsTimer();$("ansClock").style.display="none";
   $("songGot").style.display="none";$("songReplay").style.display="none";
-  songBusy=true;sgPlay(songCur.v,songSecVal(),startAnsTimer);
+  songBusy=true;sgPlay(songCur.v,songSecVal(),afterPlay);
 }
-function revealSong(got){
-  $("ansClock").style.display="none";
+function revealSong(){
   $("songGot").style.display="none";$("songReplay").style.display="none";
   $("songNext").style.display="inline-block";
-  $("songRes").textContent=got?"🎉 정답!":"❌ 시간 초과 — 땡!";
+  $("songRes").textContent="🎵 정답 공개";
   $("songAnsArtist").textContent="🎵 "+(DEC_LABEL[songCur.d]||"");
   $("songAnsTitle").textContent=songCur.a+" - "+songCur.t;
   $("songEmbed").innerHTML='<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+songCur.v+'" frameborder="0" allowfullscreen></iframe>';
