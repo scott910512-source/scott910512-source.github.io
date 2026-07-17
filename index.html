@@ -1382,8 +1382,8 @@ function songRoll(){
   $("songAnsBox").style.display="none";$("songEmbed").innerHTML="";
   $("songBtns").style.display="none";$("songNext").style.display="none";
   $("songRes").textContent="⏳ 로딩 중...";
-  /* 출제와 동시에 1초 살짝 듣기 */
-  sgPlayAt(songCur.v,songStart,1,()=>showSongBtns("🔈 1초 재생 — 더 듣거나 👁 정답 듣기"));
+  /* 출제와 동시에 1초 살짝 듣기 (로딩 지연 보정으로 실제 2초 재생) */
+  sgPlayAt(songCur.v,songStart,2,()=>showSongBtns("🔈 1초 재생 — 더 듣거나 👁 정답 듣기"));
 }
 function showSongBtns(msg){
   $("songBtns").style.display="block";
@@ -1394,7 +1394,8 @@ function showSongBtns(msg){
 function songListen(sec){
   if(!songCur||songBusy)return;
   songBusy=true;$("songRes").textContent="🔊 "+sec+"초 재생 중...";
-  sgPlayAt(songCur.v,songStart,sec,()=>showSongBtns("🔊 "+sec+"초 재생 완료 — 더 듣거나 👁 정답 듣기"));
+  const play=sec===1?2:sec; /* 1초는 로딩 지연 보정으로 실제 2초 재생 (표기는 1초 유지) */
+  sgPlayAt(songCur.v,songStart,play,()=>showSongBtns("🔊 "+sec+"초 재생 완료 — 더 듣거나 👁 정답 듣기"));
 }
 function songAnswer(){
   if(!songCur||songBusy)return;
