@@ -100,6 +100,37 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .lb tr:first-child td{color:var(--orange);font-weight:800}
 .lb td.r{text-align:right}
 
+/* decade tabs (song quiz) */
+.dec-tabs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 10px}
+.dec{border:1.5px solid var(--line);background:var(--card);color:var(--txt);padding:8px 14px;border-radius:999px;
+ font-size:13px;font-weight:800;cursor:pointer;transition:.15s}
+.dec:active{transform:scale(.93)}
+.dec.on{background:linear-gradient(90deg,#4fc3ff,#3ce8b0);color:#101334;border-color:transparent}
+.seglabel{font-size:12px;color:var(--sub);font-weight:700}
+.seg{display:inline-flex;gap:6px;margin:2px 0 6px;flex-wrap:wrap;justify-content:center}
+.seg label{font-size:12.5px;color:var(--sub);border:1.5px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;font-weight:700}
+.seg input{display:none}
+.seg input:checked+span{color:#101334}
+.seg label:has(input:checked){background:linear-gradient(90deg,#ffb340,#ff5f8f);border-color:transparent;color:#101334}
+/* answer countdown */
+.ans-clock{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:clamp(52px,17vw,84px);font-weight:900;
+ font-variant-numeric:tabular-nums;margin:6px 0 2px;line-height:1;
+ background:linear-gradient(92deg,#3ce8b0,#4fc3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ans-clock.danger{background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ans-clock.ddang{background:linear-gradient(92deg,#ff5f8f,#ff3355);-webkit-background-clip:text;background-clip:text;color:transparent;
+ animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.song-ans{font-size:clamp(20px,6.2vw,30px);font-weight:900;margin:4px 0;
+ background:linear-gradient(92deg,#ffb340,#3ce8b0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.song-artist{font-size:14px;color:var(--sub);font-weight:700}
+.song-list-item{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:8px 10px;border-bottom:1px dashed rgba(255,255,255,.09);font-size:13px;text-align:left}
+.song-list-item .sli-t{font-weight:700}.song-list-item .sli-a{font-size:11.5px;color:var(--sub)}
+.sli-play{flex-shrink:0;border:none;cursor:pointer;font-size:12px;font-weight:800;color:#101334;
+ background:linear-gradient(92deg,#4fc3ff,#3ce8b0);padding:6px 11px;border-radius:999px}
+.song-photo{width:100%;max-width:240px;height:300px;object-fit:contain;border-radius:16px;border:2px solid var(--line);
+ background:rgba(0,0,0,.35);display:block;margin:0 auto}
+
 /* bottle */
 .bottle-zone{position:relative;width:190px;height:190px;margin:6px auto;border-radius:50%;
  border:2px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
@@ -253,15 +284,16 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <li>6인 기준 4~5명 콜이 지옥 난이도</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%EC%9D%B8%EC%9B%90%EC%88%98%20%EA%B2%8C%EC%9E%84%20%EC%88%A0%EC%9E%90%EB%A6%AC" target="_blank">📺 영상으로 배우기</a></div>
 
-<div class="g"><div class="g-top"><h3>🎵 노래 인트로 퀴즈</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">국민게임</span></div></div>
-<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 2대 (유튜브용 + 도구용)</b></p>
+<div class="g"><div class="g-top"><h3>🎧 연대별 노래 맞추기</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · <b>90·00·10·20년대 유명곡 수십 곡 사전 등록</b></p>
 <div class="how"><ol>
-<li>DJ 1명이 유튜브/멜론에서 노래 준비 (화면은 본인만)</li>
-<li>도구 탭 <b>인트로 타이머</b>로 난이도 선택 — <b>1초 / 3초 / 5초</b></li>
-<li>카운트다운 후 "재생!" 신호에 DJ가 재생 → 정확히 시간이 되면 STOP 알림음 — 즉시 일시정지</li>
-<li>가장 먼저 제목(또는 가수) 외치는 사람 승점. 1초 컷 정답자는 2점</li></ol></div>
-<p class="punish">⚡ 라운드 최하 득점자 벌칙 · DJ는 다음 라운드 교대</p>
-<span class="golink" onclick="goTool('toolIntro')">⚡ 인트로 타이머 열기 →</span></div>
+<li>도구 탭 <b>연대별 노래 맞추기</b>에서 연대 선택 (90/00/10/20년대 또는 전체)</li>
+<li><b>랜덤 곡 출제</b> → 화면 가린 채 유튜브가 <b>1·3·5초</b>만 자동재생 (스포 없음)</li>
+<li>재생이 끝나면 <b>답 타이머(기본 3초)</b> 시작 — 시간 안에 못 외치면 <b style="color:#ff5f8f">"땡!"</b></li>
+<li>먼저 제목(또는 가수) 외친 사람 승점 → <b>맞췄다!</b> 버튼으로 정답·영상 공개</li></ol></div>
+<p class="punish">⚡ 땡(시간초과) 라운드는 전원 or 최하 득점자 벌칙 · DJ 없이 셀프 진행</p>
+<span class="golink" onclick="goTool('toolSong')">⚡ 연대별 노래 맞추기 열기 →</span>
+<span class="golink" style="background:linear-gradient(90deg,#ff5f8f,#ffb340)" onclick="goTool('toolIntro')">🎵 링크 직접 넣기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>👑 인물 맞추기 퀴즈</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">국민게임</span></div></div>
 <p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 한국인 + 세계구 유명인만 수록</p>
@@ -552,6 +584,48 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <div class="result" id="introRes" style="font-size:clamp(15px,4.5vw,20px)"></div>
 </div>
 
+<div class="t-card" id="toolSong">
+  <h3>🎧 연대별 노래 맞추기</h3>
+  <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 수십 곡 사전 등록 · 연대 골라 랜덤 출제 → 자동재생(스포 없음) → <b>3초 안에 정답!</b> 오버하면 <b style="color:var(--pink)">땡</b></p>
+  <div class="dec-tabs" id="decTabs">
+    <button class="dec on" data-d="all">🎲 전체</button>
+    <button class="dec" data-d="1990s">90년대</button>
+    <button class="dec" data-d="2000s">00년대</button>
+    <button class="dec" data-d="2010s">10년대</button>
+    <button class="dec" data-d="2020s">20년대</button>
+  </div>
+  <div class="seg"><span class="seglabel">▶ 미리듣기</span>
+    <label><input type="radio" name="songSec" value="1"><span>1초</span></label>
+    <label><input type="radio" name="songSec" value="3" checked><span>3초</span></label>
+    <label><input type="radio" name="songSec" value="5"><span>5초</span></label>
+  </div>
+  <div class="seg"><span class="seglabel">⏱ 답 제한</span>
+    <label><input type="radio" name="ansSec" value="3" checked><span>3초</span></label>
+    <label><input type="radio" name="ansSec" value="5"><span>5초</span></label>
+    <label><input type="radio" name="ansSec" value="10"><span>10초</span></label>
+  </div>
+  <label class="snd-toggle" style="margin:4px 0 10px"><input type="checkbox" id="songRand"> 🎲 랜덤 구간 재생 (하드코어)</label>
+  <button class="big-btn" onclick="songRoll()">🎲 랜덤 곡 출제 (재생)</button>
+  <div class="result" id="songRes" style="font-size:clamp(16px,5vw,22px)">연대를 고르고 출제하세요 🎵</div>
+  <div class="ans-clock" id="ansClock" style="display:none">3.0</div>
+  <div>
+    <button class="big-btn b2" id="songGot" style="display:none;font-size:14px;padding:11px 22px" onclick="songGot()">🙋 맞췄다! 정답 공개</button>
+    <button class="big-btn b3" id="songReplay" style="display:none;font-size:13px;padding:10px 18px" onclick="songReplay()">🔁 다시 듣기</button>
+    <button class="big-btn" id="songNext" style="display:none;font-size:14px;padding:11px 22px;background:linear-gradient(92deg,#a78bfa,#4fc3ff)" onclick="songRoll()">⏭ 다음 곡</button>
+  </div>
+  <div id="sgHolder" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0.01;pointer-events:none"></div>
+  <div id="songAnsBox" style="display:none;margin-top:10px">
+    <div class="song-artist" id="songAnsArtist"></div>
+    <div class="song-ans" id="songAnsTitle"></div>
+    <div id="songEmbed" style="border-radius:12px;overflow:hidden;margin-top:8px"></div>
+  </div>
+  <details style="margin-top:14px;text-align:left">
+    <summary style="cursor:pointer;font-size:13px;font-weight:800;color:var(--sub);text-align:center">📋 등록된 곡 목록 보기 (연대별)</summary>
+    <div id="songList" style="margin-top:8px"></div>
+  </details>
+  <p class="hint" id="songStat" style="margin-top:8px"></p>
+</div>
+
 <div class="t-card" id="toolPerson">
   <h3>👑 인물 카드 뽑기</h3>
   <p class="hint">한국인 + 세계구 유명인만 · 이마 퀴즈 / 설명 퀴즈 / 몸으로 말해요 겸용</p>
@@ -564,7 +638,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <p class="hint"><b>📷 사진 퀴즈 모드</b> — 위키백과 공식 사진을 불러와 얼굴만 보고 맞추기 (이름은 정답 버튼으로)</p>
   <button class="big-btn" style="background:linear-gradient(92deg,#ff5f8f,#a78bfa)" onclick="photoQuiz()">📷 사진으로 출제</button>
   <div id="photoBox" style="display:none;margin-top:12px">
-    <img id="photoImg" alt="누구게?" style="max-width:220px;max-height:260px;border-radius:16px;border:2px solid var(--line)">
+    <img id="photoImg" alt="누구게?" class="song-photo">
     <div><button class="big-btn b2" style="font-size:13px;padding:10px 20px;margin-top:10px" onclick="photoReveal()">👁 정답 공개</button></div>
     <div class="result" id="photoAns" style="display:none;font-size:clamp(20px,6vw,30px)"></div>
   </div>
@@ -1014,6 +1088,221 @@ function ytReveal(){
   winJingle();
 }
 
+/* ===== 연대별 노래 맞추기 ===== */
+const DEC_LABEL={"1990s":"90년대","2000s":"00년대","2010s":"10년대","2020s":"20년대"};
+/* SONGS_DATA_START — 검증된 공식 유튜브 ID (a:가수 t:제목 v:영상ID). v가 빈값이면 검색링크로 대체 */
+const SONGS={
+"1990s":[
+{a:"서태지와 아이들",t:"난 알아요",v:""},
+{a:"서태지와 아이들",t:"하여가",v:""},
+{a:"김건모",t:"잘못된 만남",v:""},
+{a:"룰라",t:"날개 잃은 천사",v:""},
+{a:"클론",t:"꿍따리 샤바라",v:""},
+{a:"터보",t:"Twist King",v:""},
+{a:"H.O.T",t:"Candy",v:""},
+{a:"젝스키스",t:"커플",v:""},
+{a:"S.E.S",t:"Dreams Come True",v:""},
+{a:"핑클",t:"내 남자친구에게",v:""},
+{a:"god",t:"어머님께",v:""},
+{a:"조성모",t:"To Heaven",v:""},
+{a:"이정현",t:"와",v:""},
+{a:"신화",t:"T.O.P",v:""}
+],
+"2000s":[
+{a:"보아",t:"No.1",v:""},
+{a:"비 (Rain)",t:"태양을 피하는 방법",v:""},
+{a:"이효리",t:"10 Minutes",v:""},
+{a:"동방신기",t:"주문 (Mirotic)",v:""},
+{a:"빅뱅",t:"거짓말",v:""},
+{a:"빅뱅",t:"하루하루",v:""},
+{a:"원더걸스",t:"Tell Me",v:""},
+{a:"원더걸스",t:"Nobody",v:""},
+{a:"소녀시대",t:"Gee",v:""},
+{a:"슈퍼주니어",t:"Sorry Sorry",v:""},
+{a:"브라운아이드걸스",t:"Abracadabra",v:""},
+{a:"2NE1",t:"I Don't Care",v:""},
+{a:"카라",t:"Mister",v:""},
+{a:"에픽하이",t:"Fly",v:""}
+],
+"2010s":[
+{a:"싸이 (PSY)",t:"강남스타일",v:"9bZkp7q19f0"},
+{a:"아이유",t:"좋은 날",v:""},
+{a:"소녀시대",t:"The Boys",v:""},
+{a:"빅뱅",t:"Fantastic Baby",v:""},
+{a:"빅뱅",t:"뱅뱅뱅",v:""},
+{a:"EXO",t:"으르렁 (Growl)",v:""},
+{a:"방탄소년단",t:"불타오르네 (Fire)",v:""},
+{a:"방탄소년단",t:"DNA",v:""},
+{a:"트와이스",t:"TT",v:""},
+{a:"트와이스",t:"Cheer Up",v:""},
+{a:"트와이스",t:"What is Love?",v:""},
+{a:"블랙핑크",t:"뚜두뚜두",v:""},
+{a:"레드벨벳",t:"빨간 맛",v:""},
+{a:"마마무",t:"넌 is 뭔들",v:""},
+{a:"볼빨간사춘기",t:"우주를 줄게",v:""}
+],
+"2020s":[
+{a:"방탄소년단",t:"Dynamite",v:""},
+{a:"방탄소년단",t:"Butter",v:""},
+{a:"아이브",t:"LOVE DIVE",v:""},
+{a:"아이브",t:"I AM",v:""},
+{a:"뉴진스",t:"Hype Boy",v:""},
+{a:"뉴진스",t:"Ditto",v:""},
+{a:"르세라핌",t:"ANTIFRAGILE",v:""},
+{a:"에스파",t:"Next Level",v:""},
+{a:"에스파",t:"Supernova",v:""},
+{a:"블랙핑크",t:"Pink Venom",v:""},
+{a:"(여자)아이들",t:"TOMBOY",v:""},
+{a:"(여자)아이들",t:"퀸카 (Queencard)",v:""},
+{a:"세븐틴",t:"손오공",v:""},
+{a:"지수 (JISOO)",t:"꽃 (FLOWER)",v:""},
+{a:"임영웅",t:"사랑은 늘 도망가",v:""},
+{a:"데이식스",t:"한 페이지가 될 수 있게",v:""}
+]
+};
+/* SONGS_DATA_END */
+let songDecade="all",songCur=null,songBusy=false;
+let sgPlayer=null,sgCurId=null,sgStopT=0;
+let ansRAF=0,ansT0=0,ansDur=3000,ansRunning=false;
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function songSecVal(){return +document.querySelector('input[name="songSec"]:checked').value;}
+function ansSecVal(){return +document.querySelector('input[name="ansSec"]:checked').value;}
+function songPlayable(){
+  const arr=songDecade==="all"
+    ? Object.entries(SONGS).flatMap(([d,list])=>list.map(s=>({...s,d})))
+    : (SONGS[songDecade]||[]).map(s=>({...s,d:songDecade}));
+  return arr.filter(s=>s.v);
+}
+document.querySelectorAll("#decTabs .dec").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#decTabs .dec").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");songDecade=b.dataset.d;renderSongList();
+  const n=songPlayable().length;
+  $("songRes").textContent=(b.dataset.d==="all"?"전체":DEC_LABEL[b.dataset.d])+" · 재생가능 "+n+"곡 — 출제하세요 🎵";
+  beep(700,.05,.15,"square");
+});
+/* 땡 버저 */
+function ddang(){
+  if(!sndOK())return;
+  try{const a=ac();
+  [0,0.18].forEach((w,i)=>{const o=a.createOscillator(),g=a.createGain();
+    o.type="square";o.frequency.setValueAtTime(i?300:380,a.currentTime+w);
+    o.frequency.exponentialRampToValueAtTime(i?150:200,a.currentTime+w+0.35);
+    g.gain.setValueAtTime(0.4,a.currentTime+w);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+w+0.4);
+    o.connect(g);g.connect(a.destination);o.start(a.currentTime+w);o.stop(a.currentTime+w+0.42);});
+  }catch(e){}
+}
+function songRoll(){
+  if(songBusy)return;
+  const pool=songPlayable();
+  if(!pool.length){$("songRes").textContent="⚠️ 이 연대엔 재생 가능한 곡이 아직 없어요";return;}
+  stopAnsTimer();songBusy=true;
+  songCur=pool[Math.floor(Math.random()*pool.length)];
+  $("songAnsBox").style.display="none";$("songEmbed").innerHTML="";
+  $("songGot").style.display="none";$("songReplay").style.display="none";$("songNext").style.display="none";
+  $("ansClock").style.display="none";
+  $("songRes").textContent="⏳ 로딩 중...";
+  sgPlay(songCur.v,songSecVal(),startAnsTimer);
+}
+function sgFallback(id,sec,start,after){
+  const h=$("sgHolder");
+  h.innerHTML='<iframe width="200" height="120" src="https://www.youtube.com/embed/'+id+
+    '?autoplay=1&start='+start+'&controls=0&playsinline=1" allow="autoplay" frameborder="0"></iframe>';
+  sgCurId=id;sgPlayer=null;
+  $("songRes").textContent="🔊 재생 시도 중... ("+sec+"초)";
+  clearTimeout(sgStopT);
+  sgStopT=setTimeout(()=>{h.innerHTML="";after&&after();},sec*1000+400);
+}
+function sgPlay(id,sec,after){
+  const start=$("songRand").checked?15+Math.floor(Math.random()*80):0;
+  ytLoad(()=>{
+    const go=()=>{
+      try{sgPlayer.seekTo(start,true);sgPlayer.playVideo();}catch(e){}
+      $("songRes").textContent="🔊 재생 중... ("+sec+"초)";
+      clearTimeout(sgStopT);
+      sgStopT=setTimeout(()=>{try{sgPlayer.pauseVideo();}catch(e){}after&&after();},sec*1000);
+    };
+    if(sgPlayer&&sgCurId===id){go();}
+    else{
+      if(sgPlayer){try{sgPlayer.destroy();}catch(e){}sgPlayer=null;}
+      $("sgHolder").innerHTML='<div id="sgFrame"></div>';sgCurId=id;
+      sgPlayer=new YT.Player("sgFrame",{videoId:id,width:200,height:120,
+        playerVars:{controls:0,disablekb:1,playsinline:1},
+        events:{onReady:go,
+          onError:()=>{$("songRes").textContent="⚠️ 이 곡은 재생 불가 — ⏭ 다음 곡";
+            $("songNext").style.display="inline-block";songBusy=false;}}});
+    }
+  },()=>{sgFallback(id,sec,start,after);});
+}
+function startAnsTimer(){
+  ansDur=ansSecVal()*1000;
+  $("ansClock").style.display="block";$("ansClock").className="ans-clock";
+  $("ansClock").textContent=(ansDur/1000).toFixed(1);
+  $("songGot").style.display="inline-block";$("songReplay").style.display="inline-block";
+  $("songRes").textContent="🎤 정답을 외쳐라!";
+  songBusy=false;ansRunning=true;ansT0=performance.now();
+  let lastSec=Math.ceil(ansDur/1000);
+  beep(880,.08,.25,"square");
+  (function loop(){
+    if(!ansRunning)return;
+    const rem=ansDur-(performance.now()-ansT0);
+    if(rem<=0){ansTimeout();return;}
+    $("ansClock").textContent=(rem/1000).toFixed(1);
+    if(rem<=1000)$("ansClock").className="ans-clock danger";
+    const isec=Math.ceil(rem/1000);
+    if(isec<lastSec){lastSec=isec;beep(520,.05,.15,"square");}
+    ansRAF=requestAnimationFrame(loop);
+  })();
+}
+function stopAnsTimer(){ansRunning=false;cancelAnimationFrame(ansRAF);}
+function ansTimeout(){
+  stopAnsTimer();
+  $("ansClock").textContent="땡!";$("ansClock").className="ans-clock ddang";
+  ddang();
+  if(navigator.vibrate)navigator.vibrate([250,80,250]);
+  document.body.style.background="#5a1030";
+  setTimeout(()=>{document.body.style.background="";},350);
+  revealSong(false);
+}
+function songGot(){
+  if(!songCur)return;
+  stopAnsTimer();$("ansClock").style.display="none";
+  winJingle();confetti();revealSong(true);
+}
+function songReplay(){
+  if(!songCur||songBusy)return;
+  stopAnsTimer();$("ansClock").style.display="none";
+  $("songGot").style.display="none";$("songReplay").style.display="none";
+  songBusy=true;sgPlay(songCur.v,songSecVal(),startAnsTimer);
+}
+function revealSong(got){
+  $("ansClock").style.display="none";
+  $("songGot").style.display="none";$("songReplay").style.display="none";
+  $("songNext").style.display="inline-block";
+  $("songRes").textContent=got?"🎉 정답!":"❌ 시간 초과 — 땡!";
+  $("songAnsArtist").textContent=(DEC_LABEL[songCur.d]||"")+" · "+songCur.a;
+  $("songAnsTitle").textContent=songCur.t;
+  $("songEmbed").innerHTML='<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+songCur.v+'" frameborder="0" allowfullscreen></iframe>';
+  $("songAnsBox").style.display="block";songBusy=false;
+}
+function songPlayOne(id){sgPlay(id,5,null);}
+function renderSongList(){
+  const box=$("songList");if(!box)return;
+  const decs=songDecade==="all"?Object.keys(SONGS):[songDecade];
+  let html="";
+  decs.forEach(d=>{
+    const list=SONGS[d]||[];
+    html+='<div style="font-size:12px;font-weight:800;color:var(--orange);margin:10px 0 2px">'+DEC_LABEL[d]+' ('+list.length+'곡)</div>';
+    list.forEach(s=>{
+      html+='<div class="song-list-item"><div><div class="sli-t">'+esc(s.t)+'</div><div class="sli-a">'+esc(s.a)+'</div></div>'+
+        (s.v?'<button class="sli-play" onclick="songPlayOne(\''+s.v+'\')">▶ 듣기</button>'
+            :'<a class="sli-play" style="text-decoration:none" target="_blank" href="https://www.youtube.com/results?search_query='+encodeURIComponent(s.a+' '+s.t)+'">🔍 검색</a>')+
+        '</div>';
+    });
+  });
+  box.innerHTML=html;
+}
+
 /* ===== person photo quiz ===== */
 const WIKI_KO={"아인슈타인":"알베르트 아인슈타인","뉴턴":"아이작 뉴턴","피카소":"파블로 피카소","반 고흐":"빈센트 반 고흐","베토벤":"루트비히 판 베토벤","모차르트":"볼프강 아마데우스 모차르트","나폴레옹":"나폴레옹 보나파르트","링컨":"에이브러햄 링컨","간디":"마하트마 간디","만델라":"넬슨 만델라","에디슨":"토머스 에디슨","마리 퀴리":"마리 퀴리","스티븐 호킹":"스티븐 호킹","셰익스피어":"윌리엄 셰익스피어","콜럼버스":"크리스토퍼 콜럼버스","찰리 채플린":"찰리 채플린","엘비스 프레슬리":"엘비스 프레슬리","마이클 잭슨":"마이클 잭슨","존 레논":"존 레논","프레디 머큐리":"프레디 머큐리","테일러 스위프트":"테일러 스위프트","메시":"리오넬 메시","호날두":"크리스티아누 호날두","마이클 조던":"마이클 조던","우사인 볼트":"우사인 볼트","타이거 우즈":"타이거 우즈","무하마드 알리":"무함마드 알리","마이클 펠프스":"마이클 펠프스","일론 머스크":"일론 머스크","스티브 잡스":"스티브 잡스","빌 게이츠":"빌 게이츠","마크 저커버그":"마크 저커버그","오바마":"버락 오바마","트럼프":"도널드 트럼프","푸틴":"블라디미르 푸틴","오프라 윈프리":"오프라 윈프리","톰 크루즈":"톰 크루즈","브래드 피트":"브래드 피트","레오나르도 디카프리오":"레오나르도 디카프리오","성룡":"성룡","이소룡":"이소룡","메르켈":"앙겔라 메르켈","젠슨 황":"젠슨 황","레오나르도 다빈치":"레오나르도 다 빈치","정국 (BTS)":"정국","한강 (작가)":"한강 (소설가)","페이커":"페이커 (프로게이머)","침착맨":"침착맨","기안84":"기안84"};
 let photoName=null,photoBusy=false;
@@ -1022,23 +1311,34 @@ async function photoQuiz(){
   const pool=P_KR.concat(P_GL);
   $("photoStat").textContent="⏳ 위키백과에서 사진 찾는 중...";
   $("photoBox").style.display="none";$("photoAns").style.display="none";
-  for(let tries=0;tries<6;tries++){
+  const el=$("photoImg");
+  for(let tries=0;tries<7;tries++){
     const name=pool[Math.floor(Math.random()*pool.length)];
     const title=WIKI_KO[name]||name;
     try{
       const res=await fetch("https://ko.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title));
       if(!res.ok)continue;
       const j=await res.json();
-      const img=(j.thumbnail&&j.thumbnail.source)?j.thumbnail.source.replace(/\/\d+px-/,"/400px-"):null;
-      if(!img)continue;
+      const thumb=j.thumbnail&&j.thumbnail.source;
+      const orig=j.originalimage&&j.originalimage.source;
+      if(!thumb&&!orig)continue;
+      /* 큰 렌더(440px) 시도 → 실패 시 원본 썸네일 → 원본 이미지 순으로 폴백 (깨짐/짤림 방지) */
+      const big=thumb?thumb.replace(/\/\d+px-/,"/440px-"):orig;
       photoName=name;
-      $("photoImg").src=img;
-      $("photoBox").style.display="block";
+      let stage=0;
+      el.onerror=()=>{
+        if(stage===0&&thumb&&el.src!==thumb){stage=1;el.src=thumb;}
+        else if(stage<=1&&orig&&el.src!==orig){stage=2;el.src=orig;}
+        else{el.onerror=null;$("photoBox").style.display="none";
+          $("photoStat").textContent="😢 이 사진은 로딩 실패 — '사진으로 출제' 한 번 더!";}
+      };
+      el.onload=()=>{$("photoBox").style.display="block";};
       $("photoAns").style.display="none";$("photoAns").textContent="";
       $("photoStat").textContent="이 사람 누구게? (힌트: "+(P_KR.includes(name)?"🇰🇷 한국인":"🌍 해외")+")";
+      el.removeAttribute("src");el.src=big||thumb||orig;
       beep(880,.1,.25);photoBusy=false;return;
     }catch(e){
-      $("photoStat").textContent="⚠️ 연결 차단됨 — 이 기능은 파일을 사파리/크롬으로 열어야 작동해요";
+      $("photoStat").textContent="⚠️ 연결 차단됨 — 사파리/크롬 브라우저로 열어야 작동해요";
       photoBusy=false;return;
     }
   }
@@ -1069,6 +1369,8 @@ function photoReveal(){
   });
 });
 setN(0); /* 초기 표시 동기화 */
+renderSongList(); /* 노래 목록 초기 렌더 */
+(function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 </script>
 </body>
 </html>
