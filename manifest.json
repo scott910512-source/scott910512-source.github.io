@@ -1,0 +1,17 @@
+{
+  "name": "아오키 게임센터",
+  "short_name": "아오키게임",
+  "description": "모임게임·술게임·연대별 노래 맞추기 등 파티 게임 모음",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b1035",
+  "theme_color": "#1b1035",
+  "lang": "ko",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
