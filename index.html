@@ -131,6 +131,27 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .song-photo{width:100%;max-width:240px;height:300px;object-fit:contain;border-radius:16px;border:2px solid var(--line);
  background:rgba(0,0,0,.35);display:block;margin:0 auto}
 
+/* game selection grid + modal */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 8px}
+.tile{border:1.5px solid var(--line);background:var(--card);color:var(--txt);border-radius:16px;
+ padding:14px 12px;cursor:pointer;text-align:left;transition:.15s;display:flex;flex-direction:column;
+ gap:9px;min-height:96px;justify-content:space-between;font-family:inherit}
+.tile:active{transform:scale(.95)}
+.tile:hover{border-color:rgba(255,255,255,.32)}
+.tile-t{font-size:15px;font-weight:800;line-height:1.28}
+.tile-b{display:flex;flex-wrap:wrap;gap:4px}
+.tile-go{align-self:flex-start;font-size:10.5px;font-weight:800;color:#101334;
+ background:linear-gradient(90deg,#4fc3ff,#3ce8b0);padding:3px 8px;border-radius:999px}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(8,4,20,.74);backdrop-filter:blur(5px);
+ display:none;align-items:flex-start;justify-content:center;padding:18px 14px;overflow-y:auto}
+.modal.on{display:flex;animation:pop .2s ease}
+.modal-inner{position:relative;max-width:620px;width:100%;margin:auto}
+.modal-bar{display:flex;justify-content:flex-end;margin-bottom:8px;position:sticky;top:0}
+.modal-x{border:none;cursor:pointer;font-size:13px;font-weight:800;color:#fff;
+ background:var(--pink);padding:9px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(255,95,143,.4)}
+.modal-x:active{transform:scale(.94)}
+#modalBody .g{margin-bottom:0}
+
 /* bottle */
 .bottle-zone{position:relative;width:190px;height:190px;margin:6px auto;border-radius:50%;
  border:2px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
@@ -587,6 +608,8 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <div class="t-card" id="toolSong">
   <h3>🎧 연대별 노래 맞추기</h3>
   <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 수십 곡 사전 등록 · 연대 골라 랜덤 출제 → 자동재생(스포 없음) → <b>3초 안에 정답!</b> 오버하면 <b style="color:var(--pink)">땡</b></p>
+  <p class="hint" style="background:rgba(79,195,255,.1);border:1px solid rgba(79,195,255,.3);border-radius:10px;padding:8px 10px;margin-bottom:10px">🔑 광고 없이·끊김 없이 들으려면 <b>같은 브라우저에서 유튜브에 로그인</b>해두세요 (프리미엄이면 자동 무광고). 앱이 그 로그인 상태로 재생해요.
+    <a href="https://www.youtube.com/account" target="_blank" style="display:inline-block;margin-top:6px;font-size:11px;font-weight:800;color:#101334;background:linear-gradient(90deg,#4fc3ff,#3ce8b0);padding:5px 12px;border-radius:999px;text-decoration:none">▶ 유튜브 로그인 열기</a></p>
   <div class="dec-tabs" id="decTabs">
     <button class="dec on" data-d="all">🎲 전체</button>
     <button class="dec" data-d="1990s">90년대</button>
@@ -663,6 +686,13 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 
 </div>
 
+<div class="modal" id="gameModal">
+  <div class="modal-inner">
+    <div class="modal-bar"><button class="modal-x" onclick="closeGame()">✕ 닫기</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
 <script>
 /* ===== tabs ===== */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
@@ -672,6 +702,7 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   window.scrollTo({top:0,behavior:"smooth"});
 });
 function goTool(id){
+  closeGame();
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
   document.querySelector('[data-p="pg3"]').classList.add("on");
@@ -679,6 +710,46 @@ function goTool(id){
   setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},80);
 }
 const $=id=>document.getElementById(id);
+
+/* ===== 게임 선택 그리드 + 규칙 모달 ===== */
+function buildGrid(pageId){
+  const page=document.getElementById(pageId);
+  if(!page)return;
+  const cards=[...page.querySelectorAll(":scope > .g")];
+  if(!cards.length)return;
+  const grid=document.createElement("div");grid.className="grid";
+  const store=document.createElement("div");store.style.display="none";store.className="g-store";
+  const notice=page.querySelector(":scope > .notice");
+  cards.forEach(card=>{
+    const h3=card.querySelector("h3");
+    const title=h3?h3.textContent:"게임";
+    const badges=card.querySelector(".badges");
+    const hasTool=!!card.querySelector(".golink");
+    const tile=document.createElement("button");
+    tile.type="button";tile.className="tile";
+    tile.innerHTML='<div class="tile-t">'+esc(title)+'</div>'+
+      '<div>'+(badges?'<div class="tile-b">'+badges.innerHTML+'</div>':'')+
+      (hasTool?'<div class="tile-go" style="margin-top:6px">⚡ 도구 있음</div>':'')+'</div>';
+    tile.onclick=()=>openGame(card);
+    grid.appendChild(tile);
+    store.appendChild(card);
+  });
+  if(notice)notice.after(grid);else page.prepend(grid);
+  page.appendChild(store);
+}
+function openGame(card){
+  const body=$("modalBody");
+  body.innerHTML="";
+  body.appendChild(card.cloneNode(true));
+  $("gameModal").classList.add("on");
+  document.body.style.overflow="hidden";
+  $("gameModal").scrollTop=0;
+}
+function closeGame(){
+  const m=$("gameModal");if(!m)return;
+  m.classList.remove("on");
+  document.body.style.overflow="";
+}
 
 /* ===== sound engine ===== */
 let AC=null;
@@ -1371,6 +1442,10 @@ function photoReveal(){
 setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
+/* 게임 카드 → 선택 그리드로 전환 */
+buildGrid("pg1");buildGrid("pg2");
+$("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGame();});
 </script>
 </body>
 </html>
