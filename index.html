@@ -140,7 +140,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .tile:hover{border-color:rgba(255,255,255,.32)}
 .tile-t{font-size:15px;font-weight:800;line-height:1.28}
 .tile-b{display:flex;flex-wrap:wrap;gap:4px}
-.tile-go{align-self:flex-start;font-size:10.5px;font-weight:800;color:#101334;
+.tile-go{display:inline-block;align-self:flex-start;font-size:10.5px;font-weight:800;color:#101334;
  background:linear-gradient(90deg,#4fc3ff,#3ce8b0);padding:3px 8px;border-radius:999px}
 .modal{position:fixed;inset:0;z-index:100;background:rgba(8,4,20,.74);backdrop-filter:blur(5px);
  display:none;align-items:flex-start;justify-content:center;padding:18px 14px;overflow-y:auto}
@@ -151,6 +151,17 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
  background:var(--pink);padding:9px 16px;border-radius:999px;box-shadow:0 6px 18px rgba(255,95,143,.4)}
 .modal-x:active{transform:scale(.94)}
 #modalBody .g{margin-bottom:0}
+
+/* 태블릿·가로모드·PC — 넓은 화면에서 공간 활용 */
+@media(min-width:760px){
+  .wrap{max-width:940px}
+  .grid{grid-template-columns:repeat(3,1fr)}
+  h1{font-size:52px}
+}
+@media(min-width:1100px){
+  .wrap{max-width:1120px;padding:0 24px}
+  .grid{grid-template-columns:repeat(4,1fr)}
+}
 
 /* bottle */
 .bottle-zone{position:relative;width:190px;height:190px;margin:6px auto;border-radius:50%;
