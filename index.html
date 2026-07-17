@@ -1351,8 +1351,8 @@ function revealSong(got){
   $("songGot").style.display="none";$("songReplay").style.display="none";
   $("songNext").style.display="inline-block";
   $("songRes").textContent=got?"🎉 정답!":"❌ 시간 초과 — 땡!";
-  $("songAnsArtist").textContent=(DEC_LABEL[songCur.d]||"")+" · "+songCur.a;
-  $("songAnsTitle").textContent=songCur.t;
+  $("songAnsArtist").textContent="🎵 "+(DEC_LABEL[songCur.d]||"");
+  $("songAnsTitle").textContent=songCur.a+" - "+songCur.t;
   $("songEmbed").innerHTML='<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+songCur.v+'" frameborder="0" allowfullscreen></iframe>';
   $("songAnsBox").style.display="block";songBusy=false;
 }
@@ -1365,7 +1365,7 @@ function renderSongList(){
     const list=SONGS[d]||[];
     html+='<div style="font-size:12px;font-weight:800;color:var(--orange);margin:10px 0 2px">'+DEC_LABEL[d]+' ('+list.length+'곡)</div>';
     list.forEach(s=>{
-      html+='<div class="song-list-item"><div><div class="sli-t">'+esc(s.t)+'</div><div class="sli-a">'+esc(s.a)+'</div></div>'+
+      html+='<div class="song-list-item"><div class="sli-t">'+esc(s.a)+' - '+esc(s.t)+'</div>'+
         (s.v?'<button class="sli-play" onclick="songPlayOne(\''+s.v+'\')">▶ 듣기</button>'
             :'<a class="sli-play" style="text-decoration:none" target="_blank" href="https://www.youtube.com/results?search_query='+encodeURIComponent(s.a+' '+s.t)+'">🔍 검색</a>')+
         '</div>';
