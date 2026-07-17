@@ -618,7 +618,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 
 <div class="t-card" id="toolSong">
   <h3>🎧 연대별 노래 맞추기</h3>
-  <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 181곡 사전 등록 · 연대 골라 랜덤 출제 → 자동재생(스포 없음) → 시간제한 없이 천천히 맞히고 <b>👁 정답 보기</b>로 확인</p>
+  <p class="hint"><b>90 · 00 · 10 · 20년대</b> 유명곡 181곡 사전 등록 · 출제 후 <b>1초 → 3초 → 5초</b>로 점점 더 듣고, <b>👁 정답 듣기</b>를 누르면 재생 후 정답 공개 (시간제한 없음)</p>
   <div class="dec-tabs" id="decTabs">
     <button class="dec on" data-d="all">🎲 전체</button>
     <button class="dec" data-d="1990s">90년대</button>
@@ -626,19 +626,17 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
     <button class="dec" data-d="2010s">10년대</button>
     <button class="dec" data-d="2020s">20년대</button>
   </div>
-  <div class="seg"><span class="seglabel">▶ 미리듣기</span>
-    <label><input type="radio" name="songSec" value="1"><span>1초</span></label>
-    <label><input type="radio" name="songSec" value="3" checked><span>3초</span></label>
-    <label><input type="radio" name="songSec" value="5"><span>5초</span></label>
-  </div>
-  <label class="snd-toggle" style="margin:4px 0 10px"><input type="checkbox" id="songRand"> 🎲 랜덤 구간 재생 (하드코어)</label>
-  <button class="big-btn" onclick="songRoll()">🎲 랜덤 곡 출제 (재생)</button>
+  <label class="snd-toggle" style="margin:4px 0 12px"><input type="checkbox" id="songRand"> 🎲 랜덤 위치 듣기 모드 (인트로 말고 노래 중간 랜덤 구간부터)</label>
+  <button class="big-btn" onclick="songRoll()">🎲 랜덤 곡 출제</button>
   <div class="result" id="songRes" style="font-size:clamp(16px,5vw,22px)">연대를 고르고 출제하세요 🎵</div>
-  <div>
-    <button class="big-btn b2" id="songGot" style="display:none;font-size:15px;padding:12px 24px" onclick="songGot()">👁 정답 보기</button>
-    <button class="big-btn b3" id="songReplay" style="display:none;font-size:13px;padding:10px 18px" onclick="songReplay()">🔁 다시 듣기</button>
-    <button class="big-btn" id="songNext" style="display:none;font-size:14px;padding:11px 22px;background:linear-gradient(92deg,#a78bfa,#4fc3ff)" onclick="songRoll()">⏭ 다음 곡</button>
+  <div id="songBtns" style="display:none">
+    <button class="big-btn b2" style="font-size:14px;padding:11px 16px" onclick="songListen(1)">🔈 1초 듣기</button>
+    <button class="big-btn b2" style="font-size:14px;padding:11px 16px" onclick="songListen(3)">🔉 3초 듣기</button>
+    <button class="big-btn b2" style="font-size:14px;padding:11px 16px" onclick="songListen(5)">🔊 5초 듣기</button>
+    <br>
+    <button class="big-btn" style="font-size:15px;padding:12px 24px" onclick="songAnswer()">👁 정답 듣기 (공개)</button>
   </div>
+  <button class="big-btn" id="songNext" style="display:none;font-size:14px;padding:11px 22px;background:linear-gradient(92deg,#a78bfa,#4fc3ff)" onclick="songRoll()">⏭ 다음 곡</button>
   <div id="sgHolder" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0.01;pointer-events:none"></div>
   <div id="songAnsBox" style="display:none;margin-top:10px">
     <div class="song-artist" id="songAnsArtist"></div>
@@ -1360,7 +1358,7 @@ const SONGS={
 let songDecade="all",songCur=null,songBusy=false;
 let sgPlayer=null,sgCurId=null,sgStopT=0;
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function songSecVal(){return +document.querySelector('input[name="songSec"]:checked').value;}
+let songStart=0;
 function songPlayable(){
   const arr=songDecade==="all"
     ? Object.entries(SONGS).flatMap(([d,list])=>list.map(s=>({...s,d})))
@@ -1380,26 +1378,43 @@ function songRoll(){
   if(!pool.length){$("songRes").textContent="⚠️ 이 연대엔 재생 가능한 곡이 아직 없어요";return;}
   songBusy=true;
   songCur=pool[Math.floor(Math.random()*pool.length)];
+  songStart=$("songRand").checked?15+Math.floor(Math.random()*80):0; /* 같은 곡은 같은 구간에서 점점 더 듣기 */
   $("songAnsBox").style.display="none";$("songEmbed").innerHTML="";
-  $("songGot").style.display="none";$("songReplay").style.display="none";$("songNext").style.display="none";
+  $("songBtns").style.display="none";$("songNext").style.display="none";
   $("songRes").textContent="⏳ 로딩 중...";
-  sgPlay(songCur.v,songSecVal(),afterPlay);
+  /* 출제와 동시에 1초 살짝 듣기 */
+  sgPlayAt(songCur.v,songStart,1,()=>showSongBtns("🔈 1초 재생 — 더 듣거나 👁 정답 듣기"));
+}
+function showSongBtns(msg){
+  $("songBtns").style.display="block";
+  $("songNext").style.display="inline-block";
+  $("songRes").textContent=msg;
+  songBusy=false;
+}
+function songListen(sec){
+  if(!songCur||songBusy)return;
+  songBusy=true;$("songRes").textContent="🔊 "+sec+"초 재생 중...";
+  sgPlayAt(songCur.v,songStart,sec,()=>showSongBtns("🔊 "+sec+"초 재생 완료 — 더 듣거나 👁 정답 듣기"));
+}
+function songAnswer(){
+  if(!songCur||songBusy)return;
+  songBusy=true;
+  $("songBtns").style.display="none";
+  $("songRes").textContent="🔊 정답 재생 중...";
+  sgPlayAt(songCur.v,songStart,5,()=>{winJingle();confetti();revealSong();});
 }
 function sgFallback(id,sec,start,after){
   const h=$("sgHolder");
   h.innerHTML='<iframe width="200" height="120" src="https://www.youtube.com/embed/'+id+
     '?autoplay=1&start='+start+'&controls=0&playsinline=1" allow="autoplay" frameborder="0"></iframe>';
   sgCurId=id;sgPlayer=null;
-  $("songRes").textContent="🔊 재생 시도 중... ("+sec+"초)";
   clearTimeout(sgStopT);
   sgStopT=setTimeout(()=>{h.innerHTML="";after&&after();},sec*1000+400);
 }
-function sgPlay(id,sec,after){
-  const start=$("songRand").checked?15+Math.floor(Math.random()*80):0;
+function sgPlayAt(id,start,sec,after){
   ytLoad(()=>{
     const go=()=>{
       try{sgPlayer.seekTo(start,true);sgPlayer.playVideo();}catch(e){}
-      $("songRes").textContent="🔊 재생 중... ("+sec+"초)";
       clearTimeout(sgStopT);
       sgStopT=setTimeout(()=>{try{sgPlayer.pauseVideo();}catch(e){}after&&after();},sec*1000);
     };
@@ -1411,35 +1426,20 @@ function sgPlay(id,sec,after){
         playerVars:{controls:0,disablekb:1,playsinline:1},
         events:{onReady:go,
           onError:()=>{$("songRes").textContent="⚠️ 이 곡은 재생 불가 — ⏭ 다음 곡";
-            $("songNext").style.display="inline-block";songBusy=false;}}});
+            $("songBtns").style.display="none";$("songNext").style.display="inline-block";songBusy=false;}}});
     }
   },()=>{sgFallback(id,sec,start,after);});
 }
-/* 재생이 끝나면 — 시간제한 없이 정답 보기 대기 */
-function afterPlay(){
-  $("songGot").style.display="inline-block";$("songReplay").style.display="inline-block";
-  $("songRes").textContent="🎤 노래 맞혀보세요! (준비되면 👁 정답 보기)";
-  songBusy=false;beep(880,.08,.25,"square");
-}
-function songGot(){
-  if(!songCur)return;
-  winJingle();confetti();revealSong();
-}
-function songReplay(){
-  if(!songCur||songBusy)return;
-  $("songGot").style.display="none";$("songReplay").style.display="none";
-  songBusy=true;sgPlay(songCur.v,songSecVal(),afterPlay);
-}
 function revealSong(){
-  $("songGot").style.display="none";$("songReplay").style.display="none";
+  $("songBtns").style.display="none";
   $("songNext").style.display="inline-block";
   $("songRes").textContent="🎵 정답 공개";
   $("songAnsArtist").textContent="🎵 "+(DEC_LABEL[songCur.d]||"");
   $("songAnsTitle").textContent=songCur.a+" - "+songCur.t;
-  $("songEmbed").innerHTML='<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+songCur.v+'" frameborder="0" allowfullscreen></iframe>';
+  $("songEmbed").innerHTML='<iframe width="100%" height="200" src="https://www.youtube.com/embed/'+songCur.v+'?start='+songStart+'" frameborder="0" allowfullscreen></iframe>';
   $("songAnsBox").style.display="block";songBusy=false;
 }
-function songPlayOne(id){sgPlay(id,5,null);}
+function songPlayOne(id){sgPlayAt(id,0,5,null);}
 function renderSongList(){
   const box=$("songList");if(!box)return;
   const decs=songDecade==="all"?Object.keys(SONGS):[songDecade];
