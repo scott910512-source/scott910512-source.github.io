@@ -34,9 +34,9 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .sub{margin-top:10px;font-size:13px;color:var(--sub)}
 .sub b{color:#fff}
 
-.tabs{display:flex;gap:8px;justify-content:center;margin:20px 0 4px;position:sticky;top:0;z-index:20;
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:20px 0 4px;position:sticky;top:0;z-index:20;
  padding:12px 0;background:linear-gradient(180deg,rgba(27,16,53,.97),rgba(27,16,53,.86));backdrop-filter:blur(10px)}
-.tab{border:1.5px solid var(--line);background:var(--card);color:var(--txt);padding:10px 18px;border-radius:999px;
+.tab{border:1.5px solid var(--line);background:var(--card);color:var(--txt);padding:10px 16px;border-radius:999px;
  font-size:14px;font-weight:700;cursor:pointer;transition:.18s}
 .tab:active{transform:scale(.94)}
 .tab.on{background:linear-gradient(90deg,#ff5f8f,#ffb340);color:#2a1040;border-color:transparent;font-weight:800}
@@ -203,6 +203,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <div class="tabs">
   <button class="tab on" data-p="pg1">🎉 모임게임</button>
   <button class="tab" data-p="pg2">🍻 술게임</button>
+  <button class="tab" data-p="pg4">🏖️ 야외놀이</button>
   <button class="tab" data-p="pg3">⚡ 도구</button>
 </div>
 
@@ -530,6 +531,140 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <li>변형: 폭탄 들고 있는 동안 삼행시·아무말 대잔치 의무</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%ED%8F%AD%ED%83%84%EB%8F%8C%EB%A6%AC%EA%B8%B0%20%EA%B2%8C%EC%9E%84" target="_blank">📺 영상으로 배우기</a>
 <span class="golink" onclick="goTool('toolBomb')">⚡ 폭탄 점화하러 가기 →</span></div>
+</div>
+
+<!-- ================= 야외놀이 ================= -->
+<div class="page" id="pg4">
+<p class="notice">🏖️ 한강·공원·계곡·MT·회사 체육대회에서 <b>몸으로 노는 기본 놀이</b> 모음 — 준비물 최소, 남녀노소·혼성 다 OK</p>
+
+<div class="g"><div class="g-top"><h3>⚽ 족구</h3><div class="badges"><span class="bd trend">국민 체육</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>6~12 (2팀)</b> · 준비물 <b>공 + 네트(끈/신발로 대체)</b> · 야유회·회사 체육대회 대표주자</p>
+<div class="how"><ol>
+<li>코트를 반으로 나누고 네트를 사이에 둔 채 두 팀 대결</li>
+<li><b>발·머리·가슴만</b> 사용(손 금지), 한 팀당 최대 <b>3번 터치</b>로 넘기기</li>
+<li>자기 코트 <b>원바운드까지 허용</b> — 아웃·네트·손터치·4번터치는 실점</li>
+<li>15점(또는 11점) 먼저, 2점차 듀스</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=족구+규칙+하는법" target="_blank">📺 영상으로 배우기</a>
+<p class="punish">⚡ 진 팀이 저녁·설거지·음료 셔틀</p></div>
+
+<div class="g"><div class="g-top"><h3>🥎 발야구</h3><div class="badges"><span class="bd easy">혼성 최적</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>10~20 (2팀)</b> · 준비물 <b>공 + 베이스 4개</b></p>
+<div class="how"><ol>
+<li>야구인데 배트 대신 <b>발로</b> 굴러오는 공을 참</li>
+<li>1·2·3루·홈을 돌아오면 득점, 수비가 공 잡거나 태그하면 아웃</li>
+<li>운동신경 편차 커도 다 같이 즐김 — 초보·아이·혼성에 최고</li>
+<li>3아웃 공수교대, 정한 이닝까지 많은 점수 팀 승</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=발야구+규칙" target="_blank">📺 영상으로 배우기</a>
+<p class="punish">⚡ 진 팀 벌칙 게임 or 뒷정리 담당</p></div>
+
+<div class="g"><div class="g-top"><h3>🤾 피구</h3><div class="badges"><span class="bd easy">국민게임</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>8~20 (2팀)</b> · 준비물 <b>말랑한 공 1개</b></p>
+<div class="how"><ol>
+<li>두 팀이 코트를 나누고 공으로 상대를 맞히기</li>
+<li>맞으면 아웃(외야로), 던진 공을 바로 <b>잡으면 세이프</b> + 던진 사람 아웃</li>
+<li>외야에서 상대를 맞히면 <b>부활</b> 룰 추가 가능</li>
+<li>상대 전원 아웃시키는 팀 승리</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=피구+게임+규칙" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🌸 무궁화 꽃이 피었습니다</h3><div class="badges"><span class="bd easy">술래잡기</span><span class="bd easy">남녀노소</span></div></div>
+<p class="meta">인원 <b>4~20</b> · 준비물 <b>없음</b></p>
+<div class="how"><ol>
+<li>술래가 벽 보고 "무궁화 꽃이 피었습니다" 외치는 동안 나머지가 접근</li>
+<li>술래가 돌아봤을 때 <b>움직인 사람</b>은 술래와 새끼손가락 연결</li>
+<li>잡힌 사람 손을 누군가 <b>탁 끊으면</b> 전원 도주 → 술래가 "그만!" 후 정한 걸음 안에 터치</li>
+<li>술래가 누굴 터치하면 그 사람이 다음 술래</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=무궁화꽃이+피었습니다+놀이" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🧣 수건돌리기</h3><div class="badges"><span class="bd easy">쉬움</span><span class="bd easy">다같이</span></div></div>
+<p class="meta">인원 <b>6~15</b> · 준비물 <b>수건 1개</b></p>
+<div class="how"><ol>
+<li>전원 둥글게 앉고, 술래가 바깥을 돌며 몰래 누군가 <b>뒤에 수건</b>을 놓음</li>
+<li>놓인 걸 눈치채면 수건 들고 술래를 쫓아 자리 뺏기</li>
+<li>한 바퀴 도는 동안 <b>못 알아챈 사람</b>이 다음 술래</li>
+<li>걸린 사람 장기자랑/벌칙</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=수건돌리기+게임" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🪢 줄다리기</h3><div class="badges"><span class="bd trend">체육대회</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>10~ (2팀 동수)</b> · 준비물 <b>밧줄</b></p>
+<div class="how"><ol>
+<li>밧줄 가운데 표시, 양 팀이 반대 방향으로 당김</li>
+<li>가운데 표시가 우리 쪽으로 넘어오면 승리</li>
+<li>발 안 밀리게 <b>몸을 뒤로 눕히고</b> "영차" 리듬 맞추기</li>
+<li>3판 2선승제</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=줄다리기+요령" target="_blank">📺 영상으로 배우기</a>
+<p class="punish">⚡ 진 팀 벌칙 · 힘보다 리듬·자세가 승부처</p></div>
+
+<div class="g"><div class="g-top"><h3>🏃 이어달리기 (계주)</h3><div class="badges"><span class="bd trend">체육대회</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>8~ (2팀)</b> · 준비물 <b>바통(없으면 손터치)</b></p>
+<div class="how"><ol>
+<li>구간을 나눠 주자를 배치하고 바통을 이어받아 달리기</li>
+<li>바통 놓치면 그 자리에서 주워 계속</li>
+<li><b>앵커(마지막 주자)</b> 순서 배치가 승부처</li>
+<li>먼저 완주한 팀 승, 꼴찌 팀 벌칙</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=계주+이어달리기+요령" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🦵 이인삼각</h3><div class="badges"><span class="bd trend">웃음보장</span><span class="bd easy">2인 1조</span></div></div>
+<p class="meta">인원 <b>4~ (2인 1조)</b> · 준비물 <b>끈/수건</b></p>
+<div class="how"><ol>
+<li>두 사람의 안쪽 다리를 끈으로 묶기</li>
+<li>"안-쪽 / 바-깥" 구령을 맞춰 <b>한 몸처럼</b> 달리기</li>
+<li>넘어지면 일어나서 계속, 반환점 돌아오기</li>
+<li>호흡 안 맞으면 대참사 = 그게 재미</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=이인삼각+게임" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🪅 윷놀이</h3><div class="badges"><span class="bd easy">명절·MT</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>4~8 (2팀)</b> · 준비물 <b>윷 + 말판</b></p>
+<div class="how"><ol>
+<li>윷을 던져 <b>도·개·걸·윷·모</b> 만큼 말 전진 (윷·모는 한 번 더 던짐)</li>
+<li>상대 말을 잡으면 한 번 더, 내 말끼리는 <b>업어서</b> 같이 이동 가능</li>
+<li>말 4개를 먼저 다 빼는 팀 승리</li>
+<li>지름길 타이밍·잡기 전략이 핵심</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=윷놀이+규칙" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🔴 제기차기</h3><div class="badges"><span class="bd easy">전통놀이</span><span class="bd easy">개인·단체</span></div></div>
+<p class="meta">인원 <b>1~</b> · 준비물 <b>제기(비닐+동전으로 대체)</b></p>
+<div class="how"><ol>
+<li>발 안쪽으로 제기를 위로 차올려 안 떨어뜨리기</li>
+<li>한 발·양발·뒷발 종목별로 <b>최다 개수</b> 대결</li>
+<li>단체전: 둥글게 서서 돌아가며 <b>이어차기 누적</b></li>
+<li>최소 개수 벌칙</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=제기차기+하는법" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🥏 원반던지기 (프리스비)</h3><div class="badges"><span class="bd easy">캠핑·한강</span><span class="bd easy">팀전</span></div></div>
+<p class="meta">인원 <b>2~</b> · 준비물 <b>원반</b></p>
+<div class="how"><ol>
+<li>기본: 마주 보고 <b>캐치 릴레이</b> (안 떨어뜨리고 오래 주고받기)</li>
+<li>얼티밋: 두 팀이 패스로 전진, 상대 골 지역에서 받으면 득점</li>
+<li>원반 든 사람은 <b>못 뛰고 3초 안에 패스</b></li>
+<li>강아지 있으면 최고의 파트너 🐶</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=얼티밋+프리스비+규칙" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>💧 물풍선 폭탄</h3><div class="badges"><span class="bd trend">계곡·바다</span><span class="bd easy">여름</span></div></div>
+<p class="meta">인원 <b>4~ (2인 1조)</b> · 준비물 <b>물풍선</b></p>
+<div class="how"><ol>
+<li>짝끼리 마주 보고 물풍선을 던지고 받기</li>
+<li>한 번 성공할 때마다 <b>한 걸음씩 뒤로</b> 이동</li>
+<li>물풍선 터뜨린 짝은 탈락, 끝까지 안 터뜨린 짝 승리</li>
+<li>변형: 폭탄 돌리기 — 음악 멈출 때 든 사람 물벼락</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=물풍선+게임" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🏸 배드민턴</h3><div class="badges"><span class="bd easy">공원·한강</span><span class="bd easy">2~4인</span></div></div>
+<p class="meta">인원 <b>2~4</b> · 준비물 <b>라켓 + 셔틀콕</b></p>
+<div class="how"><ol>
+<li>네트 없이도 <b>랠리(오래 주고받기)</b>로 충분히 재밌음</li>
+<li>복식: 2:2, 바닥에 떨어뜨린 쪽 실점</li>
+<li>바람 부는 날은 난이도 급상승 (그게 또 웃김)</li>
+<li>진 팀 음료 셔틀</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=배드민턴+기초+규칙" target="_blank">📺 영상으로 배우기</a></div>
+
+<div class="g"><div class="g-top"><h3>🗺️ 보물찾기</h3><div class="badges"><span class="bd trend">MT 이벤트</span><span class="bd easy">다같이</span></div></div>
+<p class="meta">인원 <b>다수</b> · 준비물 <b>쪽지(상품/미션/벌칙)</b></p>
+<div class="how"><ol>
+<li>진행자가 미리 쪽지를 <b>나무·돌·의자 밑</b> 등에 숨겨둠</li>
+<li>신호와 함께 다 같이 수색</li>
+<li>찾은 쪽지에 적힌 <b>상품·미션·벌칙</b> 수행</li>
+<li>밤 MT·소풍 마무리 이벤트로 국룰</li></ol></div>
+<a class="vid" href="https://www.youtube.com/results?search_query=보물찾기+게임" target="_blank">📺 영상으로 배우기</a></div>
 </div>
 
 <!-- ================= 도구 ================= -->
@@ -1566,7 +1701,7 @@ setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임 카드 → 선택 그리드로 전환 */
-buildGrid("pg1");buildGrid("pg2");
+buildGrid("pg1");buildGrid("pg2");buildGrid("pg4");
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGame();});
 </script>
