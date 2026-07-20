@@ -172,6 +172,14 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   .grid{grid-template-columns:repeat(4,1fr)}
 }
 
+/* 네글자 퀴즈 */
+#fourPuzzle{line-height:1}
+.fc{display:inline-flex;align-items:center;justify-content:center;width:clamp(46px,14vw,64px);height:clamp(54px,17vw,74px);
+ margin:3px;border-radius:12px;font-size:clamp(24px,7.5vw,36px);font-weight:900;
+ background:rgba(255,255,255,.08);border:1.5px solid var(--line);vertical-align:middle}
+.fc.blank{color:var(--pink);background:rgba(255,95,143,.12);border-color:rgba(255,95,143,.35)}
+.fc.hit{color:#101334;background:linear-gradient(92deg,#ffb340,#3ce8b0);border-color:transparent}
+
 /* bottle */
 .bottle-zone{position:relative;width:190px;height:190px;margin:6px auto;border-radius:50%;
  border:2px dashed rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center}
@@ -336,6 +344,16 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <p class="punish">⚡ 못 맞힌 사람/팀 벌칙 · DJ 없이 셀프 진행</p>
 <span class="golink" onclick="goTool('toolSong')">⚡ 연대별 노래 맞추기 열기 →</span>
 <span class="golink" style="background:linear-gradient(90deg,#ff5f8f,#ffb340)" onclick="goTool('toolIntro')">🎵 링크 직접 넣기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>🔠 네글자 퀴즈</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 앞 2글자 힌트로 네 글자 맞히기</p>
+<div class="how"><ol>
+<li>도구 탭 <b>네글자 퀴즈</b>에서 10문제 시작</li>
+<li><b>"와이 ■■"</b>처럼 앞 2글자 + 힌트 공개 → 나머지 2글자 맞히기 (예: <b>와이파이</b>)</li>
+<li><b>열린 정답</b> — 뜻만 통하면 인정, 먼저 외친 사람 승점</li>
+<li>👁 정답 보기로 확인 → ⏭ 다음 문제, 10문제 후 라운드 끝</li></ol></div>
+<p class="punish">⚡ 라운드 최저 득점자 벌칙 · 폰 하나로 셀프 진행</p>
+<span class="golink" onclick="goTool('toolFour')">⚡ 네글자 퀴즈 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>👑 인물 맞추기 퀴즈</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">국민게임</span></div></div>
 <p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 한국인 + 세계구 유명인만 수록</p>
@@ -793,6 +811,17 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
     <div id="songList" style="margin-top:8px"></div>
   </details>
   <p class="hint" id="songStat" style="margin-top:8px"></p>
+</div>
+
+<div class="t-card" id="toolFour">
+  <h3>🔠 네글자 퀴즈</h3>
+  <p class="hint">4글자 중 <b>앞 2글자만 공개</b> — 나머지를 맞혀라! <b>열린 정답</b>(뜻만 통하면 인정) · 한 라운드 <b>10문제 연속</b> · 예) 와이 ■■ → <b>와이파이</b></p>
+  <div class="tm-player" id="fourProg" style="color:var(--orange)">🎯 10문제 도전!</div>
+  <div id="fourPuzzle" style="margin:14px 0 6px;min-height:74px;font-size:34px">🔠</div>
+  <p class="hint" id="fourHint" style="min-height:20px">시작을 누르세요</p>
+  <button class="big-btn" id="fourStartBtn" onclick="fourStart()">🎯 10문제 시작</button>
+  <button class="big-btn b2" id="fourReveal" style="display:none" onclick="fourAns()">👁 정답 보기</button>
+  <button class="big-btn b3" id="fourNext" style="display:none" onclick="fourNext()">⏭ 다음 문제</button>
 </div>
 
 <div class="t-card" id="toolPerson">
@@ -1631,6 +1660,95 @@ function renderSongList(){
   });
   box.innerHTML=html;
 }
+
+/* ===== 네글자 퀴즈 ===== */
+const FOUR=[
+{w:"와이파이",h:"무선 인터넷 연결 (공유기)"},
+{w:"스마트폰",h:"손 안의 컴퓨터, 매일 봄"},
+{w:"텔레비전",h:"거실의 네모, TV"},
+{w:"블루투스",h:"무선 이어폰·스피커 연결 방식"},
+{w:"카카오톡",h:"국민 메신저 앱"},
+{w:"넷플릭스",h:"빨간 N, OTT 스트리밍"},
+{w:"페이스북",h:"파란색 원조 SNS"},
+{w:"아이패드",h:"애플 태블릿"},
+{w:"다운로드",h:"파일 내려받기"},
+{w:"비밀번호",h:"로그인할 때 입력"},
+{w:"회원가입",h:"서비스 처음 이용할 때"},
+{w:"김치찌개",h:"얼큰한 한식 국물요리"},
+{w:"된장찌개",h:"구수한 한식 국물요리"},
+{w:"부대찌개",h:"햄·소시지 들어간 찌개"},
+{w:"삼각김밥",h:"편의점 대표 간식"},
+{w:"초코파이",h:"'정(情)' 하면 떠오르는 과자"},
+{w:"딸기우유",h:"분홍색 우유"},
+{w:"카페라떼",h:"우유 들어간 커피"},
+{w:"스파게티",h:"이탈리아 면 요리"},
+{w:"파인애플",h:"피자 논쟁의 그 과일"},
+{w:"브로콜리",h:"초록 나무 모양 채소"},
+{w:"아보카도",h:"'숲속의 버터'"},
+{w:"마요네즈",h:"고소한 흰색 소스"},
+{w:"선글라스",h:"햇빛 가리는 안경"},
+{w:"오토바이",h:"두 바퀴 탈것"},
+{w:"헬리콥터",h:"프로펠러 달린 하늘 탈것"},
+{w:"놀이공원",h:"롤러코스터 있는 곳"},
+{w:"에버랜드",h:"용인 대표 테마파크"},
+{w:"롯데월드",h:"잠실 실내 놀이공원"},
+{w:"남산타워",h:"서울 야경 전망 명소"},
+{w:"한강공원",h:"치맥·자전거 명소"},
+{w:"회전목마",h:"놀이공원 클래식 놀이기구"},
+{w:"블랙핑크",h:"걸그룹, 뚜두뚜두"},
+{w:"아이언맨",h:"마블 히어로, 토니 스타크"},
+{w:"도라에몽",h:"파란 로봇 고양이"},
+{w:"신데렐라",h:"유리구두 동화 주인공"},
+{w:"백설공주",h:"일곱 난쟁이 동화"},
+{w:"인어공주",h:"바닷속 공주 동화"},
+{w:"겨울왕국",h:"엘사·안나 (Let It Go)"},
+{w:"아기상어",h:"'뚜루루뚜루' 동요"},
+{w:"대한민국",h:"우리나라 정식 국호"},
+{w:"초등학교",h:"보통 8살에 입학"},
+{w:"배드민턴",h:"셔틀콕 라켓 운동"},
+{w:"발렌타인",h:"2월 14일, 초콜릿"},
+{w:"어린이날",h:"5월 5일"},
+{w:"어버이날",h:"5월 8일, 카네이션"},
+{w:"택배기사",h:"문 앞까지 배송해주는 분"},
+{w:"배달음식",h:"앱으로 시켜 먹는 것"},
+{w:"카푸치노",h:"우유 거품 많은 커피"},
+{w:"아이스티",h:"시원한 홍차 음료"},
+{w:"여름휴가",h:"7~8월 바다·계곡"},
+{w:"생일축하",h:"'○○ 노래를 부릅니다~'"}
+];
+let fourList=[],fourIdx=0;
+function fourStart(){
+  const pool=FOUR.filter(x=>x.w.length===4);
+  fourList=pool.slice().sort(()=>Math.random()-0.5).slice(0,10);
+  fourIdx=0;fourRender();beep(880,.1,.25);
+}
+function fourRender(){
+  if(fourIdx>=fourList.length){
+    $("fourProg").textContent="🏁 "+fourList.length+"문제 끝!";
+    $("fourPuzzle").innerHTML="🎉";
+    $("fourHint").textContent="수고했어요! 다시 하려면 아래 버튼";
+    $("fourReveal").style.display="none";$("fourNext").style.display="none";
+    $("fourStartBtn").textContent="🔁 다시 10문제";$("fourStartBtn").style.display="inline-block";
+    winJingle();confetti();return;
+  }
+  const it=fourList[fourIdx];
+  $("fourProg").textContent="문제 "+(fourIdx+1)+" / "+fourList.length;
+  const shown=it.w.slice(0,2),hidden=it.w.slice(2);
+  $("fourPuzzle").innerHTML=shown.split("").map(c=>'<span class="fc">'+esc(c)+'</span>').join("")
+    +hidden.split("").map(()=>'<span class="fc blank">■</span>').join("");
+  $("fourHint").textContent="💡 힌트: "+it.h;
+  $("fourReveal").textContent="👁 정답 보기";$("fourReveal").style.display="inline-block";
+  $("fourNext").style.display="none";$("fourStartBtn").style.display="none";
+  beep(660,.05,.15,"square");
+}
+function fourAns(){
+  if(fourIdx>=fourList.length)return;
+  const it=fourList[fourIdx];
+  $("fourPuzzle").innerHTML=it.w.split("").map((c,i)=>'<span class="fc'+(i>=2?' hit':'')+'">'+esc(c)+'</span>').join("");
+  $("fourReveal").style.display="none";$("fourNext").style.display="inline-block";
+  winJingle();
+}
+function fourNext(){fourIdx++;fourRender();}
 
 /* ===== person photo quiz ===== */
 const WIKI_KO={"아인슈타인":"알베르트 아인슈타인","뉴턴":"아이작 뉴턴","피카소":"파블로 피카소","반 고흐":"빈센트 반 고흐","베토벤":"루트비히 판 베토벤","모차르트":"볼프강 아마데우스 모차르트","나폴레옹":"나폴레옹 보나파르트","링컨":"에이브러햄 링컨","간디":"마하트마 간디","만델라":"넬슨 만델라","에디슨":"토머스 에디슨","마리 퀴리":"마리 퀴리","스티븐 호킹":"스티븐 호킹","셰익스피어":"윌리엄 셰익스피어","콜럼버스":"크리스토퍼 콜럼버스","찰리 채플린":"찰리 채플린","엘비스 프레슬리":"엘비스 프레슬리","마이클 잭슨":"마이클 잭슨","존 레논":"존 레논","프레디 머큐리":"프레디 머큐리","테일러 스위프트":"테일러 스위프트","메시":"리오넬 메시","호날두":"크리스티아누 호날두","마이클 조던":"마이클 조던","우사인 볼트":"우사인 볼트","타이거 우즈":"타이거 우즈","무하마드 알리":"무함마드 알리","마이클 펠프스":"마이클 펠프스","일론 머스크":"일론 머스크","스티브 잡스":"스티브 잡스","빌 게이츠":"빌 게이츠","마크 저커버그":"마크 저커버그","오바마":"버락 오바마","트럼프":"도널드 트럼프","푸틴":"블라디미르 푸틴","오프라 윈프리":"오프라 윈프리","톰 크루즈":"톰 크루즈","브래드 피트":"브래드 피트","레오나르도 디카프리오":"레오나르도 디카프리오","성룡":"성룡","이소룡":"이소룡","메르켈":"앙겔라 메르켈","젠슨 황":"젠슨 황","레오나르도 다빈치":"레오나르도 다 빈치","정국 (BTS)":"정국","한강 (작가)":"한강 (소설가)","페이커":"페이커 (프로게이머)","침착맨":"침착맨","기안84":"기안84"};
