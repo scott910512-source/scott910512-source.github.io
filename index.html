@@ -345,15 +345,15 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <span class="golink" onclick="goTool('toolSong')">⚡ 연대별 노래 맞추기 열기 →</span>
 <span class="golink" style="background:linear-gradient(90deg,#ff5f8f,#ffb340)" onclick="goTool('toolIntro')">🎵 링크 직접 넣기 →</span></div>
 
-<div class="g"><div class="g-top"><h3>🔠 네글자 퀴즈</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd tool">도구연계</span></div></div>
-<p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 앞 2글자 힌트로 네 글자 맞히기</p>
+<div class="g"><div class="g-top"><h3>🔠 글자 맞추기 (4·5글자)</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 앞 2글자 힌트로 4~5글자 맞히기</p>
 <div class="how"><ol>
-<li>도구 탭 <b>네글자 퀴즈</b>에서 10문제 시작</li>
-<li><b>"와이 ■■"</b>처럼 앞 2글자 + 힌트 공개 → 나머지 2글자 맞히기 (예: <b>와이파이</b>)</li>
+<li>도구 탭 <b>글자 맞추기</b>에서 10문제 시작</li>
+<li><b>"와이 ■■"</b>처럼 앞 2글자 + 힌트 공개 → 나머지를 맞히기 (예: <b>와이파이</b> / <b>아메리카노</b>)</li>
 <li><b>열린 정답</b> — 뜻만 통하면 인정, 먼저 외친 사람 승점</li>
 <li>👁 정답 보기로 확인 → ⏭ 다음 문제, 10문제 후 라운드 끝</li></ol></div>
 <p class="punish">⚡ 라운드 최저 득점자 벌칙 · 폰 하나로 셀프 진행</p>
-<span class="golink" onclick="goTool('toolFour')">⚡ 네글자 퀴즈 열기 →</span></div>
+<span class="golink" onclick="goTool('toolFour')">⚡ 글자 맞추기 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>👑 인물 맞추기 퀴즈</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">국민게임</span></div></div>
 <p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대 (도구 탭)</b> · 한국인 + 세계구 유명인만 수록</p>
@@ -814,8 +814,8 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 </div>
 
 <div class="t-card" id="toolFour">
-  <h3>🔠 네글자 퀴즈</h3>
-  <p class="hint">4글자 중 <b>앞 2글자만 공개</b> — 나머지를 맞혀라! <b>열린 정답</b>(뜻만 통하면 인정) · 한 라운드 <b>10문제 연속</b> · 예) 와이 ■■ → <b>와이파이</b></p>
+  <h3>🔠 글자 맞추기 (4·5글자)</h3>
+  <p class="hint"><b>앞 2글자만 공개</b> — 나머지를 맞혀라! <b>열린 정답</b>(뜻만 통하면 인정) · 한 라운드 <b>10문제 연속</b><br>예) 와이 ■■ → <b>와이파이</b> · 아메 ■■■ → <b>아메리카노</b></p>
   <div class="tm-player" id="fourProg" style="color:var(--orange)">🎯 10문제 도전!</div>
   <div id="fourPuzzle" style="margin:14px 0 6px;min-height:74px;font-size:34px">🔠</div>
   <p class="hint" id="fourHint" style="min-height:20px">시작을 누르세요</p>
@@ -1716,9 +1716,48 @@ const FOUR=[
 {w:"여름휴가",h:"7~8월 바다·계곡"},
 {w:"생일축하",h:"'○○ 노래를 부릅니다~'"}
 ];
+/* 다섯 글자 (앞 2글자 공개, 뒤 3칸 가림) */
+const FIVE=[
+{w:"아메리카노",h:"물 탄 에스프레소, 검은 커피"},
+{w:"아이스크림",h:"여름에 시원한 디저트"},
+{w:"순두부찌개",h:"부드러운 두부 얼큰한 찌개"},
+{w:"김치볶음밥",h:"김치+밥 볶은 한 그릇"},
+{w:"오므라이스",h:"계란으로 감싼 볶음밥"},
+{w:"크림파스타",h:"하얀 소스 스파게티"},
+{w:"로제파스타",h:"분홍빛 소스 파스타"},
+{w:"마르게리타",h:"토마토·바질 기본 피자"},
+{w:"바닐라라떼",h:"바닐라 시럽 커피"},
+{w:"밀크쉐이크",h:"아이스크림 갈아 만든 음료"},
+{w:"스파이더맨",h:"거미줄 쏘는 마블 히어로"},
+{w:"트랜스포머",h:"변신 로봇 영화"},
+{w:"포켓몬스터",h:"피카츄 나오는 만화"},
+{w:"명탐정코난",h:"'몸은 어려졌어도…' 추리 만화"},
+{w:"미키마우스",h:"디즈니 대표 쥐 캐릭터"},
+{w:"토이스토리",h:"우디·버즈 장난감 애니"},
+{w:"미녀와야수",h:"장미와 저주받은 왕자 동화"},
+{w:"방탄소년단",h:"BTS, 그래미 간 그룹"},
+{w:"롤러코스터",h:"놀이공원 스릴 기구"},
+{w:"자이로드롭",h:"수직 낙하 놀이기구"},
+{w:"후룸라이드",h:"물에 첨벙 떨어지는 기구"},
+{w:"아쿠아리움",h:"물고기 보는 수족관"},
+{w:"스마트워치",h:"손목에 차는 스마트 기기"},
+{w:"보조배터리",h:"폰 충전용 휴대 배터리"},
+{w:"인스타그램",h:"사진·릴스 SNS"},
+{w:"배달의민족",h:"배달 앱, '우리가 어떤 민족입니까'"},
+{w:"카카오페이",h:"카톡 간편결제"},
+{w:"네이버지도",h:"길 찾기 국민 지도앱"},
+{w:"에어팟프로",h:"애플 노이즈캔슬 이어폰"},
+{w:"갤럭시버즈",h:"삼성 무선 이어폰"},
+{w:"크리스마스",h:"12월 25일"},
+{w:"산타클로스",h:"빨간 옷 선물 할아버지"},
+{w:"화이트데이",h:"3월 14일, 사탕"},
+{w:"빼빼로데이",h:"11월 11일"},
+{w:"핼러윈데이",h:"호박·분장·'trick or treat'"},
+{w:"편의점알바",h:"24시 매장 아르바이트"}
+];
 let fourList=[],fourIdx=0;
 function fourStart(){
-  const pool=FOUR.filter(x=>x.w.length===4);
+  const pool=FOUR.concat(FIVE).filter(x=>{const n=[...x.w].length;return n>=4&&n<=5;});
   fourList=pool.slice().sort(()=>Math.random()-0.5).slice(0,10);
   fourIdx=0;fourRender();beep(880,.1,.25);
 }
