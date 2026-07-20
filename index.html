@@ -820,6 +820,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <div id="fourPuzzle" style="margin:14px 0 6px;min-height:74px;font-size:34px">🔠</div>
   <p class="hint" id="fourHint" style="min-height:20px">시작을 누르세요</p>
   <button class="big-btn" id="fourStartBtn" onclick="fourStart()">🎯 10문제 시작</button>
+  <button class="big-btn" id="fourHintBtn" style="display:none;font-size:13px;padding:9px 16px;background:linear-gradient(92deg,#a78bfa,#ffb340)" onclick="fourShowHint()">💡 힌트 보기</button>
   <button class="big-btn b2" id="fourReveal" style="display:none" onclick="fourAns()">👁 정답 보기</button>
   <button class="big-btn b3" id="fourNext" style="display:none" onclick="fourNext()">⏭ 다음 문제</button>
 </div>
@@ -1766,6 +1767,7 @@ function fourRender(){
     $("fourProg").textContent="🏁 "+fourList.length+"문제 끝!";
     $("fourPuzzle").innerHTML="🎉";
     $("fourHint").textContent="수고했어요! 다시 하려면 아래 버튼";
+    $("fourHintBtn").style.display="none";
     $("fourReveal").style.display="none";$("fourNext").style.display="none";
     $("fourStartBtn").textContent="🔁 다시 10문제";$("fourStartBtn").style.display="inline-block";
     winJingle();confetti();return;
@@ -1775,15 +1777,22 @@ function fourRender(){
   const shown=it.w.slice(0,2),hidden=it.w.slice(2);
   $("fourPuzzle").innerHTML=shown.split("").map(c=>'<span class="fc">'+esc(c)+'</span>').join("")
     +hidden.split("").map(()=>'<span class="fc blank">■</span>').join("");
-  $("fourHint").textContent="💡 힌트: "+it.h;
+  $("fourHint").textContent=""; /* 힌트는 기본 숨김 */
+  $("fourHintBtn").style.display="inline-block";
   $("fourReveal").textContent="👁 정답 보기";$("fourReveal").style.display="inline-block";
   $("fourNext").style.display="none";$("fourStartBtn").style.display="none";
   beep(660,.05,.15,"square");
+}
+function fourShowHint(){
+  if(fourIdx>=fourList.length)return;
+  $("fourHint").textContent="💡 "+fourList[fourIdx].h;
+  $("fourHintBtn").style.display="none";
 }
 function fourAns(){
   if(fourIdx>=fourList.length)return;
   const it=fourList[fourIdx];
   $("fourPuzzle").innerHTML=it.w.split("").map((c,i)=>'<span class="fc'+(i>=2?' hit':'')+'">'+esc(c)+'</span>').join("");
+  $("fourHintBtn").style.display="none";
   $("fourReveal").style.display="none";$("fourNext").style.display="inline-block";
   winJingle();
 }
