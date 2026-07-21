@@ -161,15 +161,46 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .modal-x:active{transform:scale(.94)}
 #modalBody .g{margin-bottom:0}
 
+/* ===== 캐러셀: 한 화면에 하나씩 크게 ===== */
+.cnav{display:flex;align-items:center;gap:8px;justify-content:center;margin:14px 0 12px}
+.cnav-arrow{flex:0 0 auto;width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line);
+ background:var(--card);color:#fff;font-size:24px;font-weight:900;cursor:pointer;line-height:1}
+.cnav-arrow:active{transform:scale(.9)}
+.cnav-title{flex:1 1 auto;max-width:520px;border:1.5px solid var(--line);background:var(--card);color:#fff;
+ border-radius:999px;padding:13px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cnav-title:active{transform:scale(.97)}
+.page.cmode > .g, .page.cmode > .t-card{max-width:780px;margin-left:auto;margin-right:auto}
+.page.cmode > .g:not(.cshow), .page.cmode > .t-card:not(.cshow){display:none}
+.cmenu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmenu-item{border:1.5px solid var(--line);background:var(--card);color:#fff;border-radius:12px;
+ padding:13px 12px;font-size:13.5px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;line-height:1.3}
+.cmenu-item.on{border-color:transparent;background:linear-gradient(90deg,#ff5f8f,#ffb340);color:#2a1040}
+
 /* 태블릿·가로모드·PC — 넓은 화면에서 공간 활용 */
 @media(min-width:760px){
   .wrap{max-width:940px}
   .grid{grid-template-columns:repeat(3,1fr)}
+  .cmenu{grid-template-columns:repeat(3,1fr)}
   h1{font-size:52px}
+  /* 한 화면 1개 = 큼지막하게 */
+  .page.cmode > .g.cshow, .page.cmode > .t-card.cshow{padding:28px 30px}
+  .cmode .g h3, .cmode .t-card h3{font-size:23px}
+  .cmode .how{font-size:16px;line-height:1.85}
+  .cmode .meta{font-size:13px}
+  .cmode .big-btn{font-size:17px;padding:15px 30px}
+  .cnav-arrow{width:56px;height:56px;font-size:28px}
+  .cnav-title{font-size:16px;padding:15px 18px}
+  /* 글자 맞추기 — 아이패드에서 앞 글자 개크게 (특이도 위해 #fourPuzzle 사용) */
+  #fourPuzzle .fc{width:96px;height:116px;font-size:60px;margin:6px;border-radius:16px}
+  #fourPuzzle{min-height:116px}
 }
 @media(min-width:1100px){
   .wrap{max-width:1120px;padding:0 24px}
   .grid{grid-template-columns:repeat(4,1fr)}
+  .page.cmode > .g, .page.cmode > .t-card{max-width:860px}
+  #fourPuzzle .fc{width:126px;height:150px;font-size:80px;margin:7px;border-radius:18px}
+  #fourPuzzle{min-height:150px}
 }
 
 /* 네글자 퀴즈 */
@@ -249,7 +280,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <li><b>소수파가 벌칙</b> — 동수면 무효, 만장일치면 기적으로 인정하고 다같이 건배</li>
 <li>선택 이유 청문회가 본체. 특히 결혼·돈 문제에서 과몰입 발생</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%EB%B0%B8%EB%9F%B0%EC%8A%A4%EA%B2%8C%EC%9E%84%20%EC%88%A0%EC%9E%90%EB%A6%AC" target="_blank">📺 영상으로 배우기</a>
-<span class="golink" onclick="goTool('toolBal')">⚡ 밸런스 질문 뽑기 →</span></div>
+<span class="golink" onclick="goTool('toolPick')">⚡ 밸런스 질문 뽑기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🍄 슈퍼마리오 코인 게임</h3><div class="badges"><span class="bd trend">🔥 요즘 대학가</span><span class="bd easy">박자</span></div></div>
 <p class="meta">인원 <b>4~8</b> · 준비물 <b>없음</b> · 2025~26 개강시즌 신상 박자게임</p>
@@ -710,9 +741,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <button class="big-btn" style="background:linear-gradient(92deg,#3ce8b0,#a78bfa)" onclick="roll('obj')">🎁 물건 뽑기 (~할 수도 게임용)</button>
   <div class="result" id="rollRes">운명을 뽑아보세요</div>
 </div>
-<span id="toolBal"></span><span id="toolChar"></span>
-
-<div class="t-card">
+<div class="t-card" id="toolChar">
   <h3>🔤 글자 출제기</h3>
   <p class="hint">초성게임 · 훈민정음 · 물건 가져오기용 — 큰 글씨로 출제</p>
   <button class="big-btn b2" onclick="rollChar('han1')">ㄱ 초성 1개</button>
@@ -883,48 +912,76 @@ function goTool(id){
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
   document.querySelector('[data-p="pg3"]').classList.add("on");
   document.getElementById("pg3").classList.add("on");
-  setTimeout(()=>{const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},80);
+  const c=CAR["pg3"];
+  if(c){
+    const el=document.getElementById(id);
+    const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
+    const i=card?c.items.indexOf(card):-1;
+    if(i>=0){c.idx=i;cShow("pg3");}
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 const $=id=>document.getElementById(id);
 
-/* ===== 게임 선택 그리드 + 규칙 모달 ===== */
-function buildGrid(pageId){
-  const page=document.getElementById(pageId);
-  if(!page)return;
-  const cards=[...page.querySelectorAll(":scope > .g")];
-  if(!cards.length)return;
-  const grid=document.createElement("div");grid.className="grid";
-  const store=document.createElement("div");store.style.display="none";store.className="g-store";
-  const notice=page.querySelector(":scope > .notice");
-  cards.forEach(card=>{
-    const h3=card.querySelector("h3");
-    const title=h3?h3.textContent:"게임";
-    const badges=card.querySelector(".badges");
-    const hasTool=!!card.querySelector(".golink");
-    const tile=document.createElement("button");
-    tile.type="button";tile.className="tile";
-    tile.innerHTML='<div class="tile-t">'+esc(title)+'</div>'+
-      '<div>'+(badges?'<div class="tile-b">'+badges.innerHTML+'</div>':'')+
-      (hasTool?'<div class="tile-go" style="margin-top:6px">⚡ 도구 있음</div>':'')+'</div>';
-    tile.onclick=()=>openGame(card);
-    grid.appendChild(tile);
-    store.appendChild(card);
-  });
-  if(notice)notice.after(grid);else page.prepend(grid);
-  page.appendChild(store);
+/* ===== 캐러셀: 한 화면에 하나씩 크게 + 목록 선택 ===== */
+const CAR={};
+function buildCarousel(pageId,itemSel){
+  const page=document.getElementById(pageId);if(!page)return;
+  const items=[...page.querySelectorAll(":scope > "+itemSel)];
+  if(!items.length)return;
+  page.classList.add("cmode");
+  const nav=document.createElement("div");nav.className="cnav";
+  const prev=document.createElement("button");prev.type="button";prev.className="cnav-arrow";prev.textContent="‹";
+  const title=document.createElement("button");title.type="button";title.className="cnav-title";title.innerHTML='<span class="cpos"></span>';
+  const next=document.createElement("button");next.type="button";next.className="cnav-arrow";next.textContent="›";
+  nav.appendChild(prev);nav.appendChild(title);nav.appendChild(next);
+  items[0].before(nav);
+  prev.onclick=()=>cStep(pageId,-1);
+  next.onclick=()=>cStep(pageId,1);
+  title.onclick=()=>cMenu(pageId);
+  CAR[pageId]={items:items,idx:0,nav:nav};
+  cShow(pageId);
+  addSwipe(page,pageId);
 }
-function openGame(card){
+function cShow(pageId){
+  const c=CAR[pageId];if(!c)return;const n=c.items.length;
+  if(c.idx<0)c.idx=0;if(c.idx>=n)c.idx=n-1;
+  c.items.forEach((it,i)=>it.classList.toggle("cshow",i===c.idx));
+  const h3=c.items[c.idx].querySelector("h3");
+  const nm=(h3?h3.textContent:"").trim();
+  c.nav.querySelector(".cpos").textContent=(c.idx+1)+" / "+n+" · "+nm+"   ▾ 목록";
+}
+function cScrollTop(c){
+  const tabsEl=document.querySelector(".tabs");const th=tabsEl?tabsEl.offsetHeight:60;
+  window.scrollTo({top:Math.max(0,c.nav.offsetTop-th-4),behavior:"smooth"});
+}
+function cStep(pageId,d){
+  const c=CAR[pageId];if(!c)return;const n=c.items.length;
+  c.idx=(c.idx+d+n)%n;cShow(pageId);beep(600,.04,.1,"square");cScrollTop(c);
+}
+function cMenu(pageId){
+  const c=CAR[pageId];if(!c)return;
   const body=$("modalBody");
-  body.innerHTML="";
-  body.appendChild(card.cloneNode(true));
-  $("gameModal").classList.add("on");
-  document.body.style.overflow="hidden";
-  $("gameModal").scrollTop=0;
+  body.innerHTML='<div style="font-size:13px;font-weight:800;color:var(--sub);text-align:center;margin-bottom:10px">목록에서 바로 선택</div><div class="cmenu">'+
+    c.items.map((it,i)=>{const h3=it.querySelector("h3");const nm=(h3?h3.textContent:"").trim();
+      return '<button class="cmenu-item'+(i===c.idx?" on":"")+'" onclick="cGo(\''+pageId+'\','+i+')">'+esc(nm)+'</button>';}).join("")+'</div>';
+  $("gameModal").classList.add("on");document.body.style.overflow="hidden";
+}
+function cGo(pageId,i){
+  const c=CAR[pageId];if(!c)return;c.idx=i;cShow(pageId);closeGame();cScrollTop(c);
+}
+function addSwipe(el,pageId){
+  let x0=null,y0=null;
+  el.addEventListener("touchstart",e=>{const t=e.changedTouches[0];x0=t.clientX;y0=t.clientY;},{passive:true});
+  el.addEventListener("touchend",e=>{
+    if(x0==null)return;const t=e.changedTouches[0];const dx=t.clientX-x0,dy=t.clientY-y0;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)cStep(pageId,dx<0?1:-1);
+    x0=y0=null;
+  },{passive:true});
 }
 function closeGame(){
   const m=$("gameModal");if(!m)return;
-  m.classList.remove("on");
-  document.body.style.overflow="";
+  m.classList.remove("on");document.body.style.overflow="";
 }
 
 /* ===== sound engine ===== */
@@ -1866,10 +1923,11 @@ function photoReveal(){
 setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
-/* 게임 카드 → 선택 그리드로 전환 */
-buildGrid("pg1");buildGrid("pg2");buildGrid("pg4");
+/* 게임·도구 → 한 화면에 하나씩(캐러셀)로 전환 */
+buildCarousel("pg1",".g");buildCarousel("pg2",".g");buildCarousel("pg4",".g");buildCarousel("pg3",".t-card");
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGame();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGame();
+  else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){const on=document.querySelector(".page.on");if(on&&CAR[on.id])cStep(on.id,e.key==="ArrowRight"?1:-1);}});
 </script>
 </body>
 </html>
