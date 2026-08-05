@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111417">
+<title>샷 트리거 테스트</title>
+<style>
+  :root{
+    --ink:#111417;        /* 배경 */
+    --panel:#1B2025;      /* 패널 */
+    --line:#2C343B;       /* 테두리 */
+    --text:#E8EDF0;       /* 본문 */
+    --dim:#7E8B94;        /* 보조 텍스트 */
+    --amber:#FFB454;      /* 계측 앰버: 임계값/강조 */
+    --trace:#8FB8C9;      /* 레벨 트레이스 */
+    --warn:#F26D6D;       /* 클리핑 경고 */
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--ink);color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+    overscroll-behavior:none}
+  body{max-width:480px;margin:0 auto;padding:14px 14px calc(24px + env(safe-area-inset-bottom));
+    min-height:100dvh}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .eyebrow{font-size:11px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  header h1{font-size:14px;font-weight:600;letter-spacing:.02em}
+  .badges{display:flex;gap:10px;align-items:center}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block;
+    vertical-align:middle;margin-right:5px;transition:background .3s}
+  .badge{font-size:11px;color:var(--dim)}
+  .badge.on .dot{background:var(--amber);box-shadow:0 0 8px rgba(255,180,84,.6)}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:16px;margin-bottom:12px}
+
+  /* 카운터: 삼각대 2m 거리에서도 보이는 계기판 */
+  #counterCard{text-align:center;position:relative;transition:box-shadow .15s,border-color .15s}
+  #shotCount{font-size:96px;line-height:1;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px}
+  #lastShot{font-size:13px;color:var(--dim);min-height:18px}
+  #stateLine{font-size:13px;color:var(--amber);min-height:18px;margin-top:6px}
+  body.hit #counterCard{border-color:var(--amber);
+    box-shadow:0 0 0 3px rgba(255,180,84,.55),0 0 40px rgba(255,180,84,.35)}
+  body.hit #shotCount{animation:pop .35s ease-out}
+  @keyframes pop{0%{transform:scale(1)}30%{transform:scale(1.12)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion: reduce){
+    body.hit #shotCount{animation:none}
+  }
+
+  /* 레벨 그래프 */
+  #graphWrap{padding:12px}
+  #graph{width:100%;height:130px;display:block;border-radius:8px;background:#0C0F12}
+  .levelRow{display:flex;align-items:baseline;justify-content:space-between;margin-top:10px}
+  #dbNow{font-size:26px;font-weight:600}
+  #dbNow.clip{color:var(--warn)}
+  .levelRow .eyebrow{letter-spacing:.1em}
+  #barTrack{height:6px;background:#0C0F12;border-radius:3px;margin-top:8px;overflow:hidden;position:relative}
+  #barFill{height:100%;width:0%;background:var(--trace);border-radius:3px}
+  #barThresh{position:absolute;top:-2px;width:2px;height:10px;background:var(--amber)}
+
+  /* 버튼 */
+  .btnRow{display:flex;gap:10px;margin-bottom:12px}
+  button{flex:1;border:1px solid var(--line);background:var(--panel);color:var(--text);
+    font-size:16px;font-weight:600;padding:16px 8px;border-radius:12px;cursor:pointer;
+    font-family:inherit;transition:opacity .15s}
+  button:active{opacity:.7}
+  #btnStart.running{background:var(--amber);color:#111417;border-color:var(--amber)}
+  button.small{flex:none;font-size:13px;font-weight:500;padding:8px 14px;color:var(--dim)}
+  button:disabled{opacity:.4}
+
+  /* 설정 */
+  details{margin-bottom:12px}
+  summary{cursor:pointer;padding:12px 16px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;font-size:14px;font-weight:600;list-style:none;display:flex;justify-content:space-between}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"▸";color:var(--dim);transition:transform .2s}
+  details[open] summary::after{transform:rotate(90deg)}
+  details[open] summary{border-radius:12px 12px 0 0;border-bottom:none}
+  .settingsBody{background:var(--panel);border:1px solid var(--line);border-top:none;
+    border-radius:0 0 12px 12px;padding:6px 16px 16px}
+  .setting{padding:12px 0;border-bottom:1px solid var(--line)}
+  .setting:last-child{border-bottom:none}
+  .setting label{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}
+  .setting label .val{color:var(--amber);font-weight:600}
+  input[type=range]{width:100%;accent-color:var(--amber);height:28px}
+  .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .seg button{border:none;border-radius:0;padding:12px;font-size:14px;background:transparent}
+  .seg button.active{background:var(--amber);color:#111417}
+  .hint{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.5}
+
+  /* 로그 */
+  #log{max-height:260px;overflow-y:auto}
+  .logItem{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;line-height:1.5;
+    display:flex;gap:8px;align-items:baseline}
+  .logItem:last-child{border-bottom:none}
+  .logItem .t{color:var(--dim);flex:none;font-size:12px}
+  .logItem.shot .msg{color:var(--text);font-weight:600}
+  .logItem.shot .msg::before{content:"샷 ";color:var(--amber)}
+  .logItem.spike .msg{color:var(--dim)}
+  .logItem.info .msg{color:var(--amber);font-weight:500}
+  #logEmpty{color:var(--dim);font-size:13px;padding:8px 0;line-height:1.6}
+  #msg{font-size:13px;color:var(--warn);line-height:1.6;margin-bottom:12px;display:none;
+    background:rgba(242,109,109,.08);border:1px solid rgba(242,109,109,.35);
+    border-radius:12px;padding:12px 14px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>샷 트리거 테스트</h1>
+  <div class="badges">
+    <span class="badge" id="wakeBadge"><span class="dot"></span>화면유지</span>
+    <span class="badge" id="micBadge"><span class="dot"></span>마이크</span>
+  </div>
+</header>
+
+<div id="msg"></div>
+
+<div class="card" id="counterCard">
+  <div class="eyebrow">감지된 샷</div>
+  <div id="shotCount" class="mono">0</div>
+  <div id="lastShot" class="mono"></div>
+  <div id="stateLine">대기 — 감지 시작을 눌러</div>
+</div>
+
+<div class="card" id="graphWrap">
+  <canvas id="graph"></canvas>
+  <div class="levelRow">
+    <span class="eyebrow">현재 레벨</span>
+    <span id="dbNow" class="mono">–</span>
+  </div>
+  <div id="barTrack"><div id="barFill"></div><div id="barThresh"></div></div>
+</div>
+
+<div class="btnRow">
+  <button id="btnStart">감지 시작</button>
+  <button id="btnCal" disabled>주변 소음 측정</button>
+</div>
+
+<details>
+  <summary>설정</summary>
+  <div class="settingsBody">
+    <div class="setting">
+      <label>임계값 <span class="val mono" id="threshVal">-15 dB</span></label>
+      <input type="range" id="thresh" min="-60" max="-3" step="1" value="-15">
+      <div class="hint">이 선을 넘는 소리만 스파이크로 인식. 주변 소음 측정을 누르면 자동 제안.</div>
+    </div>
+    <div class="setting">
+      <label>감지 모드</label>
+      <div class="seg">
+        <button id="modeDouble" class="active">더블 (임팩트+천막)</button>
+        <button id="modeSingle">단발</button>
+      </div>
+      <div class="hint">더블: 두 번의 스파이크가 연달아 와야 샷으로 카운트. 빠른 샷은 두 소리가 붙어 한 봉우리로 보일 수 있음 — 그래프 확인 후 안 잡히면 단발로 전환.</div>
+    </div>
+    <div class="setting">
+      <label>더블 최대 간격 <span class="val mono" id="gapVal">0.50 s</span></label>
+      <input type="range" id="gapMax" min="0.10" max="0.80" step="0.05" value="0.50">
+    </div>
+    <div class="setting">
+      <label>쿨다운 <span class="val mono" id="cdVal">3 s</span></label>
+      <input type="range" id="cooldown" min="1" max="6" step="0.5" value="3">
+      <div class="hint">샷 감지 후 이 시간 동안은 새 감지 안 함 (공 줍고 셋업하는 시간).</div>
+    </div>
+  </div>
+</details>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <span class="eyebrow">이벤트 로그</span>
+    <button class="small" id="btnReset">리셋</button>
+  </div>
+  <div id="log"><div id="logEmpty">아직 이벤트 없음. 감지 시작 후 스윙해봐 — 샷으로 안 잡힌 스파이크도 여기 다 찍히니까, 옆 타석 소리가 몇 dB로 들어오는지 이걸로 확인해.</div></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- 상태 ----------
+  var ac=null, analyser=null, stream=null, running=false;
+  var buf=null;
+  var threshold=-15, gapMax=0.50, gapMin=0.03, cooldownSec=3, mode="double";
+  var REARM_DB=8;           // 히스테리시스: 임계값-8dB 밑으로 내려와야 재무장
+  var armed=true, pendingSpike=null, cooldownUntil=0;
+  var shots=0, clipFrames=0, clipWarned=false;
+  var history=[];           // {t, db}
+  var HIST_MS=8000, VIEW_MS=6000;
+  var shotMarks=[], spikeMarks=[];
+  var calibrating=false, calEnd=0, calPeak=-80;
+  var wakeLock=null;
+
+  // ---------- DOM ----------
+  var $=function(id){return document.getElementById(id)};
+  var elCount=$("shotCount"), elLast=$("lastShot"), elState=$("stateLine"),
+      elDb=$("dbNow"), elFill=$("barFill"), elBarThresh=$("barThresh"),
+      elLog=$("log"), elLogEmpty=$("logEmpty"), elMsg=$("msg"),
+      btnStart=$("btnStart"), btnCal=$("btnCal"),
+      canvas=$("graph"), ctx=canvas.getContext("2d");
+
+  function showMsg(t){elMsg.textContent=t;elMsg.style.display="block"}
+  function hideMsg(){elMsg.style.display="none"}
+
+  function nowStr(){
+    var d=new Date();
+    return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0");
+  }
+  function addLog(type,msg){
+    if(elLogEmpty){elLogEmpty.remove();elLogEmpty=null}
+    var div=document.createElement("div");
+    div.className="logItem "+type;
+    div.innerHTML='<span class="t mono">'+nowStr()+'</span><span class="msg"></span>';
+    div.querySelector(".msg").textContent=msg;
+    elLog.insertBefore(div,elLog.firstChild);
+    while(elLog.children.length>50) elLog.removeChild(elLog.lastChild);
+  }
+
+  // ---------- 캔버스 ----------
+  function sizeCanvas(){
+    var r=canvas.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+    canvas.width=Math.round(r.width*dpr); canvas.height=Math.round(130*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener("resize",sizeCanvas);
+
+  function dbToY(db,h){
+    var v=Math.max(-60,Math.min(0,db));
+    return (0-v)/60*(h-8)+4;
+  }
+  function drawGraph(now){
+    var w=canvas.getBoundingClientRect().width, h=130;
+    ctx.clearRect(0,0,w,h);
+    // 눈금
+    ctx.strokeStyle="#1A2026"; ctx.lineWidth=1;
+    [-20,-40].forEach(function(db){
+      var y=dbToY(db,h);
+      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    });
+    var t0=now-VIEW_MS;
+    function tx(t){return (t-t0)/VIEW_MS*w}
+    // 임계값
+    var ty=dbToY(threshold,h);
+    ctx.strokeStyle="#FFB454"; ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(0,ty);ctx.lineTo(w,ty);ctx.stroke();
+    ctx.setLineDash([]);
+    // 스파이크 점
+    ctx.fillStyle="rgba(255,180,84,.8)";
+    spikeMarks.forEach(function(m){
+      if(m.t<t0)return;
+      ctx.beginPath();ctx.arc(tx(m.t),dbToY(m.db,h),3,0,Math.PI*2);ctx.fill();
+    });
+    // 샷 세로선
+    ctx.strokeStyle="rgba(232,237,240,.9)"; ctx.lineWidth=2;
+    shotMarks.forEach(function(m){
+      if(m.t<t0)return;
+      var x=tx(m.t);
+      ctx.beginPath();ctx.moveTo(x,4);ctx.lineTo(x,h-4);ctx.stroke();
+    });
+    // 트레이스
+    ctx.strokeStyle="#8FB8C9"; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    var started=false;
+    for(var i=0;i<history.length;i++){
+      var p=history[i];
+      if(p.t<t0)continue;
+      var x=tx(p.t), y=dbToY(p.db,h);
+      if(!started){ctx.moveTo(x,y);started=true}else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // ---------- 감지 로직 ----------
+  function onSpike(t,db){
+    spikeMarks.push({t:t,db:db});
+    if(t<cooldownUntil) return;
+    if(calibrating) return;
+    if(mode==="single"){ registerShot(t,db,null); return; }
+    // double
+    if(pendingSpike){
+      var gap=(t-pendingSpike.t)/1000;
+      if(gap>=gapMin && gap<=gapMax){
+        registerShot(t,Math.max(db,pendingSpike.db),gap);
+        pendingSpike=null;
+        return;
+      }
+    }
+    pendingSpike={t:t,db:db};
+  }
+  function registerShot(t,db,gap){
+    shots++;
+    cooldownUntil=t+cooldownSec*1000;
+    shotMarks.push({t:t});
+    elCount.textContent=shots;
+    var detail="피크 "+db.toFixed(1)+" dB"+(gap!=null?" · 간격 "+gap.toFixed(2)+" s":"");
+    elLast.textContent=detail;
+    addLog("shot","#"+shots+" · "+detail);
+    document.body.classList.add("hit");
+    setTimeout(function(){document.body.classList.remove("hit")},450);
+  }
+
+  function tick(){
+    if(!running)return;
+    var now=performance.now();
+    analyser.getFloatTimeDomainData(buf);
+    var peak=0;
+    for(var i=0;i<buf.length;i++){var a=Math.abs(buf[i]);if(a>peak)peak=a}
+    var db=20*Math.log10(Math.max(peak,1e-6));
+
+    history.push({t:now,db:db});
+    while(history.length&&history[0].t<now-HIST_MS)history.shift();
+    while(spikeMarks.length&&spikeMarks[0].t<now-HIST_MS)spikeMarks.shift();
+    while(shotMarks.length&&shotMarks[0].t<now-HIST_MS)shotMarks.shift();
+
+    // 스파이크 (히스테리시스)
+    if(armed && db>=threshold){armed=false;onSpike(now,db)}
+    else if(!armed && db<threshold-REARM_DB){armed=true}
+
+    // 더블 대기 만료 → 단독 스파이크로 로그
+    if(pendingSpike && now-pendingSpike.t>gapMax*1000){
+      addLog("spike","스파이크 "+pendingSpike.db.toFixed(1)+" dB (두 번째 없음 → 미카운트)");
+      pendingSpike=null;
+    }
+
+    // 캘리브레이션
+    if(calibrating){
+      if(db>calPeak)calPeak=db;
+      var remain=(calEnd-now)/1000;
+      if(remain<=0){
+        calibrating=false;
+        var suggested=Math.min(-6,Math.round(calPeak+20));
+        threshold=suggested;
+        $("thresh").value=suggested;
+        $("threshVal").textContent=suggested+" dB";
+        addLog("info","주변 소음 피크 "+calPeak.toFixed(1)+" dB → 임계값 "+suggested+" dB 설정");
+        btnCal.disabled=false;
+      } else {
+        elState.textContent="측정 중… "+remain.toFixed(1)+"s (조용히)";
+      }
+    } else {
+      var cd=(cooldownUntil-now)/1000;
+      if(cd>0) elState.textContent="쿨다운 "+cd.toFixed(1)+"s";
+      else if(pendingSpike) elState.textContent="첫 스파이크 감지 — 두 번째 대기";
+      else elState.textContent="감지 중";
+    }
+
+    // 레벨 표시
+    elDb.textContent=(db<=-60?"-60↓":db.toFixed(1))+" dB";
+    if(db>-1){clipFrames++;elDb.classList.add("clip")}else{elDb.classList.remove("clip")}
+    if(clipFrames>90&&!clipWarned){clipWarned=true;
+      addLog("info","클리핑 잦음 — 폰을 타석에서 조금 더 떨어뜨려")}
+    var pct=Math.max(0,Math.min(100,(db+60)/60*100));
+    elFill.style.width=pct+"%";
+    elBarThresh.style.left=((threshold+60)/60*100)+"%";
+
+    drawGraph(now);
+    requestAnimationFrame(tick);
+  }
+
+  // ---------- 시작/정지 ----------
+  async function start(){
+    hideMsg();
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:{
+        echoCancellation:false,noiseSuppression:false,autoGainControl:false
+      }});
+    }catch(e){
+      showMsg("마이크를 못 열었어 ("+e.name+"). 아티팩트 환경이면 권한이 막힌 것일 수 있음 — 이 파일을 GitHub Pages에 올려서 Safari로 열면 정상 동작해. HTTPS 필수.");
+      return;
+    }
+    var AC=window.AudioContext||window.webkitAudioContext;
+    ac=new AC();
+    if(ac.state==="suspended")await ac.resume();
+    var src=ac.createMediaStreamSource(stream);
+    analyser=ac.createAnalyser();
+    analyser.fftSize=1024;
+    buf=new Float32Array(analyser.fftSize);
+    src.connect(analyser);
+    stream.getAudioTracks()[0].addEventListener("ended",function(){
+      if(running){stop();showMsg("마이크 스트림이 끊겼어. 다시 시작해봐.")}
+    });
+    running=true; armed=true; pendingSpike=null; clipFrames=0;
+    btnStart.textContent="정지"; btnStart.classList.add("running");
+    btnCal.disabled=false;
+    $("micBadge").classList.add("on");
+    addLog("info","감지 시작 (AGC/노이즈억제 꺼짐, "+Math.round(ac.sampleRate/1000)+" kHz)");
+    requestWake();
+    requestAnimationFrame(tick);
+  }
+  function stop(){
+    running=false; calibrating=false;
+    if(stream)stream.getTracks().forEach(function(t){t.stop()});
+    if(ac)ac.close();
+    stream=null;ac=null;analyser=null;
+    btnStart.textContent="감지 시작"; btnStart.classList.remove("running");
+    btnCal.disabled=true;
+    $("micBadge").classList.remove("on");
+    elState.textContent="정지됨";
+    releaseWake();
+  }
+  btnStart.addEventListener("click",function(){running?stop():start()});
+
+  btnCal.addEventListener("click",function(){
+    if(!running)return;
+    calibrating=true; calPeak=-80; calEnd=performance.now()+2000;
+    btnCal.disabled=true;
+  });
+
+  $("btnReset").addEventListener("click",function(){
+    shots=0;elCount.textContent="0";elLast.textContent="";
+    shotMarks=[];spikeMarks=[];pendingSpike=null;
+    elLog.innerHTML='<div id="logEmpty">로그 비움.</div>';
+    elLogEmpty=$("logEmpty");
+    clipFrames=0;clipWarned=false;
+  });
+
+  // ---------- 설정 바인딩 ----------
+  $("thresh").addEventListener("input",function(){
+    threshold=+this.value;$("threshVal").textContent=this.value+" dB"});
+  $("gapMax").addEventListener("input",function(){
+    gapMax=+this.value;$("gapVal").textContent=(+this.value).toFixed(2)+" s"});
+  $("cooldown").addEventListener("input",function(){
+    cooldownSec=+this.value;$("cdVal").textContent=this.value+" s"});
+  $("modeDouble").addEventListener("click",function(){
+    mode="double";this.classList.add("active");$("modeSingle").classList.remove("active")});
+  $("modeSingle").addEventListener("click",function(){
+    mode="single";this.classList.add("active");$("modeDouble").classList.remove("active");
+    pendingSpike=null});
+
+  // ---------- Wake Lock ----------
+  async function requestWake(){
+    try{
+      wakeLock=await navigator.wakeLock.request("screen");
+      $("wakeBadge").classList.add("on");
+      wakeLock.addEventListener("release",function(){$("wakeBadge").classList.remove("on")});
+    }catch(e){/* 미지원 시 무시 — 화면 자동잠금 끄고 사용 */}
+  }
+  function releaseWake(){
+    if(wakeLock){wakeLock.release();wakeLock=null}
+    $("wakeBadge").classList.remove("on");
+  }
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="visible"&&running){
+      requestWake();
+      if(ac&&ac.state==="suspended")ac.resume();
+      requestAnimationFrame(tick);
+    }
+  });
+
+  sizeCanvas();
+})();
+</script>
+</body>
+</html>
