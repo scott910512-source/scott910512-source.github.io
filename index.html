@@ -245,6 +245,14 @@ body.gated{overflow:hidden}
  background:linear-gradient(92deg,#ffb340,#ff5f8f 45%,#3ce8b0);-webkit-background-clip:text;background-clip:text;color:transparent}
 .gate-sub{font-size:12.5px;color:var(--sub);margin-bottom:16px}
 .gate-card .fb-input{text-align:center}
+.gate-title{font-weight:800;font-size:15px;margin:2px 0 10px}
+.gate-links{font-size:12.5px;color:var(--sky);margin-top:12px}
+.gate-links span{cursor:pointer;text-decoration:underline}
+.gate-row{display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:13.5px;color:var(--txt);text-align:left}
+.gate-label{font-size:12.5px;color:var(--sub);min-width:46px}
+.gate-row label{cursor:pointer}
+.gate-row input[type=radio]{accent-color:#ff5f8f;width:16px;height:16px;vertical-align:middle;margin-right:3px}
+#suAge{color:#fff}#suAge option{color:#111}
 
 /* 태블릿(넓고 + 충분히 높은 화면)에서만 큼지막하게 — 폰 가로(짧은 높이)엔 미적용 */
 @media(min-width:760px) and (min-height:600px){
@@ -327,7 +335,7 @@ body.gated{overflow:hidden}
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">AOKI GAME CENTER · 男6 SPEC</div>
+  <div class="eyebrow">AOKI GAME CENTER</div>
   <h1>아오키 게임센터</h1>
   <p class="sub">📖 룰 있는 게임만 · ⚡ 도구는 즉시 실행 · <b>2026 모임게임 트렌드 반영</b></p>
 </header>
@@ -1028,7 +1036,7 @@ body.gated{overflow:hidden}
   <h3>👤 계정 · 📊 통계</h3>
   <div id="authLogin">
     <p class="hint">닉네임+비밀번호로 로그인하면 <b>내 플레이 통계</b>가 기록돼요 (선택 · 게임은 로그인 없이도 다 됩니다)</p>
-    <input class="fb-input" id="authNick" maxlength="20" placeholder="닉네임">
+    <input class="fb-input" id="authNick" maxlength="20" placeholder="아이디">
     <input class="fb-input" id="authPw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
     <button class="big-btn" onclick="sbSignIn()">🔑 로그인</button>
     <button class="big-btn b2" onclick="sbSignUp()">✨ 회원가입</button>
@@ -1062,15 +1070,47 @@ body.gated{overflow:hidden}
 <div id="loginGate">
   <div class="gate-card">
     <div class="gate-logo">🎉 아오키 게임센터</div>
-    <div class="gate-sub">男6 SPEC · 로그인해야 이용할 수 있어요</div>
+    <div class="gate-sub">로그인해야 이용할 수 있어요</div>
     <div id="gateLoading" class="hint">불러오는 중…</div>
-    <div id="gateForm" style="display:none">
-      <input class="fb-input" id="gateNick" maxlength="20" placeholder="닉네임">
-      <input class="fb-input" id="gatePw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
+
+    <div id="gpLogin" class="gpanel" style="display:none">
+      <input class="fb-input" id="gateNick" maxlength="20" placeholder="아이디">
+      <input class="fb-input" id="gatePw" type="password" maxlength="40" placeholder="비밀번호">
       <button class="big-btn" style="width:100%" onclick="sbSignIn()">🔑 로그인</button>
-      <button class="big-btn b2" style="width:100%;margin-top:6px" onclick="sbSignUp()">✨ 회원가입</button>
-      <p class="hint" id="gateMsg" style="min-height:16px;margin-top:8px"></p>
-      <p class="hint" style="font-size:11px;opacity:.7;margin-top:4px">닉네임+비밀번호로 가입 · 다른 기기에서도 같은 계정</p>
+      <div class="gate-links"><span onclick="gateShow('signup')">✨ 회원가입</span> · <span onclick="gateShow('find')">아이디·비번 찾기</span></div>
+      <p class="hint" id="gateMsg" style="min-height:16px;margin-top:6px"></p>
+    </div>
+
+    <div id="gpSignup" class="gpanel" style="display:none">
+      <div class="gate-title">회원가입</div>
+      <input class="fb-input" id="suId" maxlength="20" placeholder="아이디 (2자 이상)">
+      <input class="fb-input" id="suPw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
+      <input class="fb-input" id="suContact" maxlength="40" placeholder="연락처 (아이디·비번 찾기에 사용)">
+      <div class="gate-row"><span class="gate-label">성별</span>
+        <label><input type="radio" name="suGender" value="남"> 남</label>
+        <label><input type="radio" name="suGender" value="여"> 여</label></div>
+      <div class="gate-row"><span class="gate-label">나이대</span>
+        <select class="fb-input" id="suAge" style="flex:1;margin:0">
+          <option value="">선택</option><option>10대</option><option>20대</option><option>30대</option><option>40대</option><option>50대 이상</option>
+        </select></div>
+      <button class="big-btn b2" style="width:100%" onclick="doSignup()">✨ 가입하기</button>
+      <div class="gate-links"><span onclick="gateShow('login')">← 로그인으로</span></div>
+      <p class="hint" id="suMsg" style="min-height:16px;margin-top:4px"></p>
+    </div>
+
+    <div id="gpFind" class="gpanel" style="display:none">
+      <div class="gate-title">🔎 아이디 찾기</div>
+      <input class="fb-input" id="fiContact" placeholder="가입한 연락처">
+      <button class="big-btn" style="width:100%;font-size:14px;padding:10px 16px" onclick="doFindId()">아이디 찾기</button>
+      <p class="hint" id="fiMsg" style="min-height:14px"></p>
+      <hr style="border:none;border-top:1px dashed var(--line);margin:12px 0">
+      <div class="gate-title">🔑 비밀번호 재설정</div>
+      <input class="fb-input" id="fpId" placeholder="아이디">
+      <input class="fb-input" id="fpContact" placeholder="가입한 연락처">
+      <input class="fb-input" id="fpPw" type="password" placeholder="새 비밀번호 (4자 이상)">
+      <button class="big-btn" style="width:100%;font-size:14px;padding:10px 16px" onclick="doResetPw()">비밀번호 재설정</button>
+      <p class="hint" id="fpMsg" style="min-height:14px"></p>
+      <div class="gate-links"><span onclick="gateShow('login')">← 로그인으로</span></div>
     </div>
   </div>
 </div>
@@ -2293,11 +2333,67 @@ function renderAuth(){
   updateGate();
 }
 /* 로그인 게이트: 로그인해야 앱 사용 (백엔드 없으면 잠그지 않음) */
+let gateMode="login";
+function gateShow(m){
+  gateMode=m;
+  const L=$("gateLoading");if(L)L.style.display="none";
+  ["login","signup","find"].forEach(x=>{const e=$("gp"+x.charAt(0).toUpperCase()+x.slice(1));if(e)e.style.display=(x===m)?"block":"none";});
+}
 function updateGate(){
   const gate=$("loginGate");if(!gate)return;
   if(sbUser||!sb){gate.classList.remove("on");document.body.classList.remove("gated");}
-  else{gate.classList.add("on");document.body.classList.add("gated");
-    const l=$("gateLoading"),f=$("gateForm");if(l)l.style.display="none";if(f)f.style.display="block";}
+  else{gate.classList.add("on");document.body.classList.add("gated");gateShow(gateMode||"login");}
+}
+/* 회원가입 (아이디·비번·연락처·성별·나이대) */
+async function doSignup(){
+  const M=t=>{const e=$("suMsg");if(e)e.textContent=t;};
+  if(!sb){M("백엔드 미연결");return;}
+  const id=$("suId").value.trim(),pw=$("suPw").value,contact=$("suContact").value.trim();
+  const g=document.querySelector('input[name="suGender"]:checked'),gender=g?g.value:"";
+  const age=$("suAge").value;
+  if(id.length<2){M("아이디는 2자 이상");return;}
+  if(pw.length<4){M("비밀번호는 4자 이상");return;}
+  if(!contact){M("연락처를 입력하세요 (찾기에 필요)");return;}
+  M("가입 중...");
+  try{
+    const email=await nickToEmail(id);
+    const {data,error}=await sb.auth.signUp({email:email,password:pw});
+    if(error){M("가입 실패: "+(/already/i.test(error.message)?"이미 있는 아이디예요 (로그인하세요)":error.message));return;}
+    if(!data.session){M("⚠️ Supabase에서 'Confirm email'을 꺼주세요");return;}
+    sbUser=data.user;
+    try{await sb.from("profiles").upsert({id:sbUser.id,username:id,nickname:id,contact:contact,gender:gender,age_group:age});}catch(e){}
+    await afterLogin();logEvent("signup",id);
+  }catch(e){M("오류: "+e.message);}
+}
+/* 아이디 찾기 (연락처로) */
+async function doFindId(){
+  const M=t=>{const e=$("fiMsg");if(e)e.textContent=t;};
+  if(!sb){M("백엔드 미연결");return;}
+  const c=$("fiContact").value.trim();
+  if(!c){M("연락처를 입력하세요");return;}
+  M("찾는 중...");
+  try{
+    const {data,error}=await sb.rpc("find_id_by_contact",{p_contact:c});
+    if(error){M("오류: "+error.message);return;}
+    M(data?("✅ 아이디: "+data):"일치하는 아이디가 없어요");
+  }catch(e){M("오류: "+e.message);}
+}
+/* 비밀번호 재설정 (아이디+연락처 확인 후 새 비번) */
+async function doResetPw(){
+  const M=t=>{const e=$("fpMsg");if(e)e.textContent=t;};
+  if(!sb){M("백엔드 미연결");return;}
+  const id=$("fpId").value.trim(),c=$("fpContact").value.trim(),pw=$("fpPw").value;
+  if(!id||!c){M("아이디·연락처를 입력하세요");return;}
+  if(pw.length<4){M("새 비밀번호는 4자 이상");return;}
+  M("처리 중...");
+  try{
+    const {data,error}=await sb.rpc("reset_pw",{p_username:id,p_contact:c,p_newpw:pw});
+    if(error){M("오류: "+error.message);return;}
+    if(data==="OK"){M("✅ 재설정 완료! 새 비번으로 로그인하세요");setTimeout(()=>gateShow("login"),1600);}
+    else if(data==="NOMATCH")M("아이디·연락처가 일치하지 않아요");
+    else if(data==="SHORT")M("비밀번호가 너무 짧아요");
+    else M("결과: "+data);
+  }catch(e){M("오류: "+e.message);}
 }
 function renderSponsor(){
   const box=$("sponsorBox");if(!box)return;
