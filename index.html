@@ -234,6 +234,17 @@ body.vip #toolAuth h3::after{content:" 💎"}
 .idea-admin button{border:none;cursor:pointer;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px}
 .idea-e{background:linear-gradient(90deg,#4fc3ff,#3ce8b0);color:#101334}
 .idea-d{background:var(--pink);color:#fff}
+/* 로그인 게이트 (로그인해야 앱 사용) */
+#loginGate{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:20px;
+ background:radial-gradient(120% 90% at 50% 0%,var(--bg2) 0%,var(--bg1) 45%,var(--bg3) 100%)}
+#loginGate.on{display:flex}
+body.gated{overflow:hidden}
+.gate-card{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:20px;
+ padding:28px 22px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.gate-logo{font-size:24px;font-weight:900;line-height:1.2;margin-bottom:4px;
+ background:linear-gradient(92deg,#ffb340,#ff5f8f 45%,#3ce8b0);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gate-sub{font-size:12.5px;color:var(--sub);margin-bottom:16px}
+.gate-card .fb-input{text-align:center}
 
 /* 태블릿(넓고 + 충분히 높은 화면)에서만 큼지막하게 — 폰 가로(짧은 높이)엔 미적용 */
 @media(min-width:760px) and (min-height:600px){
@@ -1046,6 +1057,22 @@ body.vip #toolAuth h3::after{content:" 💎"}
 
 <div id="adBanner" style="margin:14px auto 26px;min-height:60px;text-align:center"></div>
 
+</div>
+
+<div id="loginGate">
+  <div class="gate-card">
+    <div class="gate-logo">🎉 아오키 게임센터</div>
+    <div class="gate-sub">男6 SPEC · 로그인해야 이용할 수 있어요</div>
+    <div id="gateLoading" class="hint">불러오는 중…</div>
+    <div id="gateForm" style="display:none">
+      <input class="fb-input" id="gateNick" maxlength="20" placeholder="닉네임">
+      <input class="fb-input" id="gatePw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
+      <button class="big-btn" style="width:100%" onclick="sbSignIn()">🔑 로그인</button>
+      <button class="big-btn b2" style="width:100%;margin-top:6px" onclick="sbSignUp()">✨ 회원가입</button>
+      <p class="hint" id="gateMsg" style="min-height:16px;margin-top:8px"></p>
+      <p class="hint" style="font-size:11px;opacity:.7;margin-top:4px">닉네임+비밀번호로 가입 · 다른 기기에서도 같은 계정</p>
+    </div>
+  </div>
 </div>
 
 <div class="modal" id="gameModal">
@@ -2195,7 +2222,9 @@ const SB_URL="https://tjnwerbofxcdjuzyjkmk.supabase.co";
 const SB_KEY="sb_publishable_pzZRfboaHH-t4UpHtvPsJA_fkm2a0Kx";
 let sb=null,sbUser=null,sbProfile=null;
 try{ if(window.supabase&&window.supabase.createClient&&SB_URL&&SB_KEY) sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){ sb=null; }
-function authMsg(t){const el=$("authMsg");if(el)el.textContent=t;}
+function gateActive(){const g=$("loginGate");return g&&g.classList.contains("on");}
+function authMsg(t){const el=gateActive()?$("gateMsg"):$("authMsg");if(el)el.textContent=t;}
+function authFields(){return gateActive()?[$("gateNick"),$("gatePw")]:[$("authNick"),$("authPw")];}
 async function nickToEmail(nick){
   const data=new TextEncoder().encode(nick.trim().toLowerCase());
   const buf=await crypto.subtle.digest("SHA-256",data);
@@ -2204,7 +2233,7 @@ async function nickToEmail(nick){
 }
 async function sbSignUp(){
   if(!sb){authMsg("⚠️ 백엔드가 아직 연결 안 됐어요");return;}
-  const nick=$("authNick").value.trim(),pw=$("authPw").value;
+  const [nEl,pEl]=authFields();const nick=nEl.value.trim(),pw=pEl.value;
   if(nick.length<2){authMsg("닉네임은 2자 이상");return;}
   if(pw.length<4){authMsg("비밀번호는 4자 이상");return;}
   authMsg("가입 중...");
@@ -2220,7 +2249,7 @@ async function sbSignUp(){
 }
 async function sbSignIn(){
   if(!sb){authMsg("⚠️ 백엔드가 아직 연결 안 됐어요");return;}
-  const nick=$("authNick").value.trim(),pw=$("authPw").value;
+  const [nEl,pEl]=authFields();const nick=nEl.value.trim(),pw=pEl.value;
   if(!nick||!pw){authMsg("닉네임·비밀번호를 입력하세요");return;}
   authMsg("로그인 중...");
   try{
@@ -2261,6 +2290,14 @@ function renderAuth(){
     ["statsBox","sponsorBox"].forEach(id=>{const e=$(id);if(e)e.innerHTML="";});
     if($("toolIdeas"))$("toolIdeas").style.display="none";
   }
+  updateGate();
+}
+/* 로그인 게이트: 로그인해야 앱 사용 (백엔드 없으면 잠그지 않음) */
+function updateGate(){
+  const gate=$("loginGate");if(!gate)return;
+  if(sbUser||!sb){gate.classList.remove("on");document.body.classList.remove("gated");}
+  else{gate.classList.add("on");document.body.classList.add("gated");
+    const l=$("gateLoading"),f=$("gateForm");if(l)l.style.display="none";if(f)f.style.display="block";}
 }
 function renderSponsor(){
   const box=$("sponsorBox");if(!box)return;
@@ -2459,6 +2496,8 @@ function photoReveal(){
 setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 fbRender(); /* 피드백 목록 초기 렌더 */
+/* 로그인 게이트 초기 표시(백엔드 있으면 로딩 상태로 잠금 → sbRestore가 해제/폼전환) */
+if(sb&&$("loginGate")){$("loginGate").classList.add("on");document.body.classList.add("gated");}
 sbRestore(); /* 로그인 세션 복원 + 통계 */
 initAdsense(); /* 애드센스 배너 (설정 시) */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
