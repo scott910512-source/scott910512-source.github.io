@@ -1042,6 +1042,8 @@ body.vip #toolAuth h3::after{content:" 💎"}
 </div>
 </div>
 
+<div id="adBanner" style="margin:14px auto 26px;min-height:60px;text-align:center"></div>
+
 </div>
 
 <div class="modal" id="gameModal">
@@ -2173,6 +2175,23 @@ function silentFail(){
 }
 
 /* ===== Supabase 로그인 · 통계 ===== */
+/* ===== Google AdSense 배너 (승인 후 아래 2개 값만 넣으면 켜짐) ===== */
+const ADSENSE_CLIENT="";  /* 예: "ca-pub-1234567890123456" (애드센스 승인 후 발급) */
+const ADSENSE_SLOT="";    /* 광고 단위(Ad unit) 슬롯 ID (숫자) */
+function initAdsense(){
+  const box=document.getElementById("adBanner");if(!box)return;
+  if(!/^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT)||!/^\d{6,}$/.test(ADSENSE_SLOT)){
+    box.innerHTML='<div style="font-size:11px;color:var(--sub);opacity:.65;border:1px dashed var(--line);border-radius:10px;padding:12px">📢 광고 영역 · 애드센스 승인 후 자동 표시</div>';
+    return;
+  }
+  try{
+    const s=document.createElement("script");s.async=true;s.crossOrigin="anonymous";
+    s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+ADSENSE_CLIENT;
+    document.head.appendChild(s);
+    box.innerHTML='<ins class="adsbygoogle" style="display:block" data-ad-client="'+ADSENSE_CLIENT+'" data-ad-slot="'+ADSENSE_SLOT+'" data-ad-format="auto" data-full-width-responsive="true"></ins>';
+    (window.adsbygoogle=window.adsbygoogle||[]).push({});
+  }catch(e){}
+}
 const SB_URL="https://tjnwerbofxcdjuzyjkmk.supabase.co";
 const SB_KEY="sb_publishable_pzZRfboaHH-t4UpHtvPsJA_fkm2a0Kx";
 let sb=null,sbUser=null,sbProfile=null;
@@ -2442,6 +2461,7 @@ setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 fbRender(); /* 피드백 목록 초기 렌더 */
 sbRestore(); /* 로그인 세션 복원 + 통계 */
+initAdsense(); /* 애드센스 배너 (설정 시) */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildCarousel("pg3",".t-card");
