@@ -435,7 +435,7 @@ body.gated{overflow:hidden}
     </div>
     <div class="result" id="homeRollRes" style="font-size:clamp(20px,5.5vmin,36px);font-weight:900;min-height:1.3em;margin:8px 0">준비!</div>
     <button class="big-btn" style="font-size:18px;padding:16px 42px" onclick="homeRoll()">🎡 돌리기!</button>
-    <button class="big-btn b2" id="homeOpenBtn" style="display:none;font-size:15px;padding:12px 26px;margin-top:8px" onclick="openRolledGame()">📖 이 게임 열기 →</button>
+    <button class="big-btn b2" id="homeOpenBtn" style="display:none;font-size:15px;padding:12px 26px;margin-top:8px" onclick="openRolledGame()">📖 설명 보기</button>
   </div>
 
   <div class="t-card" style="text-align:center">
@@ -1663,7 +1663,16 @@ function openGameCard(pg,card){
   const h3=card.querySelector("h3");if(h3)logEvent("game_open",h3.textContent.trim());
   setTimeout(()=>{card.scrollIntoView({behavior:"smooth",block:"start"});},90);
 }
-function openRolledGame(){ if(lastRolledGame)openGameCard(lastRolledGame.page,lastRolledGame.card); }
+/* 뽑힌 게임 설명을 팝업(모달)으로 바로 표시 */
+function openRolledGame(){
+  if(!lastRolledGame)return;
+  const card=lastRolledGame.card,body=$("modalBody");if(!body)return;
+  const clone=card.cloneNode(true);
+  clone.classList.add("open");clone.classList.remove("cshow");
+  body.innerHTML="";body.appendChild(clone);
+  $("gameModal").classList.add("on");document.body.style.overflow="hidden";
+  logEvent("game_open",lastRolledGame.name);
+}
 function goPage(p){const t=document.querySelector('[data-p="'+p+'"]');if(t)t.click();}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 /* ===== 홈 룰렛: 선택한 카테고리에서 랜덤 게임 ===== */
