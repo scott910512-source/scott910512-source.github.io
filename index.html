@@ -121,6 +121,13 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .rl-chip button{border:none;background:rgba(255,120,150,.25);color:#fff;width:20px;height:20px;border-radius:50%;
   cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center}
 .rl-chip button:active{transform:scale(.88)}
+/* 순위 정하기 */
+.rank-row{display:flex;align-items:center;gap:10px;max-width:470px;margin:8px auto;background:var(--card);
+  border:1.5px solid var(--line);border-radius:13px;padding:11px 14px}
+.rank-medal{font-size:19px;font-weight:900;min-width:54px;text-align:center}
+.rank-name{flex:1;text-align:left;font-weight:700;font-size:15.5px}
+.rank-pts{color:var(--sub);font-size:12.5px;font-weight:800}
+.rank-row .ubtn{padding:5px 11px;font-size:13px}
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .result.giant{font-size:clamp(72px,24vmin,210px);min-height:1.05em;line-height:1.02;letter-spacing:.05em}
@@ -450,6 +457,16 @@ body.gated{overflow:hidden}
 <a class="vid" href="https://www.youtube.com/results?search_query=%EB%9D%BC%EC%9D%B4%EC%96%B4%EA%B2%8C%EC%9E%84%20%ED%95%98%EB%8A%94%EB%B2%95" target="_blank">📺 영상으로 배우기</a>
 <p class="punish">⚡ 라이어 승리 → 시민 전원 벌칙 / 라이어 패배 → 라이어 벌칙 2배</p>
 <span class="golink" onclick="goTool('toolLiar')">⚡ 라이어 배정기 열기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>🏆 순위 정하기</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대</b> · 소요 <b>약 5분</b></p>
+<div class="how"><ol>
+<li>순위 주제를 정한다 (예: <b>오늘 제일 웃긴 사람 순</b>) — 도구에 🎲랜덤 주제도 있음</li>
+<li><b>🗣 토의</b>: 다 같이 이야기하며 순서를 ▲▼로 배치 → 확정</li>
+<li><b>🗳 비밀투표</b>: 폰을 돌려가며 각자 몰래 1~3위를 뽑음 → 점수 합산으로 최종 순위 공개</li>
+<li>1·2·3위에 🥇🥈🥉 — 꼴찌 벌칙 / 1위 소원권도 GOOD</li></ol></div>
+<p class="punish">⚡ 꼴찌 벌칙 · 1위 소원권</p>
+<span class="golink" onclick="goTool('toolRank')">⚡ 순위 정하기 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🃏 마피아 (6인 축소판)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>6</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b> · 구성 <b>마피아2 · 경찰1 · 의사1 · 시민2</b></p>
@@ -942,6 +959,44 @@ body.gated{overflow:hidden}
   <div class="result" id="rollRes">운명을 뽑아보세요</div>
   <button class="big-btn b2" id="rollGameBtn" style="display:none;font-size:14px;padding:10px 20px" onclick="openRolledGame()">📖 이 게임 설명 보기 →</button>
 </div>
+<div class="t-card" id="toolRank">
+  <h3>🏆 순위 정하기</h3>
+  <p class="hint">모임 사람들 순위를 <b>토의</b> 또는 <b>비밀투표</b>로! 예) 오늘 제일 웃긴 사람 순</p>
+  <div id="rankPnSetup">
+    <textarea class="fb-input" id="rankNames" rows="3" placeholder="참가자 이름 (줄바꿈 또는 쉼표) 예: 철수, 영희, 민수, 지훈"></textarea>
+    <div style="display:flex;gap:8px;max-width:470px;margin:8px auto">
+      <input class="fb-input" id="rankTopicInput" style="flex:1;margin:0" placeholder="순위 주제 (비우면 '종합 순위')">
+      <button class="big-btn b3" style="font-size:13px;padding:11px 15px" onclick="rankTopicRand()">🎲 주제</button>
+    </div>
+    <button class="big-btn" onclick="rankGo('discuss')">🗣 토의로 정하기</button>
+    <button class="big-btn b2" onclick="rankGo('vote')">🗳 비밀투표로 정하기</button>
+  </div>
+  <div id="rankPnDiscuss" style="display:none">
+    <div class="hint" id="rankTopicShow" style="color:var(--orange);font-weight:800;margin-bottom:10px"></div>
+    <div id="rankList"></div>
+    <button class="big-btn" onclick="rankConfirmDiscuss()">🏆 이 순서로 확정</button>
+    <button class="big-btn b3" onclick="rankReset()">↩ 처음으로</button>
+  </div>
+  <div id="rankPnCover" style="display:none">
+    <div style="font-size:46px">🙈</div>
+    <div id="rankCoverTxt" style="font-size:18px;font-weight:800;margin:8px 0"></div>
+    <p class="hint">다른 사람이 못 보게 넘겨받은 뒤 눌러주세요</p>
+    <button class="big-btn" onclick="rankVoteShow()">👆 내 차례! 투표 시작</button>
+  </div>
+  <div id="rankPnVote" style="display:none">
+    <div class="hint" id="rankVoteTopic" style="color:var(--orange);font-weight:800"></div>
+    <div class="hint">높은 순서로 최대 <b>3명</b> 탭 (1위→2위→3위)</div>
+    <div id="rankVoteBtns"></div>
+    <div class="hint" id="rankVotePicks" style="min-height:20px;font-weight:700"></div>
+    <button class="big-btn b2" onclick="rankVoteDone()">✅ 투표 완료 → 다음 사람</button>
+  </div>
+  <div id="rankPnResult" style="display:none">
+    <div class="hint" id="rankResultTopic" style="color:var(--orange);font-weight:800"></div>
+    <div id="rankBoard"></div>
+    <button class="big-btn b3" onclick="rankReset()">🔄 다시 하기</button>
+  </div>
+</div>
+
 <div class="t-card" id="toolChar">
   <h3>🔤 글자 출제기</h3>
   <p class="hint">초성게임 · 훈민정음 · 물건 가져오기용 — 큰 글씨로 출제</p>
@@ -1503,6 +1558,66 @@ async function rlRemove(id){
   RL_ITEMS=RL_ITEMS.filter(it=>it.id!==id);rlRender();
   if(sb&&sbUser&&typeof id==="number"){try{await sb.from("roulette_items").update({active:false}).eq("id",id);}catch(e){}}
 }
+/* ===== 순위 정하기 (토의 / 비밀투표) ===== */
+const RANK_TOPICS=["오늘 제일 웃긴 사람 순","게임 제일 잘할 것 같은 순","술 제일 셀 것 같은 순","연락 제일 안 되는 순","다시 태어나면 인기 많을 순","비상금 제일 많을 것 같은 순","지각 제일 자주 하는 순","제일 동안인 순","요리 제일 잘할 것 같은 순","위기에 리더 할 것 같은 순","제일 청소 안 할 것 같은 순","로또 되면 한턱 쏠 것 같은 순","패션 센스 제일 좋은 순","엉뚱한 매력 순","의외로 반전 있는 순"];
+let RANK={names:[],topic:"",order:[],voters:0,cur:0,points:{},picks:[]};
+function rankPanel(id){["Setup","Discuss","Cover","Vote","Result"].forEach(s=>{const e=$("rankPn"+s);if(e)e.style.display=("rankPn"+s===id)?"block":"none";});}
+function rankTopicRand(){$("rankTopicInput").value=RANK_TOPICS[Math.floor(Math.random()*RANK_TOPICS.length)];beep(560,.04,.1,"square");}
+function rankParseNames(){
+  const raw=($("rankNames").value||"").split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  const seen={},out=[];raw.forEach(n=>{const k=n.toLowerCase();if(!seen[k]){seen[k]=1;out.push(n.slice(0,16));}});
+  return out;
+}
+function rankGo(mode){
+  const names=rankParseNames();
+  if(names.length<2){alert("참가자를 2명 이상 입력해주세요");return;}
+  RANK.names=names;RANK.topic=($("rankTopicInput").value.trim())||"종합 순위";
+  logEvent("play","순위정하기-"+mode);
+  if(mode==="discuss"){RANK.order=names.slice();$("rankTopicShow").textContent="📋 "+RANK.topic+"  ·  ▲▼로 순서 조정";rankRenderList();rankPanel("rankPnDiscuss");}
+  else{RANK.voters=names.length;RANK.cur=0;RANK.points={};names.forEach(n=>RANK.points[n]=0);rankShowCover();rankPanel("rankPnCover");}
+}
+function rankRenderList(){
+  $("rankList").innerHTML=RANK.order.map((n,i)=>
+    '<div class="rank-row"><span class="rank-medal">'+(i+1)+'위</span><span class="rank-name">'+esc(n)+'</span>'+
+    '<button class="ubtn" onclick="rankMove('+i+',-1)">▲</button>'+
+    '<button class="ubtn" onclick="rankMove('+i+',1)">▼</button></div>').join("");
+}
+function rankMove(i,d){const j=i+d,a=RANK.order;if(j<0||j>=a.length)return;const t=a[i];a[i]=a[j];a[j]=t;rankRenderList();beep(500,.03,.08,"square");}
+function rankConfirmDiscuss(){rankShowResult(RANK.order.map((n,i)=>({name:n,rank:i+1})),false);}
+function rankShowCover(){$("rankCoverTxt").textContent=(RANK.cur+1)+" / "+RANK.voters+" 번째 투표자 차례";}
+function rankVoteShow(){RANK.picks=[];$("rankVoteTopic").textContent="🗳 "+RANK.topic;$("rankVotePicks").textContent="";rankRenderVoteBtns();rankPanel("rankPnVote");}
+function rankRenderVoteBtns(){
+  $("rankVoteBtns").innerHTML=RANK.names.map(n=>{
+    const idx=RANK.picks.indexOf(n),lab=idx>=0?" — <b>"+(idx+1)+"위 ✔</b>":"";
+    return '<button class="quiz-choice'+(idx>=0?" qc-right":"")+'" onclick="rankPick(\''+encodeURIComponent(n)+'\')">'+esc(n)+lab+'</button>';
+  }).join("");
+}
+function rankPick(enc){
+  const n=decodeURIComponent(enc);
+  if(RANK.picks.includes(n)||RANK.picks.length>=3)return;
+  RANK.picks.push(n);beep(660,.04,.1,"square");
+  $("rankVotePicks").innerHTML="선택: "+RANK.picks.map((x,i)=>(i+1)+"위 "+esc(x)).join("  ·  ");
+  rankRenderVoteBtns();
+}
+function rankVoteDone(){
+  RANK.picks.forEach((n,i)=>{RANK.points[n]=(RANK.points[n]||0)+(3-i);});
+  RANK.cur++;
+  if(RANK.cur<RANK.voters){rankShowCover();rankPanel("rankPnCover");}
+  else{
+    const arr=Object.keys(RANK.points).map(n=>({name:n,pts:RANK.points[n]})).sort((a,b)=>b.pts-a.pts);
+    let rank=0,prev=null;const ranked=arr.map((x,i)=>{if(x.pts!==prev){rank=i+1;prev=x.pts;}return {name:x.name,rank:rank,pts:x.pts};});
+    rankShowResult(ranked,true);
+  }
+}
+function rankShowResult(ranked,withPts){
+  const medal=r=>r===1?"🥇":r===2?"🥈":r===3?"🥉":r+"위";
+  $("rankResultTopic").textContent="🏆 "+RANK.topic;
+  $("rankBoard").innerHTML=ranked.map(x=>
+    '<div class="rank-row"><span class="rank-medal">'+medal(x.rank)+'</span><span class="rank-name">'+esc(x.name)+'</span>'+
+    (withPts?'<span class="rank-pts">'+x.pts+'점</span>':'')+'</div>').join("");
+  confetti();winJingle();rankPanel("rankPnResult");
+}
+function rankReset(){rankPanel("rankPnSetup");}
 /* ===== 상식 퀴즈 (5단계 · 4지선다 · c[0]이 정답) ===== */
 const QUIZ={
   kid:[
