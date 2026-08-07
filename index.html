@@ -98,6 +98,20 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .big-btn.b2{background:linear-gradient(92deg,#3ce8b0,#4fc3ff);box-shadow:0 8px 24px rgba(79,195,255,.35)}
 .big-btn.b3{background:linear-gradient(92deg,#a78bfa,#4fc3ff)}
 .big-btn:active{transform:scale(.94)}
+/* 홈 룰렛 카테고리 선택 */
+.cat-picks{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:14px 0 6px}
+.cat-pick{border:1.5px solid var(--line);background:var(--card);color:var(--sub);padding:10px 17px;
+  border-radius:999px;font-weight:800;font-size:15px;cursor:pointer;opacity:.5;transition:.15s}
+.cat-pick.on{opacity:1;color:#2a1040;border-color:transparent;background:linear-gradient(90deg,#ff5f8f,#ffb340)}
+.cat-pick:active{transform:scale(.93)}
+/* 상식 퀴즈 */
+.quiz-levels{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.quiz-choice{display:block;width:100%;max-width:460px;margin:9px auto;text-align:left;padding:14px 18px;
+  border:1.5px solid var(--line);border-radius:14px;background:var(--card);color:var(--txt);
+  font-weight:700;font-size:15.5px;cursor:pointer;transition:.12s}
+.quiz-choice:active{transform:scale(.98)}
+.qc-right{background:linear-gradient(92deg,#3ce8b0,#4fc3ff)!important;color:#08351f!important;border-color:transparent!important;font-weight:900}
+.qc-wrong{background:linear-gradient(92deg,#ff6b6b,#ff9f43)!important;color:#3a0d0d!important;border-color:transparent!important;font-weight:900}
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .result.giant{font-size:clamp(72px,24vmin,210px);min-height:1.05em;line-height:1.02;letter-spacing:.05em}
@@ -357,14 +371,57 @@ body.gated{overflow:hidden}
 </header>
 
 <div class="tabs">
-  <button class="tab on" data-p="pg1">🎉 모임게임</button>
+  <button class="tab on" data-p="pg0">🎡 홈</button>
+  <button class="tab" data-p="pg1">🎉 모임게임</button>
   <button class="tab" data-p="pg2">🍻 술게임</button>
   <button class="tab" data-p="pg4">🏖️ 야외놀이</button>
   <button class="tab" data-p="pg3">⚡ 도구</button>
 </div>
 
+<!-- ================= 홈 (룰렛 · 도구 · 상식퀴즈) ================= -->
+<div class="page on" id="pg0">
+  <div class="t-card" style="text-align:center">
+    <h3 style="font-size:21px">🎡 랜덤 게임 룰렛</h3>
+    <p class="hint">돌릴 카테고리를 켜고 <b>돌리기!</b> — 켜진 게임 중 랜덤으로 하나 뽑아요</p>
+    <div class="cat-picks">
+      <button class="cat-pick on" data-cat="pg1" onclick="toggleCat(this)">🎉 모임게임</button>
+      <button class="cat-pick on" data-cat="pg2" onclick="toggleCat(this)">🍻 술게임</button>
+      <button class="cat-pick on" data-cat="pg4" onclick="toggleCat(this)">🏖️ 야외놀이</button>
+    </div>
+    <div class="result" id="homeRollRes" style="font-size:clamp(26px,7vmin,52px);font-weight:900;min-height:1.3em;margin:10px 0">🎲</div>
+    <button class="big-btn" style="font-size:18px;padding:16px 42px" onclick="homeRoll()">🎡 돌리기!</button>
+    <button class="big-btn b2" id="homeOpenBtn" style="display:none;font-size:15px;padding:12px 26px;margin-top:8px" onclick="openRolledGame()">📖 이 게임 열기 →</button>
+  </div>
+
+  <div class="t-card" style="text-align:center">
+    <h3 style="font-size:21px">⚡ 도구 열기</h3>
+    <p class="hint">초성 출제기 · 폭탄 돌리기 · 노래 맞추기 · 인물 카드 · 타이머 등</p>
+    <button class="big-btn b3" style="font-size:17px;padding:15px 38px" onclick="goPage('pg3')">⚡ 도구 열기 →</button>
+  </div>
+
+  <div class="t-card" id="homeQuiz" style="text-align:center">
+    <h3 style="font-size:21px">🧠 상식 퀴즈</h3>
+    <p class="hint">난이도를 골라 4지선다 도전!</p>
+    <div class="quiz-levels">
+      <button class="cat-pick on" onclick="quizStart('kid')">🐣 완전어린이</button>
+      <button class="cat-pick on" onclick="quizStart('elem')">🎒 초등</button>
+      <button class="cat-pick on" onclick="quizStart('mid')">📘 중등</button>
+      <button class="cat-pick on" onclick="quizStart('high')">📗 고등</button>
+      <button class="cat-pick on" onclick="quizStart('pro')">🎓 고급</button>
+    </div>
+    <div id="quizBox" style="display:none;margin-top:14px">
+      <div id="quizProg" class="hint" style="color:var(--orange);font-weight:800"></div>
+      <div id="quizQ" style="font-size:clamp(18px,5vmin,27px);font-weight:800;margin:12px 0;line-height:1.4">?</div>
+      <div id="quizChoices"></div>
+      <div id="quizFb" class="hint" style="min-height:22px;margin-top:10px;font-size:15px"></div>
+      <button class="big-btn" id="quizNext" style="display:none;margin-top:6px" onclick="quizNext()">⏭ 다음 문제</button>
+      <button class="big-btn b3" id="quizAgain" style="display:none;margin-top:6px" onclick="document.getElementById('quizBox').style.display='none'">🔄 난이도 다시 고르기</button>
+    </div>
+  </div>
+</div>
+
 <!-- ================= 모임게임 ================= -->
-<div class="page on" id="pg1">
+<div class="page" id="pg1">
 <p class="notice">2026 트렌드: 단순 박자게임 → <b>심리전·가치관 공유형</b>으로 이동 중. 텐션 강요 없이, 술 없이도 돌아가는 게임 위주로 구성.</p>
 
 <div class="g"><div class="g-top"><h3>🕵️ 라이어 게임</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
@@ -1378,6 +1435,112 @@ function openGameCard(pg,card){
   setTimeout(()=>{card.scrollIntoView({behavior:"smooth",block:"start"});},90);
 }
 function openRolledGame(){ if(lastRolledGame)openGameCard(lastRolledGame.page,lastRolledGame.card); }
+function goPage(p){const t=document.querySelector('[data-p="'+p+'"]');if(t)t.click();}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+/* ===== 홈 룰렛: 선택한 카테고리에서 랜덤 게임 ===== */
+function toggleCat(btn){btn.classList.toggle("on");beep(500,.03,.08,"square");}
+function homeRoll(){
+  if(rolling)return;
+  const el=$("homeRollRes");
+  const cats=[...document.querySelectorAll('.cat-pick[data-cat].on')].map(b=>b.dataset.cat);
+  if(!cats.length){el.textContent="⚠️ 카테고리를 최소 1개 켜주세요";return;}
+  const pool=GAME_INDEX.filter(g=>cats.includes(g.page));
+  if(!pool.length){el.textContent="게임이 없어요";return;}
+  rolling=true;$("homeOpenBtn").style.display="none";
+  const winIdx=Math.floor(Math.random()*pool.length),win=pool[winIdx];
+  let i=0,delay=50;
+  (function tick(){
+    el.textContent=pool[i++%pool.length].name;
+    beep(500+Math.random()*300,.03,.08,"square");
+    if(delay<300){delay*=1.15;setTimeout(tick,delay);}
+    else{el.textContent="🎉 "+win.name;confetti();winJingle();rolling=false;
+      lastRolledGame=win;$("homeOpenBtn").style.display="inline-block";
+      logEvent("play","룰렛-"+win.name);}
+  })();
+}
+/* ===== 상식 퀴즈 (5단계 · 4지선다 · c[0]이 정답) ===== */
+const QUIZ={
+  kid:[
+    {q:"하늘은 무슨 색일까요?",c:["파란색","검은색","초록색","빨간색"]},
+    {q:"야옹~ 하고 우는 동물은?",c:["고양이","강아지","소","닭"]},
+    {q:"사과는 보통 무슨 색?",c:["빨간색","파란색","보라색","검은색"]},
+    {q:"밤하늘에서 반짝반짝 빛나는 건?",c:["별","구름","비","바람"]},
+    {q:"손가락은 한 손에 몇 개?",c:["5개","3개","10개","2개"]},
+    {q:"물속에서 헤엄치는 동물은?",c:["물고기","사자","토끼","참새"]},
+    {q:"우리가 잠을 자는 곳은?",c:["침대","냉장고","신발","자동차"]},
+    {q:"눈은 무슨 색으로 내릴까요?",c:["하얀색","검은색","노란색","파란색"]}
+  ],
+  elem:[
+    {q:"태양계에서 가장 큰 행성은?",c:["목성","지구","화성","수성"]},
+    {q:"물이 끓는 온도는 몇 도?",c:["100도","50도","200도","0도"]},
+    {q:"대한민국의 수도는?",c:["서울","부산","대구","인천"]},
+    {q:"무지개는 몇 가지 색?",c:["7가지","5가지","3가지","10가지"]},
+    {q:"곤충의 다리는 몇 개?",c:["6개","4개","8개","2개"]},
+    {q:"세종대왕이 만든 것은?",c:["한글","거북선","첨성대","석굴암"]},
+    {q:"1년은 며칠일까요?",c:["365일","300일","400일","100일"]},
+    {q:"얼음이 녹으면 무엇이 될까?",c:["물","수증기","눈","구름"]}
+  ],
+  mid:[
+    {q:"물의 화학식은?",c:["H₂O","CO₂","O₂","NaCl"]},
+    {q:"대한민국 초대 대통령은?",c:["이승만","박정희","김구","윤보선"]},
+    {q:"임진왜란 때 활약한 장군은?",c:["이순신","강감찬","을지문덕","김유신"]},
+    {q:"지구에서 가장 큰 대양은?",c:["태평양","대서양","인도양","북극해"]},
+    {q:"식물이 산소를 만드는 작용은?",c:["광합성","호흡","증산","발효"]},
+    {q:"빛의 삼원색이 아닌 것은?",c:["노랑","빨강","초록","파랑"]},
+    {q:"훈민정음이 반포된 해는?",c:["1446년","1592년","1910년","1948년"]},
+    {q:"피타고라스 정리는 어떤 도형?",c:["직각삼각형","원","정사각형","오각형"]}
+  ],
+  high:[
+    {q:"DNA의 기본 단위는?",c:["뉴클레오타이드","아미노산","포도당","지방산"]},
+    {q:"프랑스 혁명이 일어난 해는?",c:["1789년","1492년","1914년","1688년"]},
+    {q:"원소기호 Fe는 무엇?",c:["철","금","나트륨","구리"]},
+    {q:"셰익스피어 4대 비극이 아닌 것은?",c:["로미오와 줄리엣","햄릿","맥베스","오셀로"]},
+    {q:"물가가 지속 상승하는 현상은?",c:["인플레이션","디플레이션","스태그네이션","리세션"]},
+    {q:"뉴턴 운동 제2법칙 F=?",c:["ma","mv","mgh","mc²"]},
+    {q:"지구의 자전 주기는 약?",c:["24시간","1년","30일","12시간"]},
+    {q:"미적분을 창시한 사람 중 하나는?",c:["뉴턴","다윈","갈릴레이","멘델"]}
+  ],
+  pro:[
+    {q:"인체에서 가장 긴 뼈는?",c:["대퇴골","정강뼈","위팔뼈","척추뼈"]},
+    {q:"'자본론'을 쓴 경제학자는?",c:["카를 마르크스","애덤 스미스","케인스","리카도"]},
+    {q:"노벨상에 없는 분야는?",c:["수학","물리학","화학","평화"]},
+    {q:"빛의 속도는 초속 약?",c:["30만 km","3만 km","300만 km","3천 km"]},
+    {q:"세계에서 가장 긴 강은?",c:["나일강","아마존강","양쯔강","미시시피강"]},
+    {q:"'모나리자'를 그린 화가는?",c:["레오나르도 다빈치","미켈란젤로","라파엘로","고흐"]},
+    {q:"원주율 π의 근삿값은?",c:["3.14","2.72","1.41","1.62"]},
+    {q:"대한민국 임시정부가 처음 수립된 도시는?",c:["상하이","베이징","도쿄","블라디보스토크"]}
+  ]
+};
+let QZ={list:[],idx:0,score:0};
+function quizStart(level){
+  const arr=QUIZ[level];if(!arr)return;
+  QZ={list:shuffle(arr.slice()),idx:0,score:0};
+  $("quizBox").style.display="block";
+  logEvent("play","상식퀴즈-"+level);
+  quizRender();
+  setTimeout(()=>$("quizBox").scrollIntoView({behavior:"smooth",block:"center"}),60);
+}
+function quizRender(){
+  const q=QZ.list[QZ.idx];if(!q)return;
+  $("quizProg").textContent="문제 "+(QZ.idx+1)+" / "+QZ.list.length+"   ·   점수 "+QZ.score;
+  $("quizQ").textContent=q.q;
+  $("quizFb").textContent="";$("quizNext").style.display="none";$("quizAgain").style.display="none";
+  const opts=shuffle(q.c.map(t=>({t:t,ok:t===q.c[0]})));
+  $("quizChoices").removeAttribute("data-done");
+  $("quizChoices").innerHTML=opts.map(o=>'<button class="quiz-choice" onclick="quizPick(this,'+o.ok+')">'+esc(o.t)+'</button>').join("");
+}
+function quizPick(btn,ok){
+  const box=$("quizChoices");if(box.dataset.done)return;box.dataset.done="1";
+  const q=QZ.list[QZ.idx];
+  [...box.querySelectorAll(".quiz-choice")].forEach(b=>{if(b.textContent===q.c[0])b.classList.add("qc-right");});
+  if(ok){QZ.score++;$("quizFb").innerHTML="✅ 정답!";winJingle();confetti();}
+  else{btn.classList.add("qc-wrong");$("quizFb").innerHTML="❌ 땡! 정답은 <b>"+esc(q.c[0])+"</b>";beep(160,.35,.22,"sawtooth");}
+  const last=QZ.idx>=QZ.list.length-1;
+  if(last){$("quizFb").innerHTML+="<br>🎯 끝! 최종 <b>"+QZ.score+" / "+QZ.list.length+"</b>";
+    $("quizAgain").style.display="inline-block";}
+  else $("quizNext").style.display="inline-block";
+}
+function quizNext(){if(QZ.idx<QZ.list.length-1){QZ.idx++;quizRender();}}
 function roll(type){
   if(rolling)return;rolling=true;
   const el=$("rollRes");
