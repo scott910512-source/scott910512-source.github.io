@@ -159,15 +159,29 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .yang-ov-box.p2 .yang-ov-name{color:#ffb340;text-shadow:0 4px 24px rgba(255,95,143,.5)}
 .yang-ov-close{font-size:clamp(12px,2.6vmin,17px);color:var(--sub);margin-top:2vmin}
 @media(orientation:landscape){.yang-ov-wrap{display:flex;gap:6vmin;align-items:center;justify-content:center;width:100%}}
-/* 도구: 열면 한 화면 꽉 차게 */
-.page.tmode > .t-card.open{min-height:calc(100dvh - 170px)}
-.page.tmode > .t-card.open > h3{font-size:24px}
-.page.tmode > .t-card.open .big-btn{font-size:17px;padding:15px 28px}
-.page.tmode > .t-card.open .hint{font-size:14px}
-@media(orientation:landscape) and (max-height:560px){
-  .page.tmode > .t-card.open{min-height:calc(100dvh - 90px)}
-  .page.tmode > .t-card.open > h3{font-size:19px}
-  .page.tmode > .t-card.open .big-btn{font-size:13.5px;padding:9px 16px}
+/* 도구: 팝업(모달)으로 크게 열림 */
+.t-card.in-pop{margin:0!important;max-width:none!important;text-align:center}
+.t-card.in-pop>h3{font-size:23px;padding:0!important;cursor:default}
+.t-card.in-pop>.g-body{display:block!important;margin-top:14px}
+.t-card.in-pop .g-caret{display:none}
+.t-card.in-pop .big-btn{font-size:16px;padding:14px 26px}
+/* 스크롤 시 고정 탭에 제목 안 가리게 */
+.g,.t-card{scroll-margin-top:78px}
+/* 홈(룰렛) 한 화면 컴팩트 — 폰 */
+@media(max-width:520px){
+  header{padding:8px 0 0}
+  header h1{font-size:24px}
+  .eyebrow,header .sub{display:none}
+  .tabs{margin:8px 0 2px;gap:6px}
+  #pg0 > .t-card{padding:10px 12px;margin-bottom:10px}
+  #pg0 > .t-card > h3{font-size:17px!important}
+  #rlHint{display:none}
+  .cat-picks{margin:6px 0 0;gap:6px}
+  .cat-pick{padding:7px 12px;font-size:12.5px}
+  .rl-addbtn{top:9px;right:10px;padding:7px 12px;font-size:12.5px}
+  .wheel-wrap{width:min(76vw,330px);margin:8px auto 0}
+  #homeRollRes{margin:4px 0;font-size:clamp(17px,5vmin,26px);min-height:1.2em}
+  #pg0 .big-btn{font-size:15px;padding:12px 28px;margin:2px}
 }
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -440,7 +454,7 @@ body.gated{overflow:hidden}
   <div class="t-card" style="text-align:center;position:relative">
     <h3 style="font-size:21px">🎡 랜덤 게임 룰렛</h3>
     <button class="rl-addbtn" onclick="rlPanelToggle()">＋ 추가</button>
-    <p class="hint">카테고리를 켜고 <b>돌리기!</b> — 룰렛이 돌아가며 하나를 뽑아요</p>
+    <p class="hint" id="rlHint">카테고리를 켜고 <b>돌리기!</b> — 룰렛이 돌아가며 하나를 뽑아요</p>
     <div class="cat-picks">
       <button class="cat-pick on" data-cat="pg1" onclick="toggleCat(this)">🎉 모임게임</button>
       <button class="cat-pick on" data-cat="pg2" onclick="toggleCat(this)">🍻 술게임</button>
@@ -1571,28 +1585,28 @@ function buildToolList(pageId){
     card.appendChild(body);
     const caret=document.createElement("span");caret.className="g-caret";caret.textContent="▸";
     h3.appendChild(caret);
-    h3.addEventListener("click",()=>{
-      const open=card.classList.contains("open");
-      page.querySelectorAll(":scope > .t-card.open").forEach(o=>o.classList.remove("open"));
-      if(!open){card.classList.add("open");beep(660,.04,.12,"square");logEvent("tool_open",h3.textContent.trim());
-        setTimeout(()=>card.scrollIntoView({behavior:"smooth",block:"start"}),80);}
-    });
+    h3.addEventListener("click",()=>openToolPopup(card));
   });
 }
+/* 도구를 페이지 이동 없이 팝업으로 열기 — 실제 노드를 모달로 옮겼다가 닫으면 원위치 */
+let toolPop=null,toolPopAnchor=null;
+function openToolPopup(card){
+  if(!card)return;
+  closeGame(); /* 이전 팝업/도구 원복 */
+  const body=$("modalBody");if(!body)return;
+  toolPopAnchor=document.createElement("div");toolPopAnchor.style.display="none";
+  card.parentNode.insertBefore(toolPopAnchor,card);
+  toolPop=card;card.classList.add("in-pop");
+  body.innerHTML="";body.appendChild(card);
+  $("gameModal").classList.add("on");$("gameModal").scrollTop=0;
+  document.body.style.overflow="hidden";
+  beep(660,.04,.12,"square");
+  const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());
+}
 function goTool(id){
-  closeGame();
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  document.querySelector('[data-p="pg3"]').classList.add("on");
-  const pg3=document.getElementById("pg3");pg3.classList.add("on");
   const el=document.getElementById(id);
   const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
-  if(card){
-    pg3.querySelectorAll(":scope > .t-card.open").forEach(o=>o.classList.remove("open"));
-    card.classList.add("open");
-    const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());
-    setTimeout(()=>card.scrollIntoView({behavior:"smooth",block:"start"}),80);
-  }else window.scrollTo({top:0,behavior:"smooth"});
+  if(card)openToolPopup(card);
 }
 const $=id=>document.getElementById(id);
 
@@ -1677,6 +1691,12 @@ function addSwipe(el,pageId){
 }
 function closeGame(){
   const m=$("gameModal");if(!m)return;
+  /* 팝업으로 옮겨온 도구 노드를 원래 자리로 복귀 */
+  if(toolPop&&toolPopAnchor){
+    toolPopAnchor.parentNode.insertBefore(toolPop,toolPopAnchor);
+    toolPopAnchor.remove();toolPop.classList.remove("in-pop");
+    toolPop=null;toolPopAnchor=null;
+  }
   m.classList.remove("on");document.body.style.overflow="";
 }
 
@@ -1770,6 +1790,7 @@ function openGameCard(pg,card){
 /* 뽑힌 게임 설명을 팝업(모달)으로 바로 표시 */
 function openRolledGame(){
   if(!lastRolledGame)return;
+  closeGame(); /* 팝업에 도구가 열려있으면 먼저 원복 (노드 유실 방지) */
   const card=lastRolledGame.card,body=$("modalBody");if(!body)return;
   const clone=card.cloneNode(true);
   clone.classList.add("open");clone.classList.remove("cshow");
