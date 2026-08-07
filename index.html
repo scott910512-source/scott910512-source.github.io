@@ -139,7 +139,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   color:#0a2b3a;font-weight:900;font-size:13.5px;padding:8px 15px;border-radius:999px;cursor:pointer;
   box-shadow:0 4px 12px rgba(79,195,255,.3)}
 .rl-addbtn:active{transform:scale(.92)}
-.wheel-wrap{position:relative;width:min(88vw,430px);margin:12px auto 2px}
+.wheel-wrap{position:relative;width:min(88vw,430px);margin:24px auto 2px}
 .wheel-wrap canvas{width:100%;height:auto;display:block}
 .wheel-ptr{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:0;height:0;z-index:2;
   border:17px solid transparent;border-bottom:none;border-top:32px solid #ff5227;
@@ -172,14 +172,19 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   header{padding:8px 0 0}
   header h1{font-size:24px}
   .eyebrow,header .sub{display:none}
-  .tabs{margin:8px 0 2px;gap:6px}
+  /* 탭 5개 한 줄 배열 (안 들어가면 좌우 스크롤) */
+  .tabs{margin:8px 0 2px;gap:4px;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding:0 3px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;white-space:nowrap;padding:6px 7px;font-size:11px}
+  .tab:first-child{margin-left:auto}.tab:last-child{margin-right:auto}
   #pg0 > .t-card{padding:10px 12px;margin-bottom:10px}
   #pg0 > .t-card > h3{font-size:17px!important}
   #rlHint{display:none}
-  .cat-picks{margin:6px 0 0;gap:6px}
+  .cat-picks{margin:6px 0 2px;gap:6px}
   .cat-pick{padding:7px 12px;font-size:12.5px}
   .rl-addbtn{top:9px;right:10px;padding:7px 12px;font-size:12.5px}
-  .wheel-wrap{width:min(76vw,330px);margin:8px auto 0}
+  /* 포인터가 카테고리 칩에 안 닿게 간격 확보 */
+  .wheel-wrap{width:min(76vw,330px);margin:22px auto 0}
   #homeRollRes{margin:4px 0;font-size:clamp(17px,5vmin,26px);min-height:1.2em}
   #pg0 .big-btn{font-size:15px;padding:12px 28px;margin:2px}
 }
