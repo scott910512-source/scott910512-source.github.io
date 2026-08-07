@@ -780,6 +780,26 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <div class="page" id="pg3">
 <label class="snd-toggle"><input type="checkbox" id="sndOn" checked> 🔊 효과음 (폭탄 째깍·폭발, 타이머 비프, 룰렛 틱)</label>
 
+<div class="t-card" id="toolAuth">
+  <h3>👤 로그인 · 📊 통계</h3>
+  <div id="authLogin">
+    <p class="hint">로그인하면 <b>내 플레이 통계</b>가 기록돼요 (선택 · 게임은 로그인 없이도 다 됩니다)</p>
+    <input class="fb-input" id="authNick" maxlength="20" placeholder="닉네임">
+    <input class="fb-input" id="authPw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
+    <button class="big-btn" onclick="sbSignIn()">🔑 로그인</button>
+    <button class="big-btn b2" onclick="sbSignUp()">✨ 회원가입</button>
+  </div>
+  <div id="authUser" style="display:none">
+    <div id="authWho" style="font-weight:800;font-size:16px;color:var(--mint)"></div>
+    <div style="margin-top:8px">
+      <button class="big-btn b2" style="font-size:13px;padding:9px 16px" onclick="loadStats()">📊 통계 새로고침</button>
+      <button class="big-btn b3" style="font-size:13px;padding:9px 16px" onclick="sbSignOut()">로그아웃</button>
+    </div>
+    <div id="statsBox" style="margin-top:12px;text-align:left"></div>
+  </div>
+  <p class="hint" id="authMsg" style="margin-top:8px;min-height:16px"></p>
+</div>
+
 <div class="t-card">
   <h3>👥 참가 인원</h3>
   <p class="hint">멤버 지목 · 라이어 · 마피아 · 타이머 순위에 자동 반영 (3~10명)</p>
@@ -986,6 +1006,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== tabs ===== */
 document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
@@ -1006,6 +1027,7 @@ function goTool(id){
     const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
     const i=card?c.items.indexOf(card):-1;
     if(i>=0){c.idx=i;cShow("pg3");}
+    if(card){const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());}
   }
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -1028,7 +1050,8 @@ function buildAccordion(pageId){
     top.addEventListener("click",()=>{
       const open=card.classList.contains("open");
       page.querySelectorAll(":scope > .g.open").forEach(o=>o.classList.remove("open"));
-      if(!open){card.classList.add("open");beep(660,.04,.12,"square");}
+      if(!open){card.classList.add("open");beep(660,.04,.12,"square");
+        const h3=card.querySelector("h3");if(h3)logEvent("game_open",h3.textContent.trim());}
     });
   });
 }
@@ -1718,7 +1741,7 @@ function songRoll(){
   if(songBusy)return;
   const pool=songPlayable();
   if(!pool.length){$("songRes").textContent="⚠️ 이 연대엔 재생 가능한 곡이 아직 없어요";return;}
-  songBusy=true;
+  songBusy=true;logEvent("play","노래 맞추기");
   songCur=pool[Math.floor(Math.random()*pool.length)];
   songStart=$("songRand").checked?15+Math.floor(Math.random()*80):0; /* 같은 곡은 같은 구간에서 점점 더 듣기 */
   $("songAnsBox").style.display="none";$("songEmbed").innerHTML="";
@@ -1922,6 +1945,7 @@ const FIVE=[
 ];
 let fourList=[],fourIdx=0;
 function fourStart(){
+  logEvent("play","글자 맞추기");
   const pool=FOUR.concat(FIVE).filter(x=>{const n=[...x.w].length;return n>=4&&n<=5;});
   fourList=pool.slice().sort(()=>Math.random()-0.5).slice(0,10);
   fourIdx=0;fourRender();beep(880,.1,.25);
@@ -2036,6 +2060,7 @@ function silentClockUp(){
   $("silentClock").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
 }
 function silentStart(){
+  logEvent("play","침묵 속 대화");
   clearInterval(silentT);silentSec=180;silentClockUp();
   $("silentStart").style.display="none";$("silentFail").style.display="inline-block";
   $("silentMsg").innerHTML="🤐 시작! <b>웃으면 지는 거예요</b>";
@@ -2060,6 +2085,111 @@ function silentFail(){
   beep(300,.18,.35,"square");beep(200,.28,.35,"square",.17);
   if(navigator.vibrate)navigator.vibrate([220,90,220]);
   document.body.style.background="#5a1030";setTimeout(()=>{document.body.style.background="";},320);
+}
+
+/* ===== Supabase 로그인 · 통계 ===== */
+const SB_URL="https://tjnwerbofxcdjuzyjkmk.supabase.co";
+const SB_KEY="sb_publishable_pzZRfboaHH-t4UpHtvPsJA_fkm2a0Kx";
+let sb=null,sbUser=null,sbProfile=null;
+try{ if(window.supabase&&window.supabase.createClient&&SB_URL&&SB_KEY) sb=window.supabase.createClient(SB_URL,SB_KEY); }catch(e){ sb=null; }
+function authMsg(t){const el=$("authMsg");if(el)el.textContent=t;}
+async function nickToEmail(nick){
+  const data=new TextEncoder().encode(nick.trim().toLowerCase());
+  const buf=await crypto.subtle.digest("SHA-256",data);
+  const hex=[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  return "u"+hex.slice(0,32)+"@aoki.app";
+}
+async function sbSignUp(){
+  if(!sb){authMsg("⚠️ 백엔드가 아직 연결 안 됐어요");return;}
+  const nick=$("authNick").value.trim(),pw=$("authPw").value;
+  if(nick.length<2){authMsg("닉네임은 2자 이상");return;}
+  if(pw.length<4){authMsg("비밀번호는 4자 이상");return;}
+  authMsg("가입 중...");
+  try{
+    const email=await nickToEmail(nick);
+    const {data,error}=await sb.auth.signUp({email:email,password:pw});
+    if(error){authMsg("가입 실패: "+(/already/i.test(error.message)?"이미 있는 닉네임이에요 (로그인하세요)":error.message));return;}
+    if(!data.session){authMsg("⚠️ Supabase에서 'Confirm email'을 꺼주세요 (이메일 인증 OFF)");return;}
+    sbUser=data.user;
+    try{await sb.from("profiles").upsert({id:sbUser.id,nickname:nick});}catch(e){}
+    await afterLogin();logEvent("signup",nick);
+  }catch(e){authMsg("오류: "+e.message);}
+}
+async function sbSignIn(){
+  if(!sb){authMsg("⚠️ 백엔드가 아직 연결 안 됐어요");return;}
+  const nick=$("authNick").value.trim(),pw=$("authPw").value;
+  if(!nick||!pw){authMsg("닉네임·비밀번호를 입력하세요");return;}
+  authMsg("로그인 중...");
+  try{
+    const email=await nickToEmail(nick);
+    const {data,error}=await sb.auth.signInWithPassword({email:email,password:pw});
+    if(error){authMsg("로그인 실패 — 닉네임/비번을 확인하세요");return;}
+    sbUser=data.user;
+    try{await sb.from("profiles").upsert({id:sbUser.id,nickname:nick});}catch(e){}
+    await afterLogin();logEvent("login",nick);
+  }catch(e){authMsg("오류: "+e.message);}
+}
+async function sbSignOut(){try{await sb.auth.signOut();}catch(e){}sbUser=null;sbProfile=null;renderAuth();}
+async function loadProfile(){
+  if(!sb||!sbUser)return;
+  try{const {data}=await sb.from("profiles").select("nickname,role").eq("id",sbUser.id).single();sbProfile=data||null;}catch(e){sbProfile=null;}
+}
+async function afterLogin(){await loadProfile();renderAuth();loadStats();}
+function renderAuth(){
+  if(!$("toolAuth"))return;
+  if(sbUser){
+    $("authLogin").style.display="none";$("authUser").style.display="block";
+    const admin=sbProfile&&sbProfile.role==="admin";
+    $("authWho").textContent="👤 "+((sbProfile&&sbProfile.nickname)||"사용자")+(admin?" 👑 관리자":"")+" 님";
+    authMsg("");
+  }else{
+    $("authLogin").style.display="block";$("authUser").style.display="none";
+    const sbx=$("statsBox");if(sbx)sbx.innerHTML="";
+  }
+}
+function logEvent(type,detail){
+  if(!sb||!sbUser)return;
+  try{ sb.from("events").insert({user_id:sbUser.id,type:type,detail:detail?String(detail).slice(0,80):null}); }catch(e){}
+}
+async function sbRestore(){
+  if(!sb){renderAuth();return;}
+  try{
+    const {data}=await sb.auth.getSession();
+    if(data&&data.session){sbUser=data.session.user;await loadProfile();renderAuth();loadStats();}
+    else renderAuth();
+  }catch(e){renderAuth();}
+}
+async function loadStats(){
+  if(!sb||!sbUser)return;
+  const box=$("statsBox");if(!box)return;
+  const admin=sbProfile&&sbProfile.role==="admin";
+  box.innerHTML="⏳ 통계 불러오는 중...";
+  try{
+    const {data:ev,error}=await sb.from("events").select("user_id,type,detail,created_at").order("created_at",{ascending:false}).limit(3000);
+    if(error){box.innerHTML="통계 오류: "+esc(error.message);return;}
+    const rows=ev||[];
+    const items={};let plays=0;
+    rows.forEach(r=>{if(r.detail&&(r.type==="game_open"||r.type==="tool_open"||r.type==="play")){items[r.detail]=(items[r.detail]||0)+1;plays++;}});
+    const top=Object.entries(items).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const topHtml=top.length?top.map((x,i)=>'<div class="fb-text" style="margin-top:2px">'+(i+1)+'. '+esc(x[0])+' — '+x[1]+'회</div>').join(""):'<div class="fb-text">아직 기록이 없어요</div>';
+    let html="";
+    if(admin){
+      let profs={};try{const {data:pl}=await sb.from("profiles").select("id,nickname,role");(pl||[]).forEach(p=>profs[p.id]=p);}catch(e){}
+      const users={};rows.forEach(r=>{users[r.user_id]=(users[r.user_id]||0)+1;});
+      html+='<div class="fb-name">👑 전체 통계 (관리자)</div>';
+      html+='<div style="font-size:13.5px;margin:6px 0">총 사용자 <b>'+Object.keys(users).length+'명</b> · 총 활동 <b>'+rows.length+'건</b></div>';
+      html+='<div style="font-size:12.5px;color:var(--sub);margin-top:8px">🏆 인기 게임·도구</div>'+topHtml;
+      html+='<div style="font-size:12.5px;color:var(--sub);margin-top:10px">👥 사용자별 활동</div>'+
+        Object.entries(users).sort((a,b)=>b[1]-a[1]).slice(0,30).map(u=>{const p=profs[u[0]];const nm=p?p.nickname:u[0].slice(0,6);return '<div class="fb-text" style="margin-top:2px">'+esc(nm||"?")+(p&&p.role==="admin"?" 👑":"")+' — '+u[1]+'건</div>';}).join("");
+    }else{
+      html+='<div class="fb-name">📊 내 통계</div>';
+      html+='<div style="font-size:13.5px;margin:6px 0">내 활동 <b>'+rows.length+'건</b> · 게임·도구 <b>'+plays+'회</b></div>';
+      html+='<div style="font-size:12.5px;color:var(--sub);margin-top:8px">🎮 내가 자주 한 것</div>'+topHtml;
+      html+='<div style="font-size:12.5px;color:var(--sub);margin-top:10px">🕒 최근 활동</div>'+
+        (rows.length?rows.slice(0,8).map(r=>'<div class="fb-text" style="margin-top:2px;font-size:12.5px">'+esc(r.detail||r.type)+' · '+fbFmt(new Date(r.created_at).getTime())+'</div>').join(""):'<div class="fb-text">아직 없어요</div>');
+    }
+    box.innerHTML=html;
+  }catch(e){box.innerHTML="통계 오류: "+esc(e.message);}
 }
 
 /* ===== person photo quiz ===== */
@@ -2130,6 +2260,7 @@ function photoReveal(){
 setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
 fbRender(); /* 피드백 목록 초기 렌더 */
+sbRestore(); /* 로그인 세션 복원 + 통계 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildCarousel("pg3",".t-card");
