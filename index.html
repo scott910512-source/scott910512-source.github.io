@@ -112,6 +112,15 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .quiz-choice:active{transform:scale(.98)}
 .qc-right{background:linear-gradient(92deg,#3ce8b0,#4fc3ff)!important;color:#08351f!important;border-color:transparent!important;font-weight:900}
 .qc-wrong{background:linear-gradient(92deg,#ff6b6b,#ff9f43)!important;color:#3a0d0d!important;border-color:transparent!important;font-weight:900}
+/* 룰렛 항목 추가/제거 */
+.rl-add{display:flex;gap:8px;max-width:460px;margin:12px auto 6px}
+.rl-add input{flex:1;margin:0!important}
+.rl-items{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:6px auto 4px;max-width:540px}
+.rl-chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1.5px solid var(--line);
+  border-radius:999px;padding:6px 8px 6px 13px;font-size:13.5px;font-weight:700;color:var(--txt)}
+.rl-chip button{border:none;background:rgba(255,120,150,.25);color:#fff;width:20px;height:20px;border-radius:50%;
+  cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center}
+.rl-chip button:active{transform:scale(.88)}
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .result.giant{font-size:clamp(72px,24vmin,210px);min-height:1.05em;line-height:1.02;letter-spacing:.05em}
@@ -388,6 +397,11 @@ body.gated{overflow:hidden}
       <button class="cat-pick on" data-cat="pg2" onclick="toggleCat(this)">🍻 술게임</button>
       <button class="cat-pick on" data-cat="pg4" onclick="toggleCat(this)">🏖️ 야외놀이</button>
     </div>
+    <div class="rl-add">
+      <input id="rlInput" class="fb-input" maxlength="30" placeholder="룰렛에 항목 추가 (예: 청소 당번, 내 게임)" onkeydown="if(event.key==='Enter')rlAdd()">
+      <button class="big-btn b2" style="font-size:14px;padding:11px 18px" onclick="rlAdd()">＋ 추가</button>
+    </div>
+    <div id="rlItems" class="rl-items"></div>
     <div class="result" id="homeRollRes" style="font-size:clamp(26px,7vmin,52px);font-weight:900;min-height:1.3em;margin:10px 0">🎲</div>
     <button class="big-btn" style="font-size:18px;padding:16px 42px" onclick="homeRoll()">🎡 돌리기!</button>
     <button class="big-btn b2" id="homeOpenBtn" style="display:none;font-size:15px;padding:12px 26px;margin-top:8px" onclick="openRolledGame()">📖 이 게임 열기 →</button>
@@ -418,6 +432,8 @@ body.gated{overflow:hidden}
       <button class="big-btn b3" id="quizAgain" style="display:none;margin-top:6px" onclick="document.getElementById('quizBox').style.display='none'">🔄 난이도 다시 고르기</button>
     </div>
   </div>
+
+  <div id="adBanner" style="margin:14px auto 20px;min-height:60px;text-align:center;max-width:640px"></div>
 </div>
 
 <!-- ================= 모임게임 ================= -->
@@ -1135,8 +1151,6 @@ body.gated{overflow:hidden}
 </div>
 </div>
 
-<div id="adBanner" style="margin:14px auto 26px;min-height:60px;text-align:center"></div>
-
 </div>
 
 <div id="loginGate">
@@ -1443,9 +1457,10 @@ function homeRoll(){
   if(rolling)return;
   const el=$("homeRollRes");
   const cats=[...document.querySelectorAll('.cat-pick[data-cat].on')].map(b=>b.dataset.cat);
-  if(!cats.length){el.textContent="⚠️ 카테고리를 최소 1개 켜주세요";return;}
-  const pool=GAME_INDEX.filter(g=>cats.includes(g.page));
-  if(!pool.length){el.textContent="게임이 없어요";return;}
+  const gPool=GAME_INDEX.filter(g=>cats.includes(g.page));
+  const cPool=RL_ITEMS.map(it=>({name:it.name,custom:true}));
+  const pool=gPool.concat(cPool);
+  if(!pool.length){el.textContent="⚠️ 카테고리를 켜거나 항목을 추가하세요";return;}
   rolling=true;$("homeOpenBtn").style.display="none";
   const winIdx=Math.floor(Math.random()*pool.length),win=pool[winIdx];
   let i=0,delay=50;
@@ -1454,9 +1469,39 @@ function homeRoll(){
     beep(500+Math.random()*300,.03,.08,"square");
     if(delay<300){delay*=1.15;setTimeout(tick,delay);}
     else{el.textContent="🎉 "+win.name;confetti();winJingle();rolling=false;
-      lastRolledGame=win;$("homeOpenBtn").style.display="inline-block";
+      if(win.custom){lastRolledGame=null;$("homeOpenBtn").style.display="none";}
+      else{lastRolledGame=win;$("homeOpenBtn").style.display="inline-block";}
       logEvent("play","룰렛-"+win.name);}
   })();
+}
+/* ===== 룰렛 커스텀 항목 (아이디별 저장 · 관리자 열람) ===== */
+let RL_ITEMS=[];
+function rlRender(){
+  const box=$("rlItems");if(!box)return;
+  box.innerHTML=RL_ITEMS.map(it=>'<span class="rl-chip">🎯 '+esc(it.name)+
+    '<button title="제거" onclick="rlRemove('+JSON.stringify(it.id)+')">✕</button></span>').join("");
+}
+async function rlLoad(){
+  if(sb&&sbUser){
+    try{const {data}=await sb.from("roulette_items").select("id,name").eq("user_id",sbUser.id).eq("active",true).order("created_at");
+      RL_ITEMS=(data||[]).map(r=>({id:r.id,name:r.name}));}catch(e){}
+  }
+  rlRender();
+}
+async function rlAdd(){
+  const inp=$("rlInput");if(!inp)return;let name=inp.value.trim();if(!name)return;name=name.slice(0,30);
+  if(sb&&sbUser){
+    try{const {data,error}=await sb.from("roulette_items")
+        .insert({user_id:sbUser.id,nickname:(sbProfile&&sbProfile.nickname)||"익명",name:name})
+        .select("id,name").single();
+      RL_ITEMS.push(!error&&data?{id:data.id,name:data.name}:{id:"loc"+Date.now(),name:name});}
+    catch(e){RL_ITEMS.push({id:"loc"+Date.now(),name:name});}
+  }else RL_ITEMS.push({id:"loc"+Date.now(),name:name});
+  inp.value="";rlRender();beep(720,.05,.12,"square");logEvent("rl_add",name);
+}
+async function rlRemove(id){
+  RL_ITEMS=RL_ITEMS.filter(it=>it.id!==id);rlRender();
+  if(sb&&sbUser&&typeof id==="number"){try{await sb.from("roulette_items").update({active:false}).eq("id",id);}catch(e){}}
 }
 /* ===== 상식 퀴즈 (5단계 · 4지선다 · c[0]이 정답) ===== */
 const QUIZ={
@@ -2541,11 +2586,12 @@ function renderAuth(){
     $("authWho").innerHTML="👤 "+esc(nm)+" 님 "+badge;
     renderSponsor();
     if($("toolIdeas"))$("toolIdeas").style.display="block";
-    ideaLoad();authMsg("");
+    ideaLoad();authMsg("");rlLoad();
   }else{
     $("authLogin").style.display="block";$("authUser").style.display="none";
     ["statsBox","sponsorBox"].forEach(id=>{const e=$(id);if(e)e.innerHTML="";});
     if($("toolIdeas"))$("toolIdeas").style.display="none";
+    RL_ITEMS=[];rlRender();
   }
   updateGate();
 }
@@ -2736,6 +2782,14 @@ async function loadStats(){
             '<button class="ubtn a" onclick="setRole(\''+u.id+'\',\'admin\')">관리자</button>'+
             '<button class="ubtn d" onclick="setRole(\''+u.id+'\',\'user\')">일반</button></div>';
         }).join("");
+      /* 🎡 룰렛 추가 이력 (전체 · 아이디별) */
+      try{
+        const {data:rl}=await sb.from("roulette_items").select("nickname,name,active,created_at").order("created_at",{ascending:false}).limit(120);
+        if(rl&&rl.length){
+          html+='<div style="font-size:12.5px;color:var(--sub);margin-top:12px">🎡 룰렛 추가 이력 (전체 '+rl.length+'건)</div>'+
+            rl.map(r=>'<div class="fb-text" style="margin-top:2px;font-size:12.5px">'+(r.active?'🎯':'🗑')+' <b>'+esc(r.nickname||"익명")+'</b> — '+esc(r.name)+' <span style="color:var(--sub);font-size:11px">'+fbFmt(new Date(r.created_at).getTime())+'</span></div>').join("");
+        }
+      }catch(e){}
     }else{
       html+='<div class="fb-name">📊 내 통계</div>';
       html+='<div style="font-size:13.5px;margin:6px 0">내 활동 <b>'+rows.length+'건</b> · 게임·도구 <b>'+plays+'회</b></div>';
