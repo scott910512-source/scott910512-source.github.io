@@ -322,6 +322,16 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <p class="punish">⚡ 진 팀 전원 벌칙. 6인은 2~3라운드면 끝나서 템포 빠름</p>
 <span class="golink" onclick="goTool('toolMafia')">⚡ 마피아 배정기 열기 →</span></div>
 
+<div class="g"><div class="g-top"><h3>🤐 침묵 속 대화</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd hard">웃참</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>2명 대결 + 관전</b> · 준비물 <b>폰 1대 (도구 탭)</b></p>
+<div class="how"><ol>
+<li>도전자 <b>2명이 마주 앉아 무표정으로 대화</b> (도구 탭에서 주제 뽑기)</li>
+<li>모드: <b>🎲 일상 주제</b>(평범한 대화 진지하게) / <b>🤥 허언증 버전</b>(진지한 얼굴로 허풍·거짓말 늘어놓기)</li>
+<li><b>웃거나</b>, <b>3분을 못 버티면 탈락</b> — 도구 탭 3분 타이머 사용</li>
+<li>나머지는 <b>그냥 관전</b> (물리적 방해·간지럽히기 금지, 눈빛·리액션은 OK)</li></ol></div>
+<p class="punish">⚡ 먼저 웃은 사람 벌칙 · 3분 버티면 생존</p>
+<span class="golink" onclick="goTool('toolSilent')">⚡ 침묵 속 대화 도구 열기 →</span></div>
+
 <div class="g"><div class="g-top"><h3>⚖️ 밸런스 게임</h3><div class="badges"><span class="bd trend">가치관 공유</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>제한없음</b> · 준비물 <b>질문</b> · 소요 <b>자유</b></p>
 <div class="how"><ol>
@@ -820,6 +830,20 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <table class="lb" id="tmBoard" style="display:none">
     <thead><tr><th>순위</th><th>선수</th><th style="text-align:right">기록</th><th style="text-align:right">오차</th></tr></thead>
     <tbody id="tmRows"></tbody></table>
+</div>
+
+<div class="t-card" id="toolSilent">
+  <h3>🤐 침묵 속 대화</h3>
+  <p class="hint">2명이 무표정으로 대화 · <b>웃거나 3분 못 버티면 탈락</b> · 나머지는 관전</p>
+  <div>
+    <button class="big-btn b2" onclick="silentTopic('daily')">🎲 일상 주제</button>
+    <button class="big-btn" style="background:linear-gradient(92deg,#a78bfa,#ff5f8f)" onclick="silentTopic('lie')">🤥 허언증 주제</button>
+  </div>
+  <div class="result" id="silentTopicRes" style="font-size:clamp(17px,5.2vw,24px);min-height:2.4em">주제를 뽑으세요 🎲</div>
+  <div class="tm-clock" id="silentClock">03:00</div>
+  <button class="big-btn" id="silentStart" onclick="silentStart()">▶ 3분 타이머 시작</button>
+  <button class="big-btn" id="silentFail" style="display:none;background:linear-gradient(92deg,#ff5f8f,#ff3355)" onclick="silentFail()">😂 웃었다 / 탈락!</button>
+  <div id="silentMsg" style="margin-top:8px;font-size:clamp(16px,4.6vw,20px);font-weight:800;min-height:1.4em"></div>
 </div>
 
 <div class="t-card" id="toolLiar">
@@ -1975,6 +1999,67 @@ function fbAdminToggle(){
   if(pw===null)return;
   if(pw===FB_PW){fbAdmin=true;$("fbAdminBtn").textContent="🔓 관리자 ON (탭하면 해제)";$("fbStat").textContent="🔓 관리자 모드 — 각 글의 🗑 삭제 사용 가능";fbRender();}
   else{$("fbStat").textContent="❌ 비밀번호가 틀렸어요";beep(300,.15,.3,"square");}
+}
+
+/* ===== 침묵 속 대화 (무표정 대화 + 3분 타이머) ===== */
+const SILENT_DAILY=[
+"오늘 아침에 뭐 먹었는지 진지하게 설명하기","가장 최근에 산 물건 자랑하기","어제 꾼 꿈 설명하기",
+"나만의 라면 끓이는 방법 토론","최애 편의점 음식 추천과 이유","지하철·버스에서 있었던 일 얘기하기",
+"반려동물(없으면 상상) 자랑하기","좋아하는 계절과 그 이유","주말에 보통 뭐 하는지 얘기하기",
+"최근에 본 영화·드라마 줄거리 설명","단골 음식점 메뉴 추천하기","아침에 일어나서 제일 먼저 하는 일",
+"좋아하는 노래 가사 진지하게 해석하기","지금 냉장고에 뭐 들어있는지 설명","좋아하는 색깔과 이유 발표",
+"최근에 산 옷·신발 자랑하기","여행 가고 싶은 곳과 이유","좋아하는 계란 요리 설명",
+"내 폰 배경화면 설명하기","어제 저녁 메뉴와 맛 평가","좋아하는 유튜브 채널 소개",
+"내가 제일 잘하는 집안일 자랑","최근에 감동받은 순간 얘기","좋아하는 과자 랭킹 발표",
+"오늘 날씨에 대한 솔직한 생각","좋아하는 지하철 노선과 이유"
+];
+const SILENT_LIE=[
+"나 사실 유튜브 구독자 100만이야","나 어릴 때 아역배우였어","나 아이돌 연습생 출신이야",
+"우리 삼촌이 대기업 회장이야","나 IQ 160이야","나 세계일주 세 번 했어",
+"나 손흥민이랑 축구해봤어","나 사실 재벌 3세야","나 3개 국어 유창하게 해",
+"나 어제 로또 3등 됐어","나 학창시절 전교 1등이었어","나 백종원이랑 밥 먹어봤어",
+"우리 집에 수영장 있어","나 태권도 9단이야","나 사실 프로게이머였어",
+"나 하루에 물 5리터 마셔","나 마라톤 풀코스 2시간에 뛰어","나 사실 모델 제안 받았어",
+"나 요리대회 우승 경력 있어","나 사실 비행기 조종할 줄 알아","나 어릴 때 영재원 다녔어",
+"나 전시회 연 적 있는 화가야","나 하루 4시간만 자도 멀쩡해","나 방송 출연한 적 있어",
+"나 사실 3개 회사 사장이야","연예인이 내 번호 저장해놨어"
+];
+function silentTopic(mode){
+  const pool=mode==="lie"?SILENT_LIE:SILENT_DAILY;
+  const t=pool[Math.floor(Math.random()*pool.length)];
+  $("silentTopicRes").innerHTML=(mode==="lie"?"🤥 허언증 — ":"🎲 일상 — ")+esc(t);
+  beep(700,.05,.15,"square");
+}
+let silentT=null,silentSec=180;
+function silentClockUp(){
+  const m=Math.floor(silentSec/60),s=silentSec%60;
+  $("silentClock").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+}
+function silentStart(){
+  clearInterval(silentT);silentSec=180;silentClockUp();
+  $("silentStart").style.display="none";$("silentFail").style.display="inline-block";
+  $("silentMsg").innerHTML="🤐 시작! <b>웃으면 지는 거예요</b>";
+  beep(880,.12,.3,"square");
+  silentT=setInterval(()=>{
+    silentSec--;silentClockUp();
+    if(silentSec<=10&&silentSec>0)beep(620,.05,.18,"square");
+    if(silentSec<=0){
+      clearInterval(silentT);
+      $("silentFail").style.display="none";
+      $("silentStart").style.display="inline-block";$("silentStart").textContent="🔁 다시 3분";
+      $("silentMsg").innerHTML="<span style='color:var(--mint)'>🎉 3분 버텼다! 생존 성공 👏</span>";
+      winJingle();confetti();
+    }
+  },1000);
+}
+function silentFail(){
+  clearInterval(silentT);
+  $("silentFail").style.display="none";
+  $("silentStart").style.display="inline-block";$("silentStart").textContent="🔁 다시 3분";
+  $("silentMsg").innerHTML="<span style='color:var(--pink)'>😂 탈락! 웃으면 안 되지~</span>";
+  beep(300,.18,.35,"square");beep(200,.28,.35,"square",.17);
+  if(navigator.vibrate)navigator.vibrate([220,90,220]);
+  document.body.style.background="#5a1030";setTimeout(()=>{document.body.style.background="";},320);
 }
 
 /* ===== person photo quiz ===== */
