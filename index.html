@@ -146,11 +146,17 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   filter:drop-shadow(0 3px 5px rgba(0,0,0,.4))}
 /* 양세찬 풀스크린 공개 (관객용 · 가로모드 대응) */
 .yang-ov{position:fixed;inset:0;z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;
-  gap:2vmin;background:#0a051a;padding:4vmin;cursor:pointer;text-align:center}
+  gap:3vmin;background:#0a051a;padding:4vmin;cursor:pointer;text-align:center}
 .yang-ov.on{display:flex}
-.yang-ov-tag{font-size:clamp(15px,4vmin,30px);font-weight:800;color:var(--sub)}
-.yang-ov-name{font-size:clamp(44px,18vmin,190px);font-weight:900;line-height:1.12;color:#ffb340;
-  text-shadow:0 4px 24px rgba(255,95,143,.45);word-break:keep-all}
+.yang-ov-box{flex:1;max-width:46%;min-width:min(88vw,340px);padding:4vmin 3vmin;border-radius:24px;border:3px solid}
+.yang-ov-box.p1{background:linear-gradient(160deg,rgba(79,195,255,.22),rgba(79,195,255,.06));border-color:#4fc3ff}
+.yang-ov-box.p2{background:linear-gradient(160deg,rgba(255,95,143,.24),rgba(255,95,143,.06));border-color:#ff5f8f}
+.yang-ov-tag{font-size:clamp(15px,4vmin,30px);font-weight:800;display:block;margin-bottom:1.5vmin}
+.yang-ov-box.p1 .yang-ov-tag{color:#4fc3ff}
+.yang-ov-box.p2 .yang-ov-tag{color:#ff7fab}
+.yang-ov-name{font-size:clamp(40px,15vmin,170px);font-weight:900;line-height:1.12;word-break:keep-all}
+.yang-ov-box.p1 .yang-ov-name{color:#7fd8ff;text-shadow:0 4px 24px rgba(79,195,255,.5)}
+.yang-ov-box.p2 .yang-ov-name{color:#ffb340;text-shadow:0 4px 24px rgba(255,95,143,.5)}
 .yang-ov-close{font-size:clamp(12px,2.6vmin,17px);color:var(--sub);margin-top:2vmin}
 @media(orientation:landscape){.yang-ov-wrap{display:flex;gap:6vmin;align-items:center;justify-content:center;width:100%}}
 /* 도구: 열면 한 화면 꽉 차게 */
@@ -1485,12 +1491,12 @@ body.gated{overflow:hidden}
 
 <div class="yang-ov" id="yangOverlay" onclick="yangToggle()">
   <div class="yang-ov-wrap">
-    <div>
-      <div class="yang-ov-tag">1️⃣ 1번이 맞출 인물 (2번 작성)</div>
+    <div class="yang-ov-box p1">
+      <span class="yang-ov-tag">1️⃣ 1번이 맞출 인물</span>
       <div class="yang-ov-name" id="yangOvN1"></div>
     </div>
-    <div>
-      <div class="yang-ov-tag">2️⃣ 2번이 맞출 인물 (1번 작성)</div>
+    <div class="yang-ov-box p2">
+      <span class="yang-ov-tag">2️⃣ 2번이 맞출 인물</span>
       <div class="yang-ov-name" id="yangOvN2"></div>
     </div>
   </div>
