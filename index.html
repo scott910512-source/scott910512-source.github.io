@@ -1959,10 +1959,22 @@ const SPEED_W={
  act:["줄넘기","셀카 찍기","양치질","머리 묶기","낚시","골프 스윙","요가","재채기","라면 먹기","운전","빨래 널기","화장하기","닭싸움","수영","캐치볼","큰절"]};
 const PEN_BASE=["물 한 잔 원샷","애교 3종 세트","다음 라운드까지 반말 금지","성대모사 1개","제자리 댄스 15초","팔굽혀펴기 10개","옆 사람 어깨 안마 30초","노래 후렴 열창","웃긴 표정 3초","존댓말로만 말하기 5분","셀카 찍어 단톡 올리기","일어나서 자기소개 시 낭송","한 발 서기 30초","다음 게임 심부름 담당","오늘 모임 사진사 담당","세글자로만 말하기 3분","휴대폰 배경화면 공개","마지막에 정리 담당"];
 function pickRand(a){return a[Math.floor(Math.random()*a.length)];}
-function balanceRoll(){const q=pickRand(BALANCE);$("balanceRes").innerHTML="🅰️ "+esc(q[0])+"<br><span style='color:var(--sub);font-size:.6em'>VS</span><br>🅱️ "+esc(q[1]);beep(660,.05,.12,"square");logEvent("play","밸런스게임");}
-function imageQRoll(){$("imageQRes").textContent="👉 "+pickRand(IMAGE_Q);beep(660,.05,.12,"square");logEvent("play","이미지게임");}
-function todRoll(m){$("todRes").textContent=(m==='t'?"💬 ":"🔥 ")+pickRand(m==='t'?TOD_T:TOD_D);beep(m==='t'?600:760,.05,.12,"square");logEvent("play","진실혹은도전");}
-function teleRoll(){$("teleRes").textContent="🔮 "+pickRand(TELE);beep(700,.05,.12,"square");logEvent("play","텔레파시");}
+/* 촤라라라~ 슬롯 애니메이션: 빠르게 돌다가 감속하며 멈춤 */
+function spinTo(el,pool,fmt){
+  if(rolling)return false;rolling=true;
+  const win=pickRand(pool);let i=Math.floor(Math.random()*pool.length),delay=45;
+  (function tick(){
+    el.innerHTML=fmt(pool[i++%pool.length]);
+    beep(500+Math.random()*300,.025,.07,"square");
+    if(delay<300){delay*=1.17;setTimeout(tick,delay);}
+    else{el.innerHTML=fmt(win);winJingle();confetti();rolling=false;}
+  })();
+  return true;
+}
+function balanceRoll(){if(spinTo($("balanceRes"),BALANCE,q=>"🅰️ "+esc(q[0])+"<br><span style='color:var(--sub);font-size:.6em'>VS</span><br>🅱️ "+esc(q[1])))logEvent("play","밸런스게임");}
+function imageQRoll(){if(spinTo($("imageQRes"),IMAGE_Q,q=>"👉 "+esc(q)))logEvent("play","이미지게임");}
+function todRoll(m){if(spinTo($("todRes"),m==='t'?TOD_T:TOD_D,q=>(m==='t'?"💬 ":"🔥 ")+esc(q)))logEvent("play","진실혹은도전");}
+function teleRoll(){if(spinTo($("teleRes"),TELE,q=>"🔮 "+esc(q)))logEvent("play","텔레파시");}
 let SPEED_CAT="animal";
 function speedRoll(cat){SPEED_CAT=cat;speedNext();$("speedNextBtn").style.display="inline-block";logEvent("play","스피드제시어-"+cat);}
 function speedNext(){$("speedRes").textContent=pickRand(SPEED_W[SPEED_CAT]);beep(660,.04,.1,"square");}
