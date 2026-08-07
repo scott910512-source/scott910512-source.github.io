@@ -100,7 +100,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .big-btn:active{transform:scale(.94)}
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
-.result.giant{font-size:clamp(48px,16vw,80px);min-height:1.2em}
+.result.giant{font-size:clamp(72px,24vmin,210px);min-height:1.05em;line-height:1.02;letter-spacing:.05em}
 .snd-toggle{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:var(--sub);
  margin:6px 0 14px;cursor:pointer;user-select:none}
 .snd-toggle input{width:17px;height:17px;accent-color:#ff5f8f}
@@ -190,6 +190,14 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .g.open > .g-top .g-caret{transform:translateY(-50%) rotate(90deg);color:var(--pink)}
 .g-body{display:none;margin-top:10px}
 .g.open > .g-body{display:block;animation:pop .2s ease}
+/* 도구: 세로 목록(아코디언) */
+.page.tmode > .t-card{max-width:820px;margin:0 auto 10px;text-align:center;padding:15px 18px}
+.page.tmode > .t-card > h3{cursor:pointer;position:relative;padding:0 26px;margin:0;font-size:18px}
+.page.tmode > .t-card > h3 .g-caret{color:var(--sub)}
+.page.tmode > .t-card.open > h3 .g-caret{color:var(--pink)}
+.page.tmode > .t-card:active{opacity:.97}
+.page.tmode > .t-card > .g-body{display:none;margin-top:14px}
+.page.tmode > .t-card.open > .g-body{display:block;animation:pop .2s ease}
 .cmenu{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cmenu-item{border:1.5px solid var(--line);background:var(--card);color:#fff;border-radius:12px;
  padding:13px 12px;font-size:13.5px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;line-height:1.3}
@@ -983,7 +991,7 @@ body.gated{overflow:hidden}
   <h3>🔠 글자 맞추기 (4·5글자)</h3>
   <p class="hint"><b>앞 2글자만 공개</b> — 나머지를 맞혀라! <b>열린 정답</b>(뜻만 통하면 인정) · 한 라운드 <b>10문제 연속</b><br>예) 와이 ■■ → <b>와이파이</b> · 아메 ■■■ → <b>아메리카노</b></p>
   <div class="tm-player" id="fourProg" style="color:var(--orange)">🎯 10문제 도전!</div>
-  <div id="fourPuzzle" style="margin:14px 0 6px;min-height:74px;font-size:34px">🔠</div>
+  <div id="fourPuzzle" style="margin:16px 0 8px;min-height:1.1em;font-size:clamp(44px,13vmin,104px);font-weight:900;letter-spacing:.06em;line-height:1.05">🔠</div>
   <p class="hint" id="fourHint" style="min-height:20px">시작을 누르세요</p>
   <button class="big-btn" id="fourStartBtn" onclick="fourStart()">🎯 10문제 시작</button>
   <button class="big-btn" id="fourHintBtn" style="display:none;font-size:13px;padding:9px 16px;background:linear-gradient(92deg,#a78bfa,#ffb340)" onclick="fourShowHint()">💡 힌트 보기</button>
@@ -1160,21 +1168,41 @@ function openAccount(){
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   const b=document.getElementById("acctBtn");if(b)b.classList.remove("on");
 }));
+/* 도구: 세로 목록(아코디언) — 제목 탭하면 펼침 */
+function buildToolList(pageId){
+  const page=document.getElementById(pageId);if(!page)return;
+  const cards=[...page.querySelectorAll(":scope > .t-card")];
+  if(!cards.length)return;
+  page.classList.add("tmode");
+  cards.forEach(card=>{
+    const h3=card.querySelector("h3");if(!h3)return;
+    const body=document.createElement("div");body.className="g-body";
+    let node=h3.nextSibling;
+    while(node){const nx=node.nextSibling;body.appendChild(node);node=nx;}
+    card.appendChild(body);
+    const caret=document.createElement("span");caret.className="g-caret";caret.textContent="▸";
+    h3.appendChild(caret);
+    h3.addEventListener("click",()=>{
+      const open=card.classList.contains("open");
+      page.querySelectorAll(":scope > .t-card.open").forEach(o=>o.classList.remove("open"));
+      if(!open){card.classList.add("open");beep(660,.04,.12,"square");logEvent("tool_open",h3.textContent.trim());}
+    });
+  });
+}
 function goTool(id){
   closeGame();
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
   document.querySelector('[data-p="pg3"]').classList.add("on");
-  document.getElementById("pg3").classList.add("on");
-  const c=CAR["pg3"];
-  if(c){
-    const el=document.getElementById(id);
-    const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
-    const i=card?c.items.indexOf(card):-1;
-    if(i>=0){c.idx=i;cShow("pg3");}
-    if(card){const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());}
-  }
-  window.scrollTo({top:0,behavior:"smooth"});
+  const pg3=document.getElementById("pg3");pg3.classList.add("on");
+  const el=document.getElementById(id);
+  const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
+  if(card){
+    pg3.querySelectorAll(":scope > .t-card.open").forEach(o=>o.classList.remove("open"));
+    card.classList.add("open");
+    const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());
+    setTimeout(()=>card.scrollIntoView({behavior:"smooth",block:"start"}),80);
+  }else window.scrollTo({top:0,behavior:"smooth"});
 }
 const $=id=>document.getElementById(id);
 
@@ -2630,7 +2658,7 @@ sbRestore(); /* 로그인 세션 복원 + 통계 */
 initAdsense(); /* 애드센스 배너 (설정 시) */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
-buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildCarousel("pg3",".t-card");
+buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildToolList("pg3");
 buildGameIndex(); /* 게임 뽑기 → 설명 연동용 인덱스 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
