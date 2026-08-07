@@ -185,6 +185,19 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .pcount-mini button:active{transform:scale(.9)}
 .pcount-mini .pm-n{font-size:22px;font-weight:900;min-width:60px;text-align:center;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* 피드백/건의함 */
+.fb-input{width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid var(--line);
+ background:rgba(0,0,0,.3);color:#fff;font-size:14px;margin-bottom:8px;font-family:inherit;resize:vertical}
+.fb-list{margin-top:12px;text-align:left}
+.fb-item{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px}
+.fb-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.fb-name{font-weight:800;font-size:14px;color:var(--mint);word-break:break-word}
+.fb-time{font-size:10.5px;color:var(--sub);font-weight:600;flex-shrink:0}
+.fb-text{font-size:14px;margin-top:5px;white-space:pre-wrap;word-break:break-word;line-height:1.55;color:#e8dffb}
+.fb-del{margin-top:8px;font-size:11.5px;font-weight:800;color:#fff;background:var(--pink);border:none;
+ border-radius:999px;padding:5px 13px;cursor:pointer}
+.fb-del:active{transform:scale(.94)}
+.fb-admin{font-size:12px;color:var(--sub);cursor:pointer;text-decoration:underline;margin-top:10px;display:inline-block}
 
 /* 태블릿(넓고 + 충분히 높은 화면)에서만 큼지막하게 — 폰 가로(짧은 높이)엔 미적용 */
 @media(min-width:760px) and (min-height:600px){
@@ -917,7 +930,18 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <button class="big-btn" onclick="spinBottle()">🌀 돌리기</button>
 </div>
 
-<p class="foot">효과음은 Web Audio 생성 — 아이폰 무음 스위치 해제 필요 · 게임 룰은 📖 탭 참조</p>
+<div class="t-card" id="toolFeedback">
+  <h3>💬 피드백 · 건의함</h3>
+  <p class="hint">아오키 게임에 바라는 점 · 버그 · 아이디어를 남겨주세요 (이름 - 내용)</p>
+  <input class="fb-input" id="fbName" maxlength="20" placeholder="이름 (별명)">
+  <textarea class="fb-input" id="fbText" maxlength="500" rows="3" placeholder="내용 (건의 · 칭찬 · 버그 등)"></textarea>
+  <button class="big-btn" onclick="fbAdd()">✍️ 등록</button>
+  <p class="hint" id="fbStat" style="margin-top:6px;min-height:16px"></p>
+  <div class="fb-list" id="fbList"></div>
+  <span class="fb-admin" id="fbAdminBtn" onclick="fbAdminToggle()">🔧 관리자</span>
+</div>
+
+<p class="foot">효과음은 Web Audio 생성 — 아이폰 무음 스위치 해제 필요 · 게임 룰은 📖 탭 참조<br>피드백은 이 기기(브라우저)에 저장됩니다.</p>
 </div>
 
 </div>
@@ -1883,6 +1907,45 @@ function fourAns(){
 }
 function fourNext(){fourIdx++;fourRender();}
 
+/* ===== 피드백 / 건의함 (localStorage 저장) ===== */
+const FB_KEY="aoki_feedback_v1", FB_PW="9911";
+let fbAdmin=false;
+function fbLoad(){try{const a=JSON.parse(localStorage.getItem(FB_KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return [];}}
+function fbSave(a){try{localStorage.setItem(FB_KEY,JSON.stringify(a));}catch(e){}}
+function fbAdd(){
+  const name=$("fbName").value.trim(),text=$("fbText").value.trim();
+  if(!name){$("fbStat").textContent="⚠️ 이름을 입력하세요";return;}
+  if(!text){$("fbStat").textContent="⚠️ 내용을 입력하세요";return;}
+  const a=fbLoad();
+  a.push({id:Date.now()+"-"+Math.floor(Math.random()*100000),name:name.slice(0,20),text:text.slice(0,500),ts:Date.now()});
+  fbSave(a);
+  $("fbName").value="";$("fbText").value="";
+  $("fbStat").textContent="✅ 등록됐어요! 고마워요 🙌";
+  fbRender();winJingle();confetti();
+}
+function fbFmt(ts){const d=new Date(ts),p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());}
+function fbRender(){
+  const box=$("fbList");if(!box)return;
+  const a=fbLoad().slice().sort((x,y)=>y.ts-x.ts);
+  if(!a.length){box.innerHTML='<div class="hint" style="text-align:center;padding:8px">아직 피드백이 없어요 — 첫 번째로 남겨보세요!</div>';return;}
+  box.innerHTML=a.map(f=>'<div class="fb-item"><div class="fb-head"><span class="fb-name">'+esc(f.name)+
+    '</span><span class="fb-time">'+fbFmt(f.ts)+'</span></div><div class="fb-text">'+esc(f.text)+'</div>'+
+    (fbAdmin?'<button class="fb-del" onclick="fbDel(\''+f.id+'\')">🗑 삭제</button>':'')+'</div>').join("");
+}
+function fbDel(id){
+  if(!fbAdmin){$("fbStat").textContent="🔒 삭제는 관리자만 가능해요";return;}
+  const a=fbLoad().filter(f=>String(f.id)!==String(id));
+  fbSave(a);fbRender();$("fbStat").textContent="🗑 삭제됨";beep(400,.08,.2,"square");
+}
+function fbAdminToggle(){
+  if(fbAdmin){fbAdmin=false;$("fbAdminBtn").textContent="🔧 관리자";$("fbStat").textContent="관리자 모드 해제";fbRender();return;}
+  const pw=prompt("관리자 비밀번호를 입력하세요");
+  if(pw===null)return;
+  if(pw===FB_PW){fbAdmin=true;$("fbAdminBtn").textContent="🔓 관리자 ON (탭하면 해제)";$("fbStat").textContent="🔓 관리자 모드 — 각 글의 🗑 삭제 사용 가능";fbRender();}
+  else{$("fbStat").textContent="❌ 비밀번호가 틀렸어요";beep(300,.15,.3,"square");}
+}
+
 /* ===== person photo quiz ===== */
 const WIKI_KO={"아인슈타인":"알베르트 아인슈타인","뉴턴":"아이작 뉴턴","피카소":"파블로 피카소","반 고흐":"빈센트 반 고흐","베토벤":"루트비히 판 베토벤","모차르트":"볼프강 아마데우스 모차르트","나폴레옹":"나폴레옹 보나파르트","링컨":"에이브러햄 링컨","간디":"마하트마 간디","만델라":"넬슨 만델라","에디슨":"토머스 에디슨","마리 퀴리":"마리 퀴리","스티븐 호킹":"스티븐 호킹","셰익스피어":"윌리엄 셰익스피어","콜럼버스":"크리스토퍼 콜럼버스","찰리 채플린":"찰리 채플린","엘비스 프레슬리":"엘비스 프레슬리","마이클 잭슨":"마이클 잭슨","존 레논":"존 레논","프레디 머큐리":"프레디 머큐리","테일러 스위프트":"테일러 스위프트","메시":"리오넬 메시","호날두":"크리스티아누 호날두","마이클 조던":"마이클 조던","우사인 볼트":"우사인 볼트","타이거 우즈":"타이거 우즈","무하마드 알리":"무함마드 알리","마이클 펠프스":"마이클 펠프스","일론 머스크":"일론 머스크","스티브 잡스":"스티브 잡스","빌 게이츠":"빌 게이츠","마크 저커버그":"마크 저커버그","오바마":"버락 오바마","트럼프":"도널드 트럼프","푸틴":"블라디미르 푸틴","오프라 윈프리":"오프라 윈프리","톰 크루즈":"톰 크루즈","브래드 피트":"브래드 피트","레오나르도 디카프리오":"레오나르도 디카프리오","성룡":"성룡","이소룡":"이소룡","메르켈":"앙겔라 메르켈","젠슨 황":"젠슨 황","레오나르도 다빈치":"레오나르도 다 빈치","정국 (BTS)":"정국","한강 (작가)":"한강 (소설가)","페이커":"페이커 (프로게이머)","침착맨":"침착맨","기안84":"기안84"};
 let photoName=null,photoBusy=false;
@@ -1950,6 +2013,7 @@ function photoReveal(){
 });
 setN(0); /* 초기 표시 동기화 */
 renderSongList(); /* 노래 목록 초기 렌더 */
+fbRender(); /* 피드백 목록 초기 렌더 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임·도구 → 한 화면에 하나씩(캐러셀)로 전환 */
 buildCarousel("pg1",".g");buildCarousel("pg2",".g");buildCarousel("pg4",".g");buildCarousel("pg3",".t-card");
