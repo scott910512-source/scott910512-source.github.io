@@ -128,6 +128,12 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .rank-name{flex:1;text-align:left;font-weight:700;font-size:15.5px}
 .rank-pts{color:var(--sub);font-size:12.5px;font-weight:800}
 .rank-row .ubtn{padding:5px 11px;font-size:13px}
+/* 제비뽑기 */
+.lot-card{width:64px;height:80px;border-radius:12px;border:1.5px solid var(--line);background:linear-gradient(135deg,#3a2a6a,#241847);
+  color:#fff;font-size:26px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.lot-card:active{transform:scale(.92)}
+.lot-card.win{background:linear-gradient(135deg,#ffb340,#ff5f8f);border-color:transparent}
+.lot-card.lose{background:var(--card);opacity:.55}
 .result{margin-top:12px;min-height:40px;font-size:clamp(22px,7vw,34px);font-weight:900;
  background:linear-gradient(92deg,#ffb340,#ff5f8f);-webkit-background-clip:text;background-clip:text;color:transparent}
 .result.giant{font-size:clamp(72px,24vmin,210px);min-height:1.05em;line-height:1.02;letter-spacing:.05em}
@@ -429,6 +435,8 @@ body.gated{overflow:hidden}
       <button class="cat-pick on" onclick="quizStart('mid')">📘 중등</button>
       <button class="cat-pick on" onclick="quizStart('high')">📗 고등</button>
       <button class="cat-pick on" onclick="quizStart('pro')">🎓 고급</button>
+      <button class="cat-pick on" onclick="quizStart('non')">🤪 넌센스</button>
+      <button class="cat-pick on" onclick="quizStart('prov')">📜 속담·사자성어</button>
     </div>
     <div id="quizBox" style="display:none;margin-top:14px">
       <div id="quizProg" class="hint" style="color:var(--orange);font-weight:800"></div>
@@ -467,6 +475,51 @@ body.gated{overflow:hidden}
 <li>1·2·3위에 🥇🥈🥉 — 꼴찌 벌칙 / 1위 소원권도 GOOD</li></ol></div>
 <p class="punish">⚡ 꼴찌 벌칙 · 1위 소원권</p>
 <span class="golink" onclick="goTool('toolRank')">⚡ 순위 정하기 열기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>👀 눈치게임</h3><div class="badges"><span class="bd easy">쉬움</span><span class="bd trend">순발력</span></div></div>
+<p class="meta">인원 <b>3~15</b> · 준비물 <b>없음</b> · 소요 <b>1분</b></p>
+<div class="how"><ol>
+<li>아무나 "눈치게임 스타트!" 외치면 시작</li>
+<li>순서 없이 <b>눈치껏 한 명씩</b> "1!" "2!" "3!" … 숫자를 이어 외친다</li>
+<li><b>동시에 외치면</b> 그 사람들 벌칙 · <b>마지막까지 못 외친 사람</b>도 벌칙</li>
+<li>인원수까지 무사히 세면 마지막 숫자 외친 사람이 벌칙</li></ol></div>
+<p class="punish">⚡ 겹친 사람 · 꼴찌 벌칙</p></div>
+
+<div class="g"><div class="g-top"><h3>⚖️ 밸런스 게임</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">쉬움</span></div></div>
+<p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대</b></p>
+<div class="how"><ol>
+<li>도구의 <b>밸런스 게임</b>으로 랜덤 질문 출제 (예: 평생 짜장 vs 평생 짬뽕)</li>
+<li>셋 세면 <b>동시에 손가락으로 선택</b> (왼쪽/오른쪽)</li>
+<li>소수파가 벌칙 or 이유 발표 → 은근 취향 공개로 수다 폭발</li></ol></div>
+<p class="punish">⚡ 소수파 벌칙 또는 이유 발표</p>
+<span class="golink" onclick="goTool('toolBalance')">⚡ 밸런스 게임 열기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>👉 이미지 게임</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd trend">심리전</span></div></div>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b></p>
+<div class="how"><ol>
+<li>도구의 <b>이미지 게임</b>으로 질문 출제 (예: 가장 먼저 결혼할 것 같은 사람?)</li>
+<li>셋 세면 <b>동시에 한 명을 지목!</b></li>
+<li>최다 득표자는 벌칙 or 해명 한마디</li></ol></div>
+<p class="punish">⚡ 최다 득표자 벌칙/해명</p>
+<span class="golink" onclick="goTool('toolImageQ')">⚡ 이미지 게임 열기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>🎯 진실 혹은 도전</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd trend">아이스브레이킹</span></div></div>
+<p class="meta">인원 <b>2~10</b> · 준비물 <b>폰 1대</b></p>
+<div class="how"><ol>
+<li>차례가 된 사람이 <b>진실 💬</b> 또는 <b>도전 🔥</b> 선택</li>
+<li>도구에서 카드 뽑아 그대로 수행 (진실=솔직 답변, 도전=미션)</li>
+<li>거부하면 벌칙 2배!</li></ol></div>
+<p class="punish">⚡ 거부 시 벌칙 2배</p>
+<span class="golink" onclick="goTool('toolTod')">⚡ 카드 뽑기 열기 →</span></div>
+
+<div class="g"><div class="g-top"><h3>🔮 텔레파시 게임</h3><div class="badges"><span class="bd tool">도구연계</span><span class="bd easy">쉬움</span></div></div>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b></p>
+<div class="how"><ol>
+<li>도구의 <b>텔레파시 주제</b> 공개 (예: 치킨 하면 떠오르는 브랜드?)</li>
+<li>"하나 둘 셋!" 하면 <b>전원 동시에 답 외치기</b></li>
+<li>같은 답 나온 사람들 생존 · <b>혼자 다른 답</b>이면 벌칙</li></ol></div>
+<p class="punish">⚡ 혼자 다른 답 벌칙</p>
+<span class="golink" onclick="goTool('toolTele')">⚡ 텔레파시 주제 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🃏 마피아 (6인 축소판)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>6</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b> · 구성 <b>마피아2 · 경찰1 · 의사1 · 시민2</b></p>
@@ -995,6 +1048,95 @@ body.gated{overflow:hidden}
     <div id="rankBoard"></div>
     <button class="big-btn b3" onclick="rankReset()">🔄 다시 하기</button>
   </div>
+</div>
+
+<div class="t-card" id="toolTeam">
+  <h3>👥 팀 나누기</h3>
+  <p class="hint">이름 넣고 팀 수 고르면 <b>랜덤 균등 배정</b> — 족구·게임 대결용</p>
+  <textarea class="fb-input" id="teamNames" rows="3" placeholder="이름 (쉼표 또는 줄바꿈) 예: 철수, 영희, 민수, 지훈"></textarea>
+  <div style="display:flex;gap:8px;justify-content:center;align-items:center;margin:8px 0">
+    <span class="hint" style="margin:0">팀 수</span>
+    <button class="cat-pick on" data-tc="2" onclick="teamCnt(this)">2팀</button>
+    <button class="cat-pick" data-tc="3" onclick="teamCnt(this)">3팀</button>
+    <button class="cat-pick" data-tc="4" onclick="teamCnt(this)">4팀</button>
+  </div>
+  <button class="big-btn" onclick="teamGo()">👥 팀 나누기!</button>
+  <div id="teamOut" style="margin-top:10px"></div>
+</div>
+
+<div class="t-card" id="toolBalance">
+  <h3>⚖️ 밸런스 게임</h3>
+  <p class="hint">둘 중 하나만! 각자 동시에 손가락으로 가리키고 소수파 벌칙도 GOOD</p>
+  <button class="big-btn" onclick="balanceRoll()">⚖️ 랜덤 질문!</button>
+  <div class="result" id="balanceRes" style="font-size:clamp(20px,5.5vmin,34px);min-height:1.4em">?</div>
+</div>
+
+<div class="t-card" id="toolImageQ">
+  <h3>👉 이미지 게임</h3>
+  <p class="hint">질문 듣고 <b>제일 어울리는 사람을 동시에 지목!</b> 최다 득표자 벌칙/한마디</p>
+  <button class="big-btn b2" onclick="imageQRoll()">👉 랜덤 질문!</button>
+  <div class="result" id="imageQRes" style="font-size:clamp(19px,5vmin,30px);min-height:1.5em">?</div>
+</div>
+
+<div class="t-card" id="toolTod">
+  <h3>🎯 진실 혹은 도전</h3>
+  <p class="hint">차례 사람이 <b>진실</b> 또는 <b>도전</b> 선택 → 카드 수행! 거부하면 벌칙</p>
+  <button class="big-btn" onclick="todRoll('t')">💬 진실</button>
+  <button class="big-btn b2" onclick="todRoll('d')">🔥 도전</button>
+  <div class="result" id="todRes" style="font-size:clamp(18px,5vmin,28px);min-height:1.5em">?</div>
+</div>
+
+<div class="t-card" id="toolTele">
+  <h3>🔮 텔레파시 게임</h3>
+  <p class="hint">주제 공개 → 셋 셀 때 <b>동시에 답 외치기!</b> 같은 답 나온 사람들 생존, 혼자면 벌칙</p>
+  <button class="big-btn b3" onclick="teleRoll()">🔮 랜덤 주제!</button>
+  <div class="result" id="teleRes" style="font-size:clamp(19px,5vmin,30px);min-height:1.5em">?</div>
+</div>
+
+<div class="t-card" id="toolSpeed">
+  <h3>🗣 스피드 제시어</h3>
+  <p class="hint">몸으로 말해요 · 설명 금지단어 퀴즈용 — 한 명만 화면 등지고!</p>
+  <div class="quiz-levels">
+    <button class="cat-pick on" onclick="speedRoll('animal')">🐾 동물</button>
+    <button class="cat-pick on" onclick="speedRoll('food')">🍜 음식</button>
+    <button class="cat-pick on" onclick="speedRoll('job')">👮 직업</button>
+    <button class="cat-pick on" onclick="speedRoll('thing')">📦 물건</button>
+    <button class="cat-pick on" onclick="speedRoll('act')">🏃 행동</button>
+  </div>
+  <div class="result giant" id="speedRes" style="font-size:clamp(38px,11vmin,90px)">?</div>
+  <button class="big-btn b2" id="speedNextBtn" style="display:none" onclick="speedNext()">⏭ 다음 제시어</button>
+</div>
+
+<div class="t-card" id="toolPenalty">
+  <h3>🎰 벌칙 룰렛</h3>
+  <p class="hint">기본 벌칙 + 직접 추가한 벌칙 중 랜덤! 걸린 사람 바로 실행 😈</p>
+  <div class="rl-add">
+    <input id="penInput" class="fb-input" maxlength="30" placeholder="벌칙 추가 (예: 세글자로만 말하기)" onkeydown="if(event.key==='Enter')penAdd()">
+    <button class="big-btn b2" style="font-size:14px;padding:11px 18px" onclick="penAdd()">＋</button>
+  </div>
+  <div id="penItems" class="rl-items"></div>
+  <button class="big-btn" onclick="penRoll()">🎰 벌칙 뽑기!</button>
+  <div class="result" id="penRes" style="font-size:clamp(20px,5.5vmin,32px);min-height:1.4em">?</div>
+</div>
+
+<div class="t-card" id="toolDice">
+  <h3>🎲 주사위 · 동전</h3>
+  <p class="hint">보드게임 · 369 · 내기 보조</p>
+  <button class="big-btn" onclick="diceRoll()">🎲 주사위</button>
+  <button class="big-btn b3" onclick="coinFlip()">🪙 동전</button>
+  <div class="result giant" id="diceRes" style="font-size:clamp(60px,18vmin,150px)">🎲</div>
+</div>
+
+<div class="t-card" id="toolLots">
+  <h3>🎫 제비뽑기</h3>
+  <p class="hint">카드 중 <b>당첨 🎉</b> 이 숨어있다! 한 명씩 골라서 탭</p>
+  <div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:8px 0">
+    <span class="hint" style="margin:0">인원</span><input id="lotN" class="fb-input" type="number" min="2" max="20" value="6" style="width:70px;margin:0;text-align:center">
+    <span class="hint" style="margin:0">당첨</span><input id="lotW" class="fb-input" type="number" min="1" max="10" value="1" style="width:70px;margin:0;text-align:center">
+    <button class="big-btn b2" style="font-size:14px;padding:11px 18px;margin:0" onclick="lotsMake()">🎫 생성</button>
+  </div>
+  <div id="lotGrid" class="rl-items" style="max-width:480px"></div>
+  <p class="hint" id="lotStat"></p>
 </div>
 
 <div class="t-card" id="toolChar">
@@ -1618,6 +1760,81 @@ function rankShowResult(ranked,withPts){
   confetti();winJingle();rankPanel("rankPnResult");
 }
 function rankReset(){rankPanel("rankPnSetup");}
+/* ===== 스몰게임 도구 모음 ===== */
+const BALANCE=[["평생 짜장면","평생 짬뽕"],["여름만 살기","겨울만 살기"],["돈 많은 백수","꿈 이루는 가난"],["과거로 가기","미래로 가기"],["말 못하기 1년","폰 없이 1년"],["매운맛 평생 금지","단맛 평생 금지"],["투명인간 되기","하늘 날기"],["평생 라면 금지","평생 치킨 금지"],["아는 맛","새로운 맛"],["부먹","찍먹"],["민초","반민초"],["즉흥 여행","계획 여행"],["산으로 휴가","바다로 휴가"],["모든 언어 마스터","모든 악기 마스터"],["10년 전 나에게 조언","10년 후 나 미리보기"],["대중교통 평생 무료","기름값 평생 무료"],["혼자 노래방","혼자 고깃집"],["김치 없는 삶","계란 없는 삶"],["아침형 인간","올빼미형 인간"],["순간이동 (하루 1번)","시간정지 (하루 1분)"],["평생 무료 커피","평생 무료 영화"],["게임 평생 금지","드라마 평생 금지"],["최신폰 2년마다 공짜","해외여행 2년마다 공짜"],["복권 1등","건물주"],["연인과 매일 통화 3시간","연인과 일주일 1번 만남"],["단톡에서 전체 읽씹","단톡에 오타 폭발"],["여름에 패딩","겨울에 반팔"],["노래 잘하기","춤 잘추기"],["과자 평생 무료","아이스크림 평생 무료"],["키 10cm 크기","연봉 10% 인상"]];
+const IMAGE_Q=["가장 먼저 결혼할 것 같은 사람?","지갑 주우면 그냥 지나칠 것 같은 사람?","무인도에서 제일 오래 살아남을 사람?","로또 되면 제일 먼저 잠수탈 사람?","제일 겁 많을 것 같은 사람?","알고 보면 제일 부자일 것 같은 사람?","드라마 보고 제일 많이 울 것 같은 사람?","길 가다 헌팅 제일 많이 당할 사람?","제일 아침잠 많을 것 같은 사람?","싸움 나면 제일 먼저 도망갈 사람?","군대(사회) 적응 제일 잘할 사람?","제일 요리 못할 것 같은 사람?","연애 상담 제일 잘해줄 사람?","제일 먼저 사장님 될 사람?","몰래 연애 중일 것 같은 사람?","제일 옛날 사람 같은 사람?","춤 시키면 제일 잘 출 사람?","제일 눈치 빠른 사람?","돈 빌려달라면 바로 빌려줄 사람?","제일 팔불출 부모 될 것 같은 사람?","혼자 여행 가장 잘 다닐 사람?","SNS 몰래 제일 열심히 할 사람?","제일 화 안 낼 것 같은 사람?","노래방에서 마이크 안 놓을 사람?","제일 장수할 것 같은 사람?"];
+const TOD_T=["첫사랑 이야기 30초 요약","최근에 한 거짓말 고백","이 중 첫인상 제일 좋았던 사람은?","폰 사진첩 최근 사진 1장 공개","제일 후회하는 소비 고백","숨겨왔던 취미/덕질 고백","이 중 나랑 제일 안 맞는 사람과 이유(순화해서)","최근에 운 적 언제였는지","이상형 구체적으로 말하기","학창시절 흑역사 하나","지금 통장 잔고 앞자리 공개","부모님 몰래 한 일 하나","최근 검색기록 3개 공개","가장 최근 DM/카톡 보낸 사람","살면서 제일 창피했던 순간","여기서 하루 바디스왑 한다면 누구랑?","나의 단점 3개 스스로 고백","오늘 모임 오기 싫었다 vs 좋았다 솔직히"];
+const TOD_D=["애교 3종 세트","옆 사람과 셀카 찍고 단톡 올리기","1분간 존댓말 금지(걸리면 벌칙)","랜덤 전화해서 '보고싶다' 하기(가족 제외)","제자리에서 댄스 15초","창밖에 대고 '야호' 외치기","옆 사람 어깨 안마 30초","성대모사 1개","가장 웃긴 표정 3초 유지","물 없이 크래커 먹기(있다면)","다음 차례까지 반말 금지","일어나서 시 낭송하듯 자기소개","팔굽혀펴기 10개","좋아하는 노래 후렴 열창","옆 사람에게 사랑 고백 연기","셀카 3연속 찍고 제일 못 나온 것 공개","혀 꼬부랑말로 자기 이름 말하기","한 발 서기 30초 (실패시 벌칙)"];
+const TELE=["치킨 하면 떠오르는 브랜드?","빨간색 하면 떠오르는 것?","라면 하면 떠오르는 브랜드?","한국 대표 관광지 하면?","겨울 하면 떠오르는 음식?","유명한 축구선수 하면?","편의점 하면 떠오르는 것?","바다 하면 떠오르는 노래?","제일 유명한 한국 가수?","떡볶이랑 제일 어울리는 음식?","공포영화 하면 떠오르는 것?","소풍 하면 떠오르는 음식?","슈퍼히어로 하면?","야식 하면 떠오르는 메뉴?","커피 하면 떠오르는 브랜드?","여름 하면 떠오르는 과일?","놀이공원 하면 떠오르는 놀이기구?","K-드라마 하면 떠오르는 작품?"];
+const SPEED_W={
+ animal:["코끼리","펭귄","캥거루","고슴도치","문어","카멜레온","수달","기린","판다","독수리","해파리","다람쥐","악어","공작새","두더지","알파카"],
+ food:["떡볶이","삼겹살","냉면","마라탕","김밥","치즈돈까스","붕어빵","곱창","팥빙수","샤인머스캣","육회","계란찜","라볶이","순대국","크로플","꿀호떡"],
+ job:["소방관","유튜버","치과의사","바리스타","택배기사","아이돌","요리사","해녀","조종사","마술사","웹툰작가","경찰","농부","앵커","약사","프로게이머"],
+ thing:["에어팟","고데기","보조배터리","텀블러","손톱깎이","우산","돗자리","셀카봉","가습기","백팩","모니터","드라이기","슬리퍼","담요","키링","물티슈"],
+ act:["줄넘기","셀카 찍기","양치질","머리 묶기","낚시","골프 스윙","요가","재채기","라면 먹기","운전","빨래 널기","화장하기","닭싸움","수영","캐치볼","큰절"]};
+const PEN_BASE=["물 한 잔 원샷","애교 3종 세트","다음 라운드까지 반말 금지","성대모사 1개","제자리 댄스 15초","팔굽혀펴기 10개","옆 사람 어깨 안마 30초","노래 후렴 열창","웃긴 표정 3초","존댓말로만 말하기 5분","셀카 찍어 단톡 올리기","일어나서 자기소개 시 낭송","한 발 서기 30초","다음 게임 심부름 담당","오늘 모임 사진사 담당","세글자로만 말하기 3분","휴대폰 배경화면 공개","마지막에 정리 담당"];
+function pickRand(a){return a[Math.floor(Math.random()*a.length)];}
+function balanceRoll(){const q=pickRand(BALANCE);$("balanceRes").innerHTML="🅰️ "+esc(q[0])+"<br><span style='color:var(--sub);font-size:.6em'>VS</span><br>🅱️ "+esc(q[1]);beep(660,.05,.12,"square");logEvent("play","밸런스게임");}
+function imageQRoll(){$("imageQRes").textContent="👉 "+pickRand(IMAGE_Q);beep(660,.05,.12,"square");logEvent("play","이미지게임");}
+function todRoll(m){$("todRes").textContent=(m==='t'?"💬 ":"🔥 ")+pickRand(m==='t'?TOD_T:TOD_D);beep(m==='t'?600:760,.05,.12,"square");logEvent("play","진실혹은도전");}
+function teleRoll(){$("teleRes").textContent="🔮 "+pickRand(TELE);beep(700,.05,.12,"square");logEvent("play","텔레파시");}
+let SPEED_CAT="animal";
+function speedRoll(cat){SPEED_CAT=cat;speedNext();$("speedNextBtn").style.display="inline-block";logEvent("play","스피드제시어-"+cat);}
+function speedNext(){$("speedRes").textContent=pickRand(SPEED_W[SPEED_CAT]);beep(660,.04,.1,"square");}
+/* 팀 나누기 */
+let TEAM_N=2;
+function teamCnt(btn){document.querySelectorAll('[data-tc]').forEach(b=>b.classList.remove('on'));btn.classList.add('on');TEAM_N=+btn.dataset.tc;beep(560,.03,.08,"square");}
+function teamGo(){
+  const names=($("teamNames").value||"").split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+  if(names.length<TEAM_N){alert("참가자가 팀 수보다 많아야 해요");return;}
+  const sh=shuffle(names.slice());const teams=Array.from({length:TEAM_N},()=>[]);
+  sh.forEach((n,i)=>teams[i%TEAM_N].push(n));
+  const ico=["🔴","🔵","🟢","🟡"];
+  $("teamOut").innerHTML=teams.map((t,i)=>'<div class="rank-row"><span class="rank-medal">'+ico[i]+' '+(i+1)+'팀</span><span class="rank-name">'+t.map(esc).join(", ")+'</span></div>').join("");
+  confetti();winJingle();logEvent("play","팀나누기");
+}
+/* 벌칙 룰렛 */
+let PEN_EXTRA=[];
+function penRender(){$("penItems").innerHTML=PEN_EXTRA.map((p,i)=>'<span class="rl-chip">😈 '+esc(p)+'<button onclick="penDel('+i+')">✕</button></span>').join("");}
+function penAdd(){const v=$("penInput").value.trim();if(!v)return;PEN_EXTRA.push(v.slice(0,30));$("penInput").value="";penRender();beep(720,.04,.1,"square");}
+function penDel(i){PEN_EXTRA.splice(i,1);penRender();}
+function penRoll(){
+  if(rolling)return;rolling=true;
+  const pool=PEN_BASE.concat(PEN_EXTRA);const el=$("penRes");
+  const win=pickRand(pool);let i=0,delay=50;
+  (function tick(){el.textContent=pool[i++%pool.length];beep(500+Math.random()*300,.03,.08,"square");
+    if(delay<280){delay*=1.16;setTimeout(tick,delay);}
+    else{el.textContent="😈 "+win;confetti();winJingle();rolling=false;logEvent("play","벌칙룰렛");}})();
+}
+/* 주사위 · 동전 */
+const DICE_F=["⚀","⚁","⚂","⚃","⚄","⚅"];
+function diceRoll(){
+  if(rolling)return;rolling=true;const el=$("diceRes");let n=0;
+  const iv=setInterval(()=>{el.textContent=DICE_F[Math.floor(Math.random()*6)];beep(500+Math.random()*200,.02,.06,"square");
+    if(++n>=10){clearInterval(iv);const v=Math.floor(Math.random()*6);el.textContent=DICE_F[v];winJingle();rolling=false;logEvent("play","주사위");}},80);
+}
+function coinFlip(){
+  if(rolling)return;rolling=true;const el=$("diceRes");let n=0;
+  const iv=setInterval(()=>{el.textContent=n%2?"🌕":"🌑";beep(600,.02,.06,"square");
+    if(++n>=10){clearInterval(iv);const v=Math.random()<.5;el.textContent=v?"🌕 앞면!":"🌑 뒷면!";winJingle();rolling=false;logEvent("play","동전");}},80);
+}
+/* 제비뽑기 */
+let LOT={left:0,win:0};
+function lotsMake(){
+  const n=Math.min(20,Math.max(2,+$("lotN").value||6));
+  const w=Math.min(n-1,Math.max(1,+$("lotW").value||1));
+  const deck=shuffle(Array.from({length:n},(_,i)=>i<w));
+  LOT={left:n,win:w};
+  $("lotStat").textContent="당첨 "+w+"개 숨어있음 — 한 명씩 탭!";
+  $("lotGrid").innerHTML=deck.map(isWin=>'<button class="lot-card" data-w="'+(isWin?1:0)+'" onclick="lotOpen(this)">🎫</button>').join("");
+  logEvent("play","제비뽑기");
+}
+function lotOpen(el){
+  if(el.dataset.done)return;el.dataset.done="1";
+  const win=el.dataset.w==="1";
+  el.classList.add(win?"win":"lose");el.textContent=win?"🎉":"💨";
+  if(win){confetti();winJingle();}else beep(300,.12,.12,"sawtooth");
+}
 /* ===== 상식 퀴즈 (5단계 · 4지선다 · c[0]이 정답) ===== */
 const QUIZ={
   kid:[
@@ -1669,6 +1886,26 @@ const QUIZ={
     {q:"'모나리자'를 그린 화가는?",c:["레오나르도 다빈치","미켈란젤로","라파엘로","고흐"]},
     {q:"원주율 π의 근삿값은?",c:["3.14","2.72","1.41","1.62"]},
     {q:"대한민국 임시정부가 처음 수립된 도시는?",c:["상하이","베이징","도쿄","블라디보스토크"]}
+  ],
+  non:[
+    {q:"세상에서 가장 뜨거운 과일은?",c:["천도복숭아","수박","파인애플","용과"]},
+    {q:"왕이 넘어지면?",c:["킹콩","퀸","잭","조커"]},
+    {q:"바나나가 웃으면?",c:["바나나킥","바나나우유","원숭이","스마일"]},
+    {q:"세상에서 가장 억울한 도형은?",c:["원통","삼각형","사각형","오각형"]},
+    {q:"먹으면 먹을수록 늘어나는 것은?",c:["나이","돈","키","머리카락"]},
+    {q:"눈이 녹으면? (넌센스)",c:["눈물","봄","물","비"]},
+    {q:"아몬드가 죽으면?",c:["다이아몬드","아몬드봉봉","초코아몬드","호두"]},
+    {q:"별 중에 가장 슬픈 별은?",c:["이별","금성","화성","목성"]}
+  ],
+  prov:[
+    {q:"'낮말은 새가 듣고 밤말은 ○가 듣는다'",c:["쥐","개","소","고양이"]},
+    {q:"'일석이조'와 같은 뜻의 속담은?",c:["꿩 먹고 알 먹기","소 잃고 외양간 고치기","티끌 모아 태산","우물 안 개구리"]},
+    {q:"'어부지리'의 뜻은?",c:["둘이 싸우는 사이 엉뚱한 이가 이득","고기 잡아 이득 봄","친구 사이의 우정","노력 끝의 성공"]},
+    {q:"'등잔 밑이 ○○○'",c:["어둡다","밝다","뜨겁다","좁다"]},
+    {q:"'과유불급'의 뜻은?",c:["지나침은 모자람만 못하다","과일은 급히 먹지 마라","공부는 끝이 없다","욕심이 클수록 좋다"]},
+    {q:"'백문이 불여일견'의 뜻은?",c:["백 번 듣기보다 한 번 보기","백 번 묻고 한 번 답하기","듣는 것이 보는 것보다 낫다","말보다 글이 낫다"]},
+    {q:"'원숭이도 나무에서 ○○○○'",c:["떨어진다","올라간다","잠을 잔다","논다"]},
+    {q:"'유비무환'의 뜻은?",c:["준비가 있으면 걱정이 없다","비가 오면 우환이 온다","친구가 있으면 근심이 없다","여유가 있어야 환영받는다"]}
   ]
 };
 let QZ={list:[],idx:0,score:0};
