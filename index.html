@@ -13,6 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="아오키게임">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<!-- Google AdSense (사이트 소유 확인 + 광고) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1881620907984218" crossorigin="anonymous"></script>
 <style>
 :root{
   --bg1:#1b1035;--bg2:#2a1454;--bg3:#12082b;
@@ -2175,19 +2177,16 @@ function silentFail(){
 }
 
 /* ===== Supabase 로그인 · 통계 ===== */
-/* ===== Google AdSense 배너 (승인 후 아래 2개 값만 넣으면 켜짐) ===== */
-const ADSENSE_CLIENT="";  /* 예: "ca-pub-1234567890123456" (애드센스 승인 후 발급) */
-const ADSENSE_SLOT="";    /* 광고 단위(Ad unit) 슬롯 ID (숫자) */
+/* ===== Google AdSense (로더는 <head>에 삽입됨) ===== */
+const ADSENSE_CLIENT="ca-pub-1881620907984218";
+const ADSENSE_SLOT="";    /* 승인 후 '광고 단위' 만들면 나오는 슬롯 ID(숫자)를 넣으면 수동 배너 표시 */
 function initAdsense(){
   const box=document.getElementById("adBanner");if(!box)return;
-  if(!/^ca-pub-\d{10,}$/.test(ADSENSE_CLIENT)||!/^\d{6,}$/.test(ADSENSE_SLOT)){
-    box.innerHTML='<div style="font-size:11px;color:var(--sub);opacity:.65;border:1px dashed var(--line);border-radius:10px;padding:12px">📢 광고 영역 · 애드센스 승인 후 자동 표시</div>';
+  if(!/^\d{6,}$/.test(ADSENSE_SLOT)){
+    box.innerHTML='<div style="font-size:11px;color:var(--sub);opacity:.65;border:1px dashed var(--line);border-radius:10px;padding:12px">📢 광고 영역 · 애드센스 검토·승인 후 표시됩니다</div>';
     return;
   }
   try{
-    const s=document.createElement("script");s.async=true;s.crossOrigin="anonymous";
-    s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client="+ADSENSE_CLIENT;
-    document.head.appendChild(s);
     box.innerHTML='<ins class="adsbygoogle" style="display:block" data-ad-client="'+ADSENSE_CLIENT+'" data-ad-slot="'+ADSENSE_SLOT+'" data-ad-format="auto" data-full-width-responsive="true"></ins>';
     (window.adsbygoogle=window.adsbygoogle||[]).push({});
   }catch(e){}
