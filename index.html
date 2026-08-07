@@ -299,6 +299,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <button class="tab" data-p="pg2">🍻 술게임</button>
   <button class="tab" data-p="pg4">🏖️ 야외놀이</button>
   <button class="tab" data-p="pg3">⚡ 도구</button>
+  <button class="tab" data-p="pg5">👤 계정</button>
 </div>
 
 <!-- ================= 모임게임 ================= -->
@@ -785,26 +786,6 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 <div class="page" id="pg3">
 <label class="snd-toggle"><input type="checkbox" id="sndOn" checked> 🔊 효과음 (폭탄 째깍·폭발, 타이머 비프, 룰렛 틱)</label>
 
-<div class="t-card" id="toolAuth">
-  <h3>👤 로그인 · 📊 통계</h3>
-  <div id="authLogin">
-    <p class="hint">로그인하면 <b>내 플레이 통계</b>가 기록돼요 (선택 · 게임은 로그인 없이도 다 됩니다)</p>
-    <input class="fb-input" id="authNick" maxlength="20" placeholder="닉네임">
-    <input class="fb-input" id="authPw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
-    <button class="big-btn" onclick="sbSignIn()">🔑 로그인</button>
-    <button class="big-btn b2" onclick="sbSignUp()">✨ 회원가입</button>
-  </div>
-  <div id="authUser" style="display:none">
-    <div id="authWho" style="font-weight:800;font-size:16px;color:var(--mint)"></div>
-    <div style="margin-top:8px">
-      <button class="big-btn b2" style="font-size:13px;padding:9px 16px" onclick="loadStats()">📊 통계 새로고침</button>
-      <button class="big-btn b3" style="font-size:13px;padding:9px 16px" onclick="sbSignOut()">로그아웃</button>
-    </div>
-    <div id="statsBox" style="margin-top:12px;text-align:left"></div>
-  </div>
-  <p class="hint" id="authMsg" style="margin-top:8px;min-height:16px"></p>
-</div>
-
 <div class="t-card">
   <h3>👥 참가 인원</h3>
   <p class="hint">멤버 지목 · 라이어 · 마피아 · 타이머 순위에 자동 반영 (3~10명)</p>
@@ -825,6 +806,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
   <button class="big-btn" style="background:linear-gradient(92deg,#ffb340,#3ce8b0)" onclick="roll('bal')">⚖️ 밸런스 질문</button>
   <button class="big-btn" style="background:linear-gradient(92deg,#3ce8b0,#a78bfa)" onclick="roll('obj')">🎁 물건 뽑기 (~할 수도 게임용)</button>
   <div class="result" id="rollRes">운명을 뽑아보세요</div>
+  <button class="big-btn b2" id="rollGameBtn" style="display:none;font-size:14px;padding:10px 20px" onclick="openRolledGame()">📖 이 게임 설명 보기 →</button>
 </div>
 <div class="t-card" id="toolChar">
   <h3>🔤 글자 출제기</h3>
@@ -1000,6 +982,29 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 </div>
 
 <p class="foot">효과음은 Web Audio 생성 — 아이폰 무음 스위치 해제 필요 · 게임 룰은 📖 탭 참조<br>피드백은 이 기기(브라우저)에 저장됩니다.</p>
+</div>
+
+<!-- ================= 계정 ================= -->
+<div class="page" id="pg5">
+<div class="t-card" id="toolAuth" style="max-width:560px;margin:18px auto">
+  <h3>👤 계정 · 📊 통계</h3>
+  <div id="authLogin">
+    <p class="hint">닉네임+비밀번호로 로그인하면 <b>내 플레이 통계</b>가 기록돼요 (선택 · 게임은 로그인 없이도 다 됩니다)</p>
+    <input class="fb-input" id="authNick" maxlength="20" placeholder="닉네임">
+    <input class="fb-input" id="authPw" type="password" maxlength="40" placeholder="비밀번호 (4자 이상)">
+    <button class="big-btn" onclick="sbSignIn()">🔑 로그인</button>
+    <button class="big-btn b2" onclick="sbSignUp()">✨ 회원가입</button>
+  </div>
+  <div id="authUser" style="display:none">
+    <div id="authWho" style="font-weight:800;font-size:16px;color:var(--mint)"></div>
+    <div style="margin-top:8px">
+      <button class="big-btn b2" style="font-size:13px;padding:9px 16px" onclick="loadStats()">📊 통계 새로고침</button>
+      <button class="big-btn b3" style="font-size:13px;padding:9px 16px" onclick="sbSignOut()">로그아웃</button>
+    </div>
+    <div id="statsBox" style="margin-top:12px;text-align:left"></div>
+  </div>
+  <p class="hint" id="authMsg" style="margin-top:8px;min-height:16px"></p>
+</div>
 </div>
 
 </div>
@@ -1187,17 +1192,47 @@ who:["1번 멤버","2번 멤버","3번 멤버","4번 멤버","5번 멤버","6번
 obj:["휴지","숟가락","젓가락","소주병","병뚜껑","종이컵","슬리퍼","수건","베개","라면봉지","물티슈","리모컨","충전기 케이블","모자","양말","선크림","컵라면","생수병","안경","쌈장통","깻잎 한 장","수박 껍질","아이스박스 뚜껑","튜브"],
 bal:["평생 삼겹살 금지 vs 평생 치킨 금지","월급 2배+주6일 vs 현재 월급+주4일","10억 받고 폰 없이 1년 vs 그냥 살기","과거로 가서 조언 1번 vs 미래 1일 미리보기","모든 음식 미지근하게 vs 모든 음료 미지근하게","텐트에서 한 달 vs 차에서 한 달","평생 여름만 vs 평생 겨울만","술 끊기 vs 커피 끊기","로또 1등 비밀유지 vs 절반 기부하고 공개","상사와 단둘이 등산 매주 vs 매일 아침 회의 진행","머리 스타일 평생 고정 vs 옷 스타일 평생 고정","축구 직관 평생 무료 vs 게임 평생 무료","치약맛 된장찌개 vs 된장맛 아이스크림","전화만 가능한 폰 vs 문자만 가능한 폰","10년 전으로 vs 10년 후로","노래방에서 발라드만 vs 댄스곡만","자녀가 나 닮음 vs 와이프 닮음 (외모)","평생 라면 금지 vs 평생 탄산 금지","출근 왕복 4시간+재택 무제한 vs 도보 10분+풀출근","내 폰 검색기록 전체공개 vs 통장잔고 전체공개"]};
 let rolling=false;
+/* 실제 게임 카드에서 게임 목록 인덱스 구성 (뽑기 → 설명 연동용) */
+let GAME_INDEX=[],lastRolledGame=null;
+function buildGameIndex(){
+  GAME_INDEX=[];
+  ["pg1","pg2","pg4"].forEach(pg=>{
+    const page=document.getElementById(pg);if(!page)return;
+    page.querySelectorAll(":scope > .g").forEach(card=>{
+      const h3=card.querySelector("h3");
+      if(h3)GAME_INDEX.push({name:h3.textContent.trim(),page:pg,card:card});
+    });
+  });
+}
+function openGameCard(pg,card){
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+  const tab=document.querySelector('[data-p="'+pg+'"]');if(tab)tab.classList.add("on");
+  const page=document.getElementById(pg);if(!page)return;page.classList.add("on");
+  page.querySelectorAll(":scope > .g.open").forEach(o=>o.classList.remove("open"));
+  card.classList.add("open");
+  const h3=card.querySelector("h3");if(h3)logEvent("game_open",h3.textContent.trim());
+  setTimeout(()=>{card.scrollIntoView({behavior:"smooth",block:"start"});},90);
+}
+function openRolledGame(){ if(lastRolledGame)openGameCard(lastRolledGame.page,lastRolledGame.card); }
 function roll(type){
   if(rolling)return;rolling=true;
   const el=$("rollRes");
-  const pool=type==="who"?Array.from({length:N},(_,i)=>(i+1)+"번 멤버"):POOL[type];
+  if($("rollGameBtn"))$("rollGameBtn").style.display="none";
+  const gameMode=(type==="game"&&GAME_INDEX.length>0);
+  const pool=gameMode?GAME_INDEX.map(g=>g.name)
+    :type==="who"?Array.from({length:N},(_,i)=>(i+1)+"번 멤버"):POOL[type];
   let i=0,delay=50;
-  const win=pool[Math.floor(Math.random()*pool.length)];
+  const winIdx=Math.floor(Math.random()*pool.length);
+  const win=pool[winIdx];
   (function tick(){
     el.textContent=pool[i++%pool.length];
     beep(500+Math.random()*300,.03,.08,"square");
     if(delay<300){delay*=1.15;setTimeout(tick,delay);}
-    else{el.textContent="🎉 "+win;confetti();winJingle();rolling=false;}
+    else{
+      el.textContent="🎉 "+win;confetti();winJingle();rolling=false;
+      if(gameMode){lastRolledGame=GAME_INDEX[winIdx];if($("rollGameBtn"))$("rollGameBtn").style.display="inline-block";}
+    }
   })();
 }
 /* 글자 출제기 */
@@ -2269,6 +2304,7 @@ sbRestore(); /* 로그인 세션 복원 + 통계 */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildCarousel("pg3",".t-card");
+buildGameIndex(); /* 게임 뽑기 → 설명 연동용 인덱스 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeGame();
   else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){const on=document.querySelector(".page.on");if(on&&CAR[on.id])cStep(on.id,e.key==="ArrowRight"?1:-1);}});
