@@ -43,6 +43,13 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .tab:active{transform:scale(.94)}
 .tab.on{background:linear-gradient(90deg,#ff5f8f,#ffb340);color:#2a1040;border-color:transparent;font-weight:800}
 .page{display:none}.page.on{display:block;animation:pop .3s ease}
+.acct-btn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);right:12px;z-index:60;
+  height:40px;padding:0 14px;border-radius:999px;border:1.5px solid transparent;
+  background:linear-gradient(135deg,#ff5f8f,#ffb340);color:#2a1040;font-weight:800;font-size:14px;
+  cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.32);display:flex;align-items:center;gap:6px;line-height:1}
+.acct-btn:active{transform:scale(.93)}
+.acct-btn.on{outline:2px solid rgba(255,255,255,.55);outline-offset:1px}
+@media(max-width:520px){.acct-btn{height:36px;padding:0 11px;font-size:13px}}
 @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
 .sec{margin:26px 0 12px;font-size:13.5px;font-weight:800;letter-spacing:.2em;color:var(--sub);text-align:center}
@@ -332,6 +339,7 @@ body.gated{overflow:hidden}
 </style>
 </head>
 <body>
+<button id="acctBtn" class="acct-btn" onclick="openAccount()" title="계정 · 통계">👤 계정</button>
 <div class="wrap">
 
 <header>
@@ -345,7 +353,6 @@ body.gated{overflow:hidden}
   <button class="tab" data-p="pg2">🍻 술게임</button>
   <button class="tab" data-p="pg4">🏖️ 야외놀이</button>
   <button class="tab" data-p="pg3">⚡ 도구</button>
-  <button class="tab" data-p="pg5">👤 계정</button>
 </div>
 
 <!-- ================= 모임게임 ================= -->
@@ -1141,6 +1148,18 @@ document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
   t.classList.add("on");document.getElementById(t.dataset.p).classList.add("on");
   window.scrollTo({top:0,behavior:"smooth"});
 });
+function openAccount(){
+  try{closeGame();}catch(e){}
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+  const p=document.getElementById("pg5");if(p)p.classList.add("on");
+  const b=document.getElementById("acctBtn");if(b)b.classList.add("on");
+  window.scrollTo({top:0,behavior:"smooth"});
+  try{loadStats();}catch(e){}
+}
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  const b=document.getElementById("acctBtn");if(b)b.classList.remove("on");
+}));
 function goTool(id){
   closeGame();
   document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
@@ -2316,6 +2335,13 @@ function renderAuth(){
   const er=effRole();
   document.body.classList.toggle("vip",!!sbUser&&er==="vip");
   document.body.classList.toggle("isadmin",!!sbUser&&er==="admin");
+  const ab=$("acctBtn");
+  if(ab){
+    if(sbUser){const nm=(sbProfile&&sbProfile.nickname)||"계정";
+      const ic=er==="admin"?"👑":er==="vip"?"💎":"👤";
+      ab.innerHTML=ic+" "+esc(nm.length>6?nm.slice(0,6)+"…":nm);}
+    else ab.innerHTML="👤 계정";
+  }
   if(sbUser){
     $("authLogin").style.display="none";$("authUser").style.display="block";
     const nm=(sbProfile&&sbProfile.nickname)||"사용자";
