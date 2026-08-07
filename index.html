@@ -574,6 +574,16 @@ body.gated{overflow:hidden}
 <p class="punish">⚡ 진 사람 벌칙</p>
 <span class="golink" onclick="goTool('toolYang')">⚡ 양세찬 게임 열기 →</span></div>
 
+<div class="g"><div class="g-top"><h3>🌈 무지개 찾기</h3><div class="badges"><span class="bd easy">쉬움</span><span class="bd trend">순발력</span></div></div>
+<p class="meta">인원 <b>2~10</b> · 준비물 <b>주변 물건</b> · 소요 <b>5분</b></p>
+<div class="how"><ol>
+<li>순서를 정하고 도구의 <b>무지개 찾기</b> 시작 — 화면에 색깔이 크게 뜸</li>
+<li><b>빨주노초파남보 순서</b>로 자기 차례 색깔의 <b>실물 물건</b>을 찾아와 보여주기 (빨강→수박, 주황→과자봉지 등 뭐든 OK)</li>
+<li>성공하면 <b>다음 색 →</b> 다음 사람! 보라 다음엔 다시 빨강으로 계속</li>
+<li><b>제한시간 안에 못 찾으면 탈락</b> — 못 찾을 때까지 무한 반복!</li></ol></div>
+<p class="punish">⚡ 못 찾은 사람 벌칙</p>
+<span class="golink" onclick="goTool('toolRainbow')">⚡ 무지개 찾기 열기 →</span></div>
+
 <div class="g"><div class="g-top"><h3>🃏 마피아 (6인 축소판)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>6</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b> · 구성 <b>마피아2 · 경찰1 · 의사1 · 시민2</b></p>
 <div class="how"><ol>
@@ -1370,6 +1380,19 @@ body.gated{overflow:hidden}
     <button class="big-btn" id="yangRevealBtn" onclick="yangToggle()">👁 전체 공개 (관객용)</button>
     <button class="big-btn b3" onclick="yangReset()">🔄 처음부터</button>
   </div>
+</div>
+
+<div class="t-card" id="toolRainbow">
+  <h3>🌈 무지개 찾기</h3>
+  <p class="hint"><b>빨주노초파남보</b> 순서로 한 명씩 <b>그 색깔 물건</b>을 찾아 보여주기!<br>빨강→수박, 주황→과자봉지… 뭐든 OK! <b>못 찾을 때까지 계속</b> 돕니다 😱</p>
+  <div id="rbStage" style="display:none;border-radius:22px;padding:7vmin 4vmin;margin:12px 0;transition:background .3s">
+    <div id="rbName" style="font-size:clamp(52px,17vmin,150px);font-weight:900;color:#fff;line-height:1.05;text-shadow:0 3px 14px rgba(0,0,0,.45)"></div>
+    <div id="rbInfo" style="font-size:clamp(14px,3.5vmin,22px);font-weight:800;color:rgba(255,255,255,.92);margin-top:8px"></div>
+  </div>
+  <div class="result" id="rbResult" style="display:none;font-size:clamp(19px,5vmin,30px)"></div>
+  <button class="big-btn" id="rbStartBtn" onclick="rbStart()">🌈 시작!</button>
+  <button class="big-btn b2" id="rbNextBtn" style="display:none;font-size:17px;padding:15px 34px" onclick="rbNext()">✅ 찾았다! 다음 색 →</button>
+  <button class="big-btn" id="rbFailBtn" style="display:none;background:linear-gradient(92deg,#ff6b6b,#ff9f43)" onclick="rbFail()">❌ 못 찾음 (탈락)</button>
 </div>
 
 <div class="t-card">
@@ -3656,6 +3679,35 @@ function yangToggle(){
   }
 }
 function yangReset(){yangPanel("yangPnSetup");}
+/* ===== 무지개 찾기 (빨주노초파남보) ===== */
+const RB_COLORS=[["빨강","#ff3b30"],["주황","#ff9500"],["노랑","#e6b800"],["초록","#34c759"],["파랑","#0a84ff"],["남색","#5e5ce6"],["보라","#bf5af2"]];
+let RB={i:0,on:false};
+function rbRender(){
+  const c=RB_COLORS[RB.i%7];
+  $("rbStage").style.background="linear-gradient(150deg,"+c[1]+","+c[1]+"cc)";
+  $("rbName").textContent=c[0];
+  $("rbInfo").textContent=(Math.floor(RB.i/7)+1)+"바퀴째 · "+(RB.i+1)+"번째 순서 — 이 색 물건을 찾아라!";
+}
+function rbStart(){
+  RB={i:0,on:true};
+  $("rbStage").style.display="block";$("rbResult").style.display="none";
+  $("rbStartBtn").style.display="none";$("rbNextBtn").style.display="inline-block";$("rbFailBtn").style.display="inline-block";
+  rbRender();beep(880,.1,.2);logEvent("play","무지개찾기");
+}
+function rbNext(){
+  if(!RB.on)return;
+  RB.i++;winJingle();rbRender();
+}
+function rbFail(){
+  if(!RB.on)return;RB.on=false;
+  const c=RB_COLORS[RB.i%7];
+  $("rbStage").style.display="none";
+  $("rbResult").innerHTML="🏁 <b>"+(RB.i+1)+"번째</b>("+(Math.floor(RB.i/7)+1)+"바퀴)에서 <b style='color:"+c[1]+"'>"+c[0]+"</b>을 못 찾고 탈락! 🍺 벌칙!";
+  $("rbResult").style.display="block";
+  $("rbStartBtn").style.display="inline-block";$("rbStartBtn").textContent="🌈 다시 시작!";
+  $("rbNextBtn").style.display="none";$("rbFailBtn").style.display="none";
+  beep(160,.4,.25,"sawtooth");confetti();
+}
 /* 정답 공개 ↔ 다시 가리기 토글 (사회자 확인용) */
 function photoToggle(){
   if(!photoName)return;
