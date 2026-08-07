@@ -539,6 +539,16 @@ body.gated{overflow:hidden}
 <p class="punish">⚡ 혼자 다른 답 벌칙</p>
 <span class="golink" onclick="goTool('toolTele')">⚡ 텔레파시 주제 열기 →</span></div>
 
+<div class="g"><div class="g-top"><h3>🎭 양세찬 게임</h3><div class="badges"><span class="bd trend">인기</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>2명 대결</b> (+관객) · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b></p>
+<div class="how"><ol>
+<li>폰을 돌려가며 <b>서로 상대가 맞출 인물을 몰래 입력</b> (1번 → 2번)</li>
+<li>번갈아 <b>예/아니오 질문</b> ("사람이야?", "연예인이야?") — <b>작성자가 답변</b></li>
+<li>먼저 자기 인물을 맞추는 사람이 승리!</li>
+<li>관객은 <b>전체 공개</b> 버튼으로 답을 보면서 구경 (다시 가리기 가능)</li></ol></div>
+<p class="punish">⚡ 진 사람 벌칙</p>
+<span class="golink" onclick="goTool('toolYang')">⚡ 양세찬 게임 열기 →</span></div>
+
 <div class="g"><div class="g-top"><h3>🃏 마피아 (6인 축소판)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>6</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b> · 구성 <b>마피아2 · 경찰1 · 의사1 · 시민2</b></p>
 <div class="how"><ol>
@@ -1297,13 +1307,44 @@ body.gated{overflow:hidden}
   <p class="hint" id="personHint" style="margin-top:6px"></p>
   <hr style="border:none;border-top:1px dashed var(--line);margin:14px 0">
   <p class="hint"><b>📷 사진 퀴즈 모드</b> — 위키백과 공식 사진을 불러와 얼굴만 보고 맞추기 (이름은 정답 버튼으로)</p>
-  <button class="big-btn" style="background:linear-gradient(92deg,#ff5f8f,#a78bfa)" onclick="photoQuiz()">📷 사진으로 출제</button>
+  <div>
+    <button class="big-btn" style="font-size:14px;padding:11px 18px" onclick="photoQuiz('kr')">🇰🇷 한국인</button>
+    <button class="big-btn b2" style="font-size:14px;padding:11px 18px" onclick="photoQuiz('gl')">🌍 외국인</button>
+    <button class="big-btn b3" style="font-size:14px;padding:11px 18px" onclick="photoQuiz('hist')">🏛 역사인물</button>
+  </div>
   <div id="photoBox" style="display:none;margin-top:12px">
     <img id="photoImg" alt="누구게?" class="song-photo">
-    <div><button class="big-btn b2" style="font-size:13px;padding:10px 20px;margin-top:10px" onclick="photoReveal()">👁 정답 공개</button></div>
+    <div><button class="big-btn b2" id="photoTgl" style="font-size:13px;padding:10px 20px;margin-top:10px" onclick="photoToggle()">👁 정답 공개</button></div>
     <div class="result" id="photoAns" style="display:none;font-size:clamp(20px,6vw,30px)"></div>
   </div>
   <p class="hint" id="photoStat" style="margin-top:8px"></p>
+</div>
+
+<div class="t-card" id="toolYang">
+  <h3>🎭 양세찬 게임</h3>
+  <p class="hint">둘이서! 서로 <b>상대가 맞출 인물</b>을 몰래 입력 → 번갈아 질문하고 <b>작성자가 답변</b> → 먼저 맞추면 승리!<br>관객은 <b>전체 공개</b>로 답을 보면서 구경 😆</p>
+  <div id="yangPnSetup">
+    <button class="big-btn" onclick="yangBegin()">✏️ 1번부터 입력 시작</button>
+  </div>
+  <div id="yangPnCover" style="display:none">
+    <div style="font-size:46px">🙈</div>
+    <div id="yangCoverTxt" style="font-size:18px;font-weight:800;margin:8px 0"></div>
+    <p class="hint">다른 사람이 못 보게 폰을 넘겨받고 눌러주세요</p>
+    <button class="big-btn" onclick="yangShowInput()">👆 입력 시작</button>
+  </div>
+  <div id="yangPnInput" style="display:none">
+    <div class="hint" id="yangInputLabel" style="color:var(--orange);font-weight:800;margin-bottom:8px"></div>
+    <input class="fb-input" id="yangName" maxlength="20" placeholder="인물 이름 (예: 유재석, 아이언맨)" onkeydown="if(event.key==='Enter')yangDone()">
+    <button class="big-btn b2" onclick="yangDone()">✅ 입력 완료</button>
+  </div>
+  <div id="yangPnGame" style="display:none">
+    <div style="font-size:40px">🎮</div>
+    <div style="font-size:17px;font-weight:800;margin:8px 0">게임 시작!</div>
+    <p class="hint">번갈아 <b>예/아니오 질문</b> → 상대(작성자)가 답변 · 먼저 맞추는 사람 승리!</p>
+    <div id="yangBoard" style="display:none;margin:10px 0"></div>
+    <button class="big-btn" id="yangRevealBtn" onclick="yangToggle()">👁 전체 공개 (관객용)</button>
+    <button class="big-btn b3" onclick="yangReset()">🔄 처음부터</button>
+  </div>
 </div>
 
 <div class="t-card">
@@ -3503,9 +3544,11 @@ async function loadStats(){
 /* ===== person photo quiz ===== */
 const WIKI_KO={"아인슈타인":"알베르트 아인슈타인","뉴턴":"아이작 뉴턴","피카소":"파블로 피카소","반 고흐":"빈센트 반 고흐","베토벤":"루트비히 판 베토벤","모차르트":"볼프강 아마데우스 모차르트","나폴레옹":"나폴레옹 보나파르트","링컨":"에이브러햄 링컨","간디":"마하트마 간디","만델라":"넬슨 만델라","에디슨":"토머스 에디슨","마리 퀴리":"마리 퀴리","스티븐 호킹":"스티븐 호킹","셰익스피어":"윌리엄 셰익스피어","콜럼버스":"크리스토퍼 콜럼버스","찰리 채플린":"찰리 채플린","엘비스 프레슬리":"엘비스 프레슬리","마이클 잭슨":"마이클 잭슨","존 레논":"존 레논","프레디 머큐리":"프레디 머큐리","테일러 스위프트":"테일러 스위프트","메시":"리오넬 메시","호날두":"크리스티아누 호날두","마이클 조던":"마이클 조던","우사인 볼트":"우사인 볼트","타이거 우즈":"타이거 우즈","무하마드 알리":"무함마드 알리","마이클 펠프스":"마이클 펠프스","일론 머스크":"일론 머스크","스티브 잡스":"스티브 잡스","빌 게이츠":"빌 게이츠","마크 저커버그":"마크 저커버그","오바마":"버락 오바마","트럼프":"도널드 트럼프","푸틴":"블라디미르 푸틴","오프라 윈프리":"오프라 윈프리","톰 크루즈":"톰 크루즈","브래드 피트":"브래드 피트","레오나르도 디카프리오":"레오나르도 디카프리오","성룡":"성룡","이소룡":"이소룡","메르켈":"앙겔라 메르켈","젠슨 황":"젠슨 황","레오나르도 다빈치":"레오나르도 다 빈치","정국 (BTS)":"정국","한강 (작가)":"한강 (소설가)","페이커":"페이커 (프로게이머)","침착맨":"침착맨","기안84":"기안84"};
 let photoName=null,photoBusy=false;
-async function photoQuiz(){
+const P_HIST=["세종대왕","이순신","안중근","김구","유관순","신사임당","장영실","정약용","이황","이이","고종","흥선대원군","나폴레옹","링컨","간디","클레오파트라","진시황","칭기즈 칸","레오나르도 다빈치","콜럼버스","잔 다르크","율리우스 카이사르","소크라테스","아리스토텔레스","공자","뉴턴","아인슈타인","베토벤","모차르트","마리 퀴리"];
+async function photoQuiz(mode){
   if(photoBusy)return;photoBusy=true;
-  const pool=P_KR.concat(P_GL);
+  const pool=mode==="kr"?P_KR:mode==="gl"?P_GL:mode==="hist"?P_HIST:P_KR.concat(P_GL);
+  const modeLabel=mode==="kr"?"🇰🇷 한국인":mode==="gl"?"🌍 외국인":mode==="hist"?"🏛 역사인물":"🎲 랜덤";
   $("photoStat").textContent="⏳ 위키백과에서 사진 찾는 중...";
   $("photoBox").style.display="none";$("photoAns").style.display="none";
   const el=$("photoImg");
@@ -3531,7 +3574,8 @@ async function photoQuiz(){
       };
       el.onload=()=>{$("photoBox").style.display="block";};
       $("photoAns").style.display="none";$("photoAns").textContent="";
-      $("photoStat").textContent="이 사람 누구게? (힌트: "+(P_KR.includes(name)?"🇰🇷 한국인":"🌍 해외")+")";
+      const tg=$("photoTgl");if(tg)tg.textContent="👁 정답 공개";
+      $("photoStat").textContent="이 사람 누구게? ("+modeLabel+")";
       el.removeAttribute("src");el.src=big||thumb||orig;
       beep(880,.1,.25);photoBusy=false;return;
     }catch(e){
@@ -3542,11 +3586,39 @@ async function photoQuiz(){
   $("photoStat").textContent="사진을 못 찾았어요 — 한 번 더 눌러보세요";
   photoBusy=false;
 }
-function photoReveal(){
+/* ===== 양세찬 게임 (2인 서로 출제) ===== */
+let YANG={names:["",""],step:0,shown:false};
+function yangPanel(id){["Setup","Cover","Input","Game"].forEach(s=>{const e=$("yangPn"+s);if(e)e.style.display=("yangPn"+s===id)?"block":"none";});}
+function yangBegin(){YANG={names:["",""],step:0,shown:false};yangCover();logEvent("play","양세찬게임");}
+function yangCover(){$("yangCoverTxt").textContent=(YANG.step+1)+"번 차례 — 상대가 맞출 인물을 입력해요";yangPanel("yangPnCover");}
+function yangShowInput(){
+  $("yangInputLabel").textContent="✏️ "+(YANG.step+1)+"번 입력 중 · 이 인물은 "+(YANG.step===0?"2":"1")+"번이 맞추게 됩니다";
+  $("yangName").value="";yangPanel("yangPnInput");$("yangName").focus();
+}
+function yangDone(){
+  const v=$("yangName").value.trim();
+  if(!v){alert("인물 이름을 입력해주세요");return;}
+  YANG.names[YANG.step]=v.slice(0,20);YANG.step++;beep(720,.05,.12,"square");
+  if(YANG.step<2)yangCover();
+  else{YANG.shown=false;$("yangBoard").style.display="none";$("yangRevealBtn").textContent="👁 전체 공개 (관객용)";yangPanel("yangPnGame");winJingle();}
+}
+function yangToggle(){
+  YANG.shown=!YANG.shown;
+  const b=$("yangBoard");
+  if(YANG.shown){
+    b.innerHTML='<div class="rank-row"><span class="rank-medal">1️⃣</span><span class="rank-name">1번이 맞출 인물: <b style="color:var(--orange)">'+esc(YANG.names[1])+'</b> <span style="color:var(--sub);font-size:12px">(2번 작성)</span></span></div>'+
+      '<div class="rank-row"><span class="rank-medal">2️⃣</span><span class="rank-name">2번이 맞출 인물: <b style="color:var(--orange)">'+esc(YANG.names[0])+'</b> <span style="color:var(--sub);font-size:12px">(1번 작성)</span></span></div>'+
+      '<p class="hint" style="margin-top:6px">⚠️ 두 플레이어는 보면 안 돼요! 관객만 보세요</p>';
+    b.style.display="block";$("yangRevealBtn").textContent="🙈 다시 가리기";beep(880,.08,.15);
+  }else{b.style.display="none";b.innerHTML="";$("yangRevealBtn").textContent="👁 전체 공개 (관객용)";beep(400,.06,.1,"square");}
+}
+function yangReset(){yangPanel("yangPnSetup");}
+/* 정답 공개 ↔ 다시 가리기 토글 (사회자 확인용) */
+function photoToggle(){
   if(!photoName)return;
-  $("photoAns").textContent="🎉 "+photoName;
-  $("photoAns").style.display="block";
-  winJingle();confetti();
+  const ans=$("photoAns"),btn=$("photoTgl");
+  if(ans.style.display==="block"){ans.style.display="none";if(btn)btn.textContent="👁 정답 공개";beep(400,.06,.1,"square");}
+  else{ans.textContent="🎉 "+photoName;ans.style.display="block";if(btn)btn.textContent="🙈 다시 가리기";winJingle();confetti();}
 }
 /* 링크 붙여넣는 순간 플레이어 미리 준비 (iOS 첫 재생 호환성) */
 ["change","blur","paste"].forEach(ev=>{
