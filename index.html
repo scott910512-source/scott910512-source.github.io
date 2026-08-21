@@ -560,6 +560,18 @@ header h1{font-size:27px}
 .pcount-mini button{background:#3d3566!important;color:#e9e4ff!important;box-shadow:none!important;width:44px!important;height:44px!important;min-height:44px}
 .acct-btn{background:#3d3566;color:#e9e4ff;box-shadow:none;border:1px solid var(--line)}
 body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5f8f,#ffb340);color:#2a1040;border-color:transparent}
+/* ===== P5: Party Setup · 추천 · 최근/즐겨찾기 ===== */
+.setup{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:4px 12px}
+.setup>summary{cursor:pointer;padding:12px 2px;font-size:14.5px;font-weight:800;min-height:44px;display:flex;align-items:center}
+.setup[open]>summary{border-bottom:1px dashed var(--line);margin-bottom:8px}
+.setup-r{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.setup:not([open]) .setup-r{display:none}
+.setup-l{font-size:12px;font-weight:800;color:var(--sub);min-width:44px}
+.setup .cat-pick{padding:8px 12px;font-size:12.5px;min-height:38px}
+.gd-fav{margin-top:10px;background:none;border:1.5px solid var(--line);color:var(--sub);
+  border-radius:var(--r-pill);padding:9px 18px;font-size:13.5px;font-weight:800;cursor:pointer;min-height:44px}
+.gd-fav.on{color:#ff7fab;border-color:#ff5f8f}
+.gd-fav:active{transform:scale(.94)}
 </style>
 </head>
 <body>
@@ -595,11 +607,30 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
     <button class="big-btn home-cta" onclick="pickForMe()">🎲 아무거나 골라줘</button>
     <div id="homePick"></div>
   </div>
-  <div class="cat-picks" style="margin-top:14px">
-    <button class="cat-pick" onclick="goCat('gathering')">🎉 모임게임</button>
-    <button class="cat-pick" onclick="goCat('drinking')">🍻 술게임</button>
-    <button class="cat-pick" onclick="goCat('outdoor')">🏖️ 야외놀이</button>
-  </div>
+  <details class="setup" id="setupBox">
+    <summary>🎯 우리 상황에 맞춰 추천</summary>
+    <div class="setup-r"><span class="setup-l">장소</span>
+      <button class="cat-pick on" onclick="setSetup('loc','any',this)">상관없음</button>
+      <button class="cat-pick" onclick="setSetup('loc','indoor',this)">🏠 실내</button>
+      <button class="cat-pick" onclick="setSetup('loc','outdoor',this)">🌳 야외</button></div>
+    <div class="setup-r"><span class="setup-l">분위기</span>
+      <button class="cat-pick on" onclick="setSetup('mood','any',this)">아무거나</button>
+      <button class="cat-pick" onclick="setSetup('mood','funny',this)">😂 웃긴</button>
+      <button class="cat-pick" onclick="setSetup('mood','psychology',this)">🧠 심리전</button>
+      <button class="cat-pick" onclick="setSetup('mood','competition',this)">🏆 경쟁</button>
+      <button class="cat-pick" onclick="setSetup('mood','conversation',this)">🗣 대화</button>
+      <button class="cat-pick" onclick="setSetup('mood','quick',this)">⚡ 빠른</button></div>
+    <div class="setup-r"><span class="setup-l">술</span>
+      <button class="cat-pick on" onclick="setSetup('drink','any',this)">상관없음</button>
+      <button class="cat-pick" onclick="setSetup('drink','yes',this)">🍻 술 있음</button>
+      <button class="cat-pick" onclick="setSetup('drink','no',this)">🥤 술 없이</button></div>
+    <div class="setup-r"><span class="setup-l">준비물</span>
+      <button class="cat-pick on" onclick="setSetup('prep','any',this)">상관없음</button>
+      <button class="cat-pick" onclick="setSetup('prep','none',this)">📦 없이 가능</button></div>
+  </details>
+  <div id="homeRecs"></div>
+  <div id="homeRecent"></div>
+  <div id="homeFav"></div>
   <div class="t-card" style="text-align:center;position:relative">
     <h3 style="font-size:21px">🎡 랜덤 게임 룰렛</h3>
     <button class="rl-addbtn" onclick="rlPanelToggle()">＋ 추가</button>
@@ -2206,6 +2237,7 @@ function openGameDetail(id){
   h+='<div class="dchips">'+detailChips(g)+'</div>';
   h+='<button class="big-btn gd-cta" onclick="startGame(\''+g.id+'\')">▶ 게임 시작</button>';
   h+='<div class="hint" style="margin-top:6px">'+(g.tool?"폰으로 바로 진행할 수 있어요":"규칙만 보고 바로 즐기는 게임이에요")+'</div>';
+  h+='<button class="gd-fav'+(isFav(g.id)?" on":"")+'" onclick="toggleFav(\''+g.id+'\')">'+(isFav(g.id)?"♥ 즐겨찾기":"♡ 즐겨찾기")+'</button>';
   h+='</div>';
   const steps=[];
   g.src.forEach(([pg,i])=>{const c=document.querySelectorAll("#"+pg+" > .g")[i]; if(!c)return;
@@ -2255,7 +2287,7 @@ function toggleFullRules(btn){
 }
 function startGame(id){
   const g=GAMES.find(x=>x.id===id); if(!g)return;
-  logEvent("play",g.t);
+  logEvent("play",g.t); pushRecent(id);
   if(g.tool){location.hash="#/tool/"+g.tool;return;}
   const f=$("gdFull");
   if(f){f.style.display="block";
@@ -2276,12 +2308,12 @@ function toggleSnd(){const el=$("sndOn");if(el){el.checked=!el.checked;$("sndSta
 
 /* ===== P1: 홈 — 인원 + 즉시 1개 추천 (부록 B-1: 연출 없음, 룰렛과 역할 분리) ===== */
 let HOME_N=6;
-function setHomeN(d){HOME_N=Math.max(2,Math.min(20,HOME_N+d));$("homeN").textContent=HOME_N;beep(500,.03,.08,"square");}
+function setHomeN(d){HOME_N=Math.max(2,Math.min(20,HOME_N+d));$("homeN").textContent=HOME_N;beep(500,.03,.08,"square");
+  SETUP.n=HOME_N;lsSet(LSK.setup,SETUP);renderRecs();}
 function fitN(g,n){return (g.min==null||n>=g.min)&&(g.max==null||n<=g.max);}
 function pickForMe(){
-  let pool=GAMES.filter(g=>fitN(g,HOME_N));
-  let note="";
-  if(pool.length<3){pool=GAMES;note="이 인원에 딱 맞는 게임이 적어 전체에서 골랐어요";}
+  const pool=recommend(SETUP,5); let note="";
+  if(GAMES.filter(x=>scoreGame(x,SETUP)>0).length<3)note="조건에 딱 맞는 게임이 적어 조건을 넓혔어요";
   const g=pool[Math.floor(Math.random()*pool.length)];
   $("homePick").innerHTML='<div class="home-pick"><div class="hint">오늘은 이거!</div>'+
     '<div class="home-pick-t">'+esc(g.t)+'</div>'+
@@ -2293,6 +2325,80 @@ function pickForMe(){
   winJingle();logEvent("play","홈추천-"+g.t);
 }
 function goCat(c){gameFilter=c;go("games");}
+/* ===== P5(Optional): 최근 플레이 · 즐겨찾기 · 상황 기반 추천 =====
+   부록 D-4: 새 키만 사용하고 기존 키(aoki_feedback_v1)는 건드리지 않는다.
+   저장 실패해도 앱이 죽지 않도록 전 구간 try/catch + 기본값 동작 */
+const LSK={recent:"aoki_recent_v1",fav:"aoki_fav_v1",setup:"aoki_setup_v1"};
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+let RECENT=[],FAVS=[],SETUP={n:6,loc:"any",mood:"any",drink:"any",prep:"any"};
+function loadPrefs(){
+  RECENT=lsGet(LSK.recent,[]).filter(id=>GAMES.some(g=>g.id===id)).slice(0,5);
+  FAVS=lsGet(LSK.fav,[]).filter(id=>GAMES.some(g=>g.id===id));
+  const s=lsGet(LSK.setup,null);
+  if(s&&typeof s==="object")SETUP=Object.assign(SETUP,s);
+  HOME_N=SETUP.n||6;
+}
+function pushRecent(id){
+  if(!GAMES.some(g=>g.id===id))return;
+  RECENT=[id].concat(RECENT.filter(x=>x!==id)).slice(0,5);
+  lsSet(LSK.recent,RECENT); renderHomeExtras();
+}
+function isFav(id){return FAVS.indexOf(id)>=0;}
+function toggleFav(id){
+  if(isFav(id))FAVS=FAVS.filter(x=>x!==id); else FAVS=[id].concat(FAVS);
+  lsSet(LSK.fav,FAVS); renderHomeExtras();
+  const b=document.querySelector(".gd-fav"); if(b){b.textContent=isFav(id)?"♥ 즐겨찾기":"♡ 즐겨찾기";b.classList.toggle("on",isFav(id));}
+  beep(isFav(id)?760:420,.05,.12,"square");
+}
+/* ---- 상황 기반 추천 스코어링 (본문 10항) ---- */
+function scoreGame(g,S){
+  let s=0;
+  if(S.n){ if(g.min==null&&g.max==null)s+=1; else if(fitN(g,S.n))s+=3; else s-=4; }
+  if(S.loc!=="any"){ s+= (g.loc===S.loc)?2:-2; }
+  if(S.mood!=="any"){ s+= g.moods.includes(S.mood)?3:0; }
+  if(S.drink==="no"){ s+= (g.drink===2)?-5:(g.drink===1?0:1); }
+  else if(S.drink==="yes"){ s+= (g.drink>0)?2:0; }
+  if(S.prep==="none"){ s+= (g.prep==="none")?2:(g.prep==="phone"?1:-3); }
+  if(RECENT.indexOf(g.id)>=0)s-=1.5;      /* 최근 한 건 살짝 뒤로 */
+  if(isFav(g.id))s+=1.5;
+  if(g.tag)s+=0.5;
+  return s;
+}
+function recommend(S,k){
+  const scored=GAMES.map(g=>({g:g,s:scoreGame(g,S)})).sort((a,b)=>b.s-a.s);
+  let top=scored.filter(x=>x.s>0).slice(0,k||5);
+  if(top.length<3)top=scored.slice(0,k||5);   /* 부록 C-4: 3개 미만이면 자동 완화 */
+  return top.map(x=>x.g);
+}
+function setSetup(key,val,el){
+  SETUP[key]=val; lsSet(LSK.setup,SETUP);
+  const row=el.parentNode; row.querySelectorAll(".cat-pick").forEach(b=>b.classList.toggle("on",b===el));
+  beep(520,.03,.08,"square"); renderRecs();
+}
+function renderRecs(){
+  const box=$("homeRecs"); if(!box)return;
+  const strict=GAMES.filter(g=>scoreGame(g,SETUP)>0).length;
+  const list=recommend(SETUP,3);
+  box.innerHTML='<div class="glist-h">'+(strict>=3?"우리 상황 추천":"조건에 딱 맞는 게임이 적어 비슷한 걸로 추천")+'</div>'+
+    list.map(gcardHtml).join("");
+}
+function renderHomeExtras(){
+  const r=$("homeRecent");
+  if(r){
+    if(RECENT.length){
+      r.innerHTML='<div class="glist-h">🕒 최근 플레이</div>'+
+        RECENT.slice(0,2).map(id=>gcardHtml(GAMES.find(g=>g.id===id))).join("");
+    }else r.innerHTML="";
+  }
+  const f=$("homeFav");
+  if(f){
+    if(FAVS.length){
+      f.innerHTML='<div class="glist-h">❤️ 즐겨찾기</div>'+
+        FAVS.slice(0,2).map(id=>gcardHtml(GAMES.find(g=>g.id===id))).join("");
+    }else f.innerHTML="";
+  }
+}
 /* ===== sound engine ===== */
 let AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC;}
@@ -4562,6 +4668,8 @@ spyBuildUI();
   const ab=$("acctBtn"); if(ab)ab.setAttribute("onclick","openSheet()"); /* 계정 진입점 통합 */
 })();
 stripToolBadges();
+loadPrefs();renderHomeExtras();renderRecs();
+try{$("homeN").textContent=HOME_N;}catch(e){}
 routeApply(); /* 초기 라우트 적용 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
