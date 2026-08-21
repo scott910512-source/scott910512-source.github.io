@@ -533,6 +533,33 @@ header h1{font-size:27px}
 .wheel-n{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;font-size:13px;color:var(--sub);font-weight:700}
 .wheel-n button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--txt);font-size:15px;font-weight:900;cursor:pointer}
 .wheel-n .wn-v{min-width:52px;text-align:center;color:var(--orange);font-weight:900}
+/* ===== P4: 비주얼 토큰 통일 ===== */
+:root{
+  --r-card:14px;      /* 카드 반경 */
+  --r-pill:999px;
+  --pad-card:14px;
+  --tap:44px;         /* 최소 터치 영역 (본문 38항) */
+  --tap-cta:52px;     /* 주요 CTA */
+}
+/* 본문 33항: 목록/상세에서 태그는 Registry tag 1개만 — 원본 배지는 검색 metadata로만 유지 */
+#gdFull .badges{display:none}
+/* 본문 36항: gradient는 Primary Action에만. 보조 버튼은 solid */
+.big-btn.b2{background:#2b6f8a;color:#eafaff;box-shadow:none}
+.big-btn.b3{background:#3d3566;color:#e9e4ff;box-shadow:none}
+.big-btn.b2:active,.big-btn.b3:active{filter:brightness(1.15)}
+/* 카드 토큰 통일 (본문 37항) */
+.t-card,.g,.gcard{border-radius:var(--r-card)}
+.gcard{padding:var(--pad-card)}
+/* 터치 영역 (본문 38항) */
+.big-btn{min-height:var(--tap)}
+.gd-cta,.home-cta{min-height:var(--tap-cta)}
+.cat-pick,.bnav-i,.quiz-choice{min-height:var(--tap)}
+.rl-chip button{width:26px;height:26px}
+.wheel-n button{width:var(--tap);height:34px}
+/* 본문 36항: gradient는 Primary CTA에만 — 보조 컨트롤은 solid */
+.pcount-mini button{background:#3d3566!important;color:#e9e4ff!important;box-shadow:none!important;width:44px!important;height:44px!important;min-height:44px}
+.acct-btn{background:#3d3566;color:#e9e4ff;box-shadow:none;border:1px solid var(--line)}
+body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5f8f,#ffb340);color:#2a1040;border-color:transparent}
 </style>
 </head>
 <body>
@@ -542,7 +569,7 @@ header h1{font-size:27px}
 <header>
   <div class="eyebrow">AOKI GAME CENTER</div>
   <h1>아오키 게임센터</h1>
-  <p class="sub">📖 룰 있는 게임만 · ⚡ 도구는 즉시 실행 · <b>2026 모임게임 트렌드 반영</b></p>
+  
 </header>
 
 <!-- 게임 탭 (pg1/pg2/pg4 통합 · Registry 기반 렌더) -->
@@ -636,7 +663,7 @@ header h1{font-size:27px}
 
 <!-- ================= 모임게임 ================= -->
 <div class="page" id="pg1">
-<p class="notice">2026 트렌드: 단순 박자게임 → <b>심리전·가치관 공유형</b>으로 이동 중. 텐션 강요 없이, 술 없이도 돌아가는 게임 위주로 구성.</p>
+
 
 <div class="g"><div class="g-top"><h3>🕵️ 라이어게임</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b> · 모드 <b>라이어 / 바보</b></p>
@@ -882,7 +909,7 @@ header h1{font-size:27px}
 
 <!-- ================= 술게임 ================= -->
 <div class="page" id="pg2">
-<p class="notice">🥤 트렌드 반영: 게임 시작 전 <b>"논알코올(음료 대체) 가능"</b> 공지가 요즘 국룰 — 운전조·컨디션 난조자는 물·사이다로 대체</p>
+
 
 <div class="g"><div class="g-top"><h3>💀 더 게임 오브 데스</h3><div class="badges"><span class="bd easy">국민게임</span></div></div>
 <p class="meta">인원 <b>4~10</b> · 난이도 <b>하</b></p>
@@ -1058,7 +1085,7 @@ header h1{font-size:27px}
 
 <!-- ================= 야외놀이 ================= -->
 <div class="page" id="pg4">
-<p class="notice">🏖️ 한강·공원·계곡·MT·회사 체육대회에서 <b>몸으로 노는 기본 놀이</b> 모음 — 준비물 최소, 남녀노소·혼성 다 OK</p>
+
 
 <div class="g"><div class="g-top"><h3>⚽ 족구</h3><div class="badges"><span class="bd trend">국민 체육</span><span class="bd easy">팀전</span></div></div>
 <p class="meta">인원 <b>6~12 (2팀)</b> · 준비물 <b>공 + 네트(끈/신발로 대체)</b> · 야유회·회사 체육대회 대표주자</p>
@@ -1625,7 +1652,7 @@ header h1{font-size:27px}
   <span class="fb-admin" id="fbAdminBtn" onclick="fbAdminToggle()">🔧 관리자</span>
 </div>
 
-<p class="foot">효과음은 Web Audio 생성 — 아이폰 무음 스위치 해제 필요 · 게임 룰은 📖 탭 참조<br>피드백은 이 기기(브라우저)에 저장됩니다.</p>
+
 </div>
 
 <!-- ================= 계정 ================= -->
@@ -1727,7 +1754,7 @@ header h1{font-size:27px}
 
 <div class="modal" id="gameModal">
   <div class="modal-inner">
-    <div class="modal-bar"><button class="modal-x" onclick="closeGame()">✕ 닫기</button></div>
+    <div class="modal-bar"><button class="modal-x" onclick="closeOverlay()">✕ 닫기</button></div>
     <div id="modalBody"></div>
   </div>
 </div>
@@ -2099,6 +2126,14 @@ function routeApply(){
   showRoute(head||"home");
 }
 window.addEventListener("hashchange",routeApply);
+/* 팝업 ✕: 노드 복귀 + 해시 정합성 유지 */
+function closeOverlay(){
+  const h=location.hash;
+  closeGame();
+  /* ✕ 는 항상 목록으로 (뒤로가기와 달리 예측 가능하게) */
+  if(/^#\/tool\//.test(h))location.hash="#/tools";
+  else if(/^#\/game\//.test(h))location.hash="#/games";
+}
 
 /* ===== P1: 게임 목록 (Registry 기반 · 검색/필터) ===== */
 let gameFilter="all";
@@ -2343,14 +2378,9 @@ function openGameCard(pg,card){
 }
 /* 뽑힌 게임 설명을 팝업(모달)으로 바로 표시 */
 function openRolledGame(){
-  if(!lastRolledGame)return;
-  closeGame(); /* 팝업에 도구가 열려있으면 먼저 원복 (노드 유실 방지) */
-  const card=lastRolledGame.card,body=$("modalBody");if(!body)return;
-  const clone=card.cloneNode(true);
-  clone.classList.add("open");clone.classList.remove("cshow");
-  body.innerHTML="";body.appendChild(clone);
-  $("gameModal").classList.add("on");document.body.style.overflow="hidden";
-  logEvent("game_open",lastRolledGame.name);
+  /* 룰렛 당첨 → 게임 상세로 (진입 경로 통일) */
+  if(!lastRolledGame||!lastRolledGame.id)return;
+  location.hash="#/game/"+lastRolledGame.id;
 }
 function goPage(p){const m={pg0:"home",pg3:"tools",pgGames:"games",pgRandom:"random"};go(m[p]||"home");}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
