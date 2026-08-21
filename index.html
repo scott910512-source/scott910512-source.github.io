@@ -179,14 +179,15 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .yang-ov-close{font-size:clamp(12px,2.6vmin,17px);color:var(--sub);margin-top:2vmin}
 @media(orientation:landscape){.yang-ov-wrap{display:flex;gap:6vmin;align-items:center;justify-content:center;width:100%}}
 /* 도구: 격자 타일 (세로 2열 · 가로/넓은 화면 4열) */
-.page.tmode{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch}
+.page.tmode{display:none}
+.page.tmode.on{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch}
 .page.tmode > :not(.t-card){grid-column:1/-1}
 .page.tmode > .t-card{margin:0;padding:18px 8px;display:flex;align-items:center;justify-content:center;min-height:66px;cursor:pointer}
 .page.tmode > .t-card:active{transform:scale(.96)}
 .page.tmode > .t-card > h3{font-size:14.5px;padding:0;line-height:1.3;word-break:keep-all}
 .page.tmode > .t-card .g-caret{display:none}
-@media(orientation:landscape) and (min-width:640px){.page.tmode{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:900px){.page.tmode{grid-template-columns:repeat(4,1fr)}}
+@media(orientation:landscape) and (min-width:640px){.page.tmode.on{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:900px){.page.tmode.on{grid-template-columns:repeat(4,1fr)}}
 /* 피드백·건의함: 따로 강조 (풀와이드 + 핑크) */
 .page.tmode > #toolFeedback{grid-column:1/-1;min-height:74px;margin-top:8px;
   background:linear-gradient(135deg,rgba(255,95,143,.32),rgba(255,179,64,.2));border:2px solid #ff5f8f;
@@ -463,6 +464,55 @@ body.gated{overflow:hidden}
 .confetti{position:fixed;top:-30px;font-size:22px;z-index:60;animation:fall linear forwards;pointer-events:none}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.9}}
 .foot{margin-top:30px;text-align:center;font-size:11px;color:var(--sub);opacity:.85;line-height:1.7}
+
+/* ===== P1: 하단 네비게이션 ===== */
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:90;display:flex;
+  background:rgba(20,12,42,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.bnav-i{flex:1;min-height:56px;border:none;background:none;color:var(--sub);cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:11.5px;font-weight:800;padding:8px 2px;transition:color .15s}
+.bnav-i span{font-size:21px;line-height:1}
+.bnav-i.on{color:var(--orange)}
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+/* ===== P1: 게임 목록 Compact Card ===== */
+#gameSearch{margin:6px 0 4px}
+.gcard{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:8px;
+  color:var(--txt);min-height:60px}
+.gcard:active{transform:scale(.985)}
+.gcard-ic{font-size:24px;flex:0 0 auto;width:30px;text-align:center}
+.gcard-b{flex:1;min-width:0;display:block}
+.gcard-t{display:block;font-size:15.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gcard-s{display:block;font-size:12px;color:var(--sub);font-weight:600;margin-top:2px}
+.gcard-tag{flex:0 0 auto;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;
+  background:rgba(255,95,143,.18);color:#ff9fbc;border:1px solid rgba(255,95,143,.3)}
+.gcard-ar{flex:0 0 auto;color:var(--sub);font-size:15px}
+.glist-h{font-size:12px;color:var(--sub);font-weight:700;margin:10px 0 6px}
+/* ===== P1: 설정 시트 ===== */
+.sheet{position:fixed;inset:0;z-index:150;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(8,4,20,.7);backdrop-filter:blur(4px)}
+.sheet.on{display:flex}
+.sheet-in{width:100%;max-width:560px;max-height:82vh;overflow-y:auto;background:var(--card);
+  border:1px solid var(--line);border-radius:20px 20px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 4px;
+  border-bottom:1px dashed var(--line);font-size:15px;font-weight:700;cursor:pointer}
+.set-row:last-child{border-bottom:none}
+.set-row:active{opacity:.7}
+/* 헤더 축소 */
+header{padding:14px 0 4px}
+header h1{font-size:27px}
+.eyebrow,header .sub{display:none}
+.page.tmode > .t-card.t-hidden{display:none}
+.page.tmode > .sndrow{display:none}
+.page.tmode > .glist-h.tgrp{grid-column:1/-1;margin:12px 0 2px;font-size:13px;color:var(--orange)}
+.home-hero{text-align:center;padding:18px 14px 16px;background:var(--card);border:1px solid var(--line);border-radius:20px}
+.home-q{font-size:clamp(20px,5.6vmin,28px);font-weight:900}
+.home-cta{font-size:18px;padding:17px 40px}
+.home-pick{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03)}
+.home-pick-t{font-size:clamp(19px,5vmin,26px);font-weight:900;color:var(--orange);margin:2px 0 4px}
+.home-more{display:inline-block;margin-top:8px;font-size:12.5px;color:var(--sub);text-decoration:underline;cursor:pointer}
 </style>
 </head>
 <body>
@@ -475,16 +525,34 @@ body.gated{overflow:hidden}
   <p class="sub">📖 룰 있는 게임만 · ⚡ 도구는 즉시 실행 · <b>2026 모임게임 트렌드 반영</b></p>
 </header>
 
-<div class="tabs">
-  <button class="tab on" data-p="pg0">🎡 홈</button>
-  <button class="tab" data-p="pg1">🎉 모임게임</button>
-  <button class="tab" data-p="pg2">🍻 술게임</button>
-  <button class="tab" data-p="pg4">🏖️ 야외놀이</button>
-  <button class="tab" data-p="pg3">⚡ 도구</button>
+<!-- 게임 탭 (pg1/pg2/pg4 통합 · Registry 기반 렌더) -->
+<div class="page" id="pgGames">
+  <input id="gameSearch" class="fb-input" placeholder="🔍 게임 검색 (이름 · 6명 · 심리 · 준비물 없음 · 야외)" oninput="renderGames()">
+  <div class="cat-picks" id="gameFilters">
+    <button class="cat-pick on" data-f="all" onclick="setGameFilter(this)">전체</button>
+    <button class="cat-pick" data-f="gathering" onclick="setGameFilter(this)">🎉 모임</button>
+    <button class="cat-pick" data-f="drinking" onclick="setGameFilter(this)">🍻 술게임</button>
+    <button class="cat-pick" data-f="outdoor" onclick="setGameFilter(this)">🏖️ 야외</button>
+  </div>
+  <div id="gameList"></div>
 </div>
+
+<!-- 랜덤 탭 (룰렛 이동 대상) -->
+<div class="page" id="pgRandom"></div>
 
 <!-- ================= 홈 (룰렛 · 도구 · 상식퀴즈) ================= -->
 <div class="page on" id="pg0">
+  <div class="home-hero">
+    <div class="home-q">오늘 뭐 할까?</div>
+    <div class="pcount-mini" style="margin:10px auto 12px"><span class="lbl">👥</span><button onclick="setHomeN(-1)">−</button><span class="pm-n"><span id="homeN">6</span>명</span><button onclick="setHomeN(1)">+</button></div>
+    <button class="big-btn home-cta" onclick="pickForMe()">🎲 아무거나 골라줘</button>
+    <div id="homePick"></div>
+  </div>
+  <div class="cat-picks" style="margin-top:14px">
+    <button class="cat-pick" onclick="goCat('gathering')">🎉 모임게임</button>
+    <button class="cat-pick" onclick="goCat('drinking')">🍻 술게임</button>
+    <button class="cat-pick" onclick="goCat('outdoor')">🏖️ 야외놀이</button>
+  </div>
   <div class="t-card" style="text-align:center;position:relative">
     <h3 style="font-size:21px">🎡 랜덤 게임 룰렛</h3>
     <button class="rl-addbtn" onclick="rlPanelToggle()">＋ 추가</button>
@@ -1100,9 +1168,9 @@ body.gated{overflow:hidden}
 
 <!-- ================= 도구 ================= -->
 <div class="page" id="pg3">
-<label class="snd-toggle"><input type="checkbox" id="sndOn" checked> 🔊 효과음 (폭탄 째깍·폭발, 타이머 비프, 룰렛 틱)</label>
+<label class="snd-toggle sndrow" style="display:none"><input type="checkbox" id="sndOn" checked> 🔊 효과음</label>
 
-<div class="t-card">
+<div class="t-card" id="toolCount">
   <h3>👥 참가 인원</h3>
   <p class="hint">멤버 지목 · 라이어 · 마피아 · 타이머 순위에 자동 반영 (3~10명)</p>
   <div class="pcount">
@@ -1267,7 +1335,7 @@ body.gated{overflow:hidden}
   <button class="big-btn" id="bombBtn" style="background:linear-gradient(92deg,#ff5f8f,#ff3355)" onclick="bomb()">💣 폭탄 점화</button>
 </div>
 
-<div class="t-card">
+<div class="t-card" id="toolTimer">
   <h3>⏱️ 타이머 챌린지</h3>
   <p class="hint">랜덤 목표시간(15초 이내)에 가장 가깝게 STOP — 오차 순위전 (선수 = 인원)</p>
   <div class="pcount-mini"><span class="lbl">👥 시작 전 인원</span><button onclick="setN(-1)">−</button><span class="pm-n"><span class="nRef">6</span>명</span><button onclick="setN(1)">+</button></div>
@@ -1509,7 +1577,7 @@ body.gated{overflow:hidden}
   <button class="big-btn" id="rbFailBtn" style="display:none;background:linear-gradient(92deg,#ff6b6b,#ff9f43)" onclick="rbFail()">❌ 못 찾음 (탈락)</button>
 </div>
 
-<div class="t-card">
+<div class="t-card" id="toolBottle">
   <h3>🍾 병 돌리기</h3>
   <p class="hint">둥글게 앉아서 — 병목이 가리키는 사람 당첨</p>
   <div class="bottle-zone">
@@ -1619,6 +1687,20 @@ body.gated{overflow:hidden}
   </div>
 </div>
 
+<nav class="bnav" id="bnav">
+  <button class="bnav-i on" data-r="home"   onclick="go('home')"><span>🏠</span>홈</button>
+  <button class="bnav-i"    data-r="games"  onclick="go('games')"><span>🎮</span>게임</button>
+  <button class="bnav-i"    data-r="random" onclick="go('random')"><span>🎲</span>랜덤</button>
+  <button class="bnav-i"    data-r="tools"  onclick="go('tools')"><span>⚡</span>도구</button>
+</nav>
+
+<div class="sheet" id="setSheet" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet-in">
+    <div class="sheet-bar"><b>⚙️ 설정</b><button class="modal-x" onclick="closeSheet()">✕ 닫기</button></div>
+    <div id="setBody"></div>
+  </div>
+</div>
+
 <div class="modal" id="gameModal">
   <div class="modal-inner">
     <div class="modal-bar"><button class="modal-x" onclick="closeGame()">✕ 닫기</button></div>
@@ -1653,24 +1735,14 @@ body.gated{overflow:hidden}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* ===== tabs ===== */
-document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
-  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  t.classList.add("on");document.getElementById(t.dataset.p).classList.add("on");
-  window.scrollTo({top:0,behavior:"smooth"});
-});
 function openAccount(){
   try{closeGame();}catch(e){}
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
   const p=document.getElementById("pg5");if(p)p.classList.add("on");
-  const b=document.getElementById("acctBtn");if(b)b.classList.add("on");
+  document.querySelectorAll(".bnav-i").forEach(b=>b.classList.remove("on"));
   window.scrollTo({top:0,behavior:"smooth"});
   try{loadStats();}catch(e){}
 }
-document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
-  const b=document.getElementById("acctBtn");if(b)b.classList.remove("on");
-}));
 /* 도구: 세로 목록(아코디언) — 제목 탭하면 펼침 */
 function buildToolList(pageId){
   const page=document.getElementById(pageId);if(!page)return;
@@ -1704,11 +1776,108 @@ function openToolPopup(card){
   const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());
 }
 function goTool(id){
+  if(document.getElementById(id)&&location.hash!=="#/tool/"+id){location.hash="#/tool/"+id;return;}
   const el=document.getElementById(id);
   const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
   if(card)openToolPopup(card);
 }
 const $=id=>document.getElementById(id);
+/* ===== Game Registry — 탐색·추천·검색 metadata layer (Single Source of Truth) =====
+   원칙: 게임 데이터·실행 로직을 복제하지 않는다. src=[페이지,순번]으로 기존 DOM 카드를 참조만 한다.
+   min/max=null → '제한없음'. 필터에서 제외가 아니라 '통과'로 처리한다 (부록 C-3).
+   prep: none(준비물 없음) | phone(폰만) | items(도구 필요)
+   drink: 0(술 무관) | 1(술게임, 음료 대체 가능) | 2(술 필수)
+   dur: 분 단위 추정치 (P0 승인) · moods: funny|psychology|competition|conversation|quick|active|knowledge */
+const GAMES=[
+{id:"liar",t:"🕵️ 라이어게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:10,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolSpy",src:[["pg1",0]]},
+{id:"rank",t:"🏆 순위 정하기",cats:["gathering"],min:null,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolRank",src:[["pg1",1]]},
+{id:"nunchi",t:"👀 눈치게임",cats:["gathering","drinking"],min:3,max:15,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:null,drink:0,tool:null,src:[["pg1",2],["pg2",16]]},
+{id:"balance",t:"⚖️ 밸런스 게임",cats:["gathering"],min:null,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["conversation","funny"],tag:null,drink:0,tool:"toolBalance",src:[["pg1",3],["pg1",11]]},
+{id:"imagegame",t:"👉 이미지 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:5,moods:["psychology","funny"],tag:null,drink:0,tool:"toolImageQ",src:[["pg1",4]]},
+{id:"truthdare",t:"🎯 진실 혹은 도전",cats:["gathering"],min:2,max:10,team:false,loc:"indoor",prep:"phone",dur:10,moods:["conversation","funny"],tag:null,drink:0,tool:"toolTod",src:[["pg1",5]]},
+{id:"telepathy",t:"🔮 텔레파시 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:5,moods:["conversation","quick"],tag:null,drink:0,tool:"toolTele",src:[["pg1",6],["pg1",24]]},
+{id:"yangsechan",t:"🎭 양세찬 게임",cats:["gathering"],min:2,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["funny","psychology"],tag:"인기",drink:0,tool:"toolYang",src:[["pg1",7]]},
+{id:"rainbow",t:"🌈 무지개 찾기",cats:["gathering"],min:2,max:10,team:false,loc:"indoor",prep:"items",dur:5,moods:["quick","active"],tag:null,drink:0,tool:"toolRainbow",src:[["pg1",8]]},
+{id:"mafia",t:"🃏 마피아 (6인 축소판)",cats:["gathering"],min:6,max:null,team:false,loc:"indoor",prep:"phone",dur:20,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolMafia",src:[["pg1",9]]},
+{id:"silent",t:"🤐 침묵 속 대화",cats:["gathering"],min:2,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["funny","psychology"],tag:"🔥 신규",drink:0,tool:"toolSilent",src:[["pg1",10]]},
+{id:"mario",t:"🍄 슈퍼마리오 코인 게임",cats:["gathering"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:"🔥 요즘 대학가",drink:0,tool:null,src:[["pg1",12]]},
+{id:"apart",t:"🏢 아파트 게임",cats:["gathering"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:"APT 재유행",drink:0,tool:null,src:[["pg1",13]]},
+{id:"anonchat",t:"📱 익명 채팅방",cats:["gathering"],min:4,max:10,team:false,loc:"indoor",prep:"items",dur:15,moods:["psychology","conversation"],tag:null,drink:0,tool:null,src:[["pg1",14]]},
+{id:"choseong",t:"🔤 초성 게임",cats:["gathering"],min:null,max:null,team:false,loc:"indoor",prep:"items",dur:5,moods:["quick","conversation"],tag:null,drink:0,tool:"toolChar",src:[["pg1",15]]},
+{id:"silentshout",t:"🎧 고요 속의 외침",cats:["gathering"],min:4,max:8,team:true,loc:"indoor",prep:"items",dur:10,moods:["funny","competition"],tag:"국민게임",drink:0,tool:null,src:[["pg1",16]]},
+{id:"catchmind",t:"🎨 캐치마인드",cats:["gathering"],min:4,max:8,team:true,loc:"indoor",prep:"phone",dur:10,moods:["competition","funny"],tag:"국민게임",drink:0,tool:null,src:[["pg1",17]]},
+{id:"postit",t:"🏷️ 이마 포스트잇 (후엠아이)",cats:["gathering"],min:3,max:8,team:false,loc:"indoor",prep:"items",dur:10,moods:["funny","conversation"],tag:null,drink:0,tool:null,src:[["pg1",18]]},
+{id:"charades",t:"🕺 몸으로 말해요",cats:["gathering"],min:4,max:8,team:true,loc:"indoor",prep:"items",dur:10,moods:["funny","competition"],tag:"국민게임",drink:0,tool:null,src:[["pg1",19]]},
+{id:"headcount",t:"🔢 인원수 게임",cats:["gathering"],min:5,max:10,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","active"],tag:null,drink:0,tool:null,src:[["pg1",20]]},
+{id:"songquiz",t:"🎧 연대별 노래 맞추기",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:15,moods:["competition","knowledge"],tag:"🔥 신규",drink:0,tool:"toolSong",src:[["pg1",21]]},
+{id:"wordguess",t:"🔠 글자 맞추기 (4·5글자)",cats:["gathering"],min:null,max:null,team:false,loc:"indoor",prep:"phone",dur:10,moods:["quick","knowledge"],tag:"🔥 신규",drink:0,tool:"toolFour",src:[["pg1",22]]},
+{id:"personquiz",t:"👑 인물 맞추기 퀴즈",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:10,moods:["knowledge","competition"],tag:"국민게임",drink:0,tool:"toolPerson",src:[["pg1",23]]},
+{id:"deathgame",t:"💀 더 게임 오브 데스",cats:["drinking"],min:4,max:10,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:"국민게임",drink:1,tool:null,src:[["pg2",0]]},
+{id:"bunny",t:"🐰 바니바니",cats:["drinking"],min:4,max:10,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:null,drink:1,tool:null,src:[["pg2",1]]},
+{id:"strawberry",t:"🍓 딸기 게임",cats:["drinking"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:null,drink:1,tool:null,src:[["pg2",2]]},
+{id:"threeword",t:"✂️ 세글자 게임",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"none",dur:5,moods:["quick","funny"],tag:"🔥 최신",drink:1,tool:null,src:[["pg2",3]]},
+{id:"eomok",t:"🐟 어목조동",cats:["drinking"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:5,moods:["quick","knowledge"],tag:"🔥 최신",drink:1,tool:null,src:[["pg2",4]]},
+{id:"n369",t:"🔢 3·6·9",cats:["drinking"],min:3,max:10,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick"],tag:"국민게임",drink:1,tool:null,src:[["pg2",5]]},
+{id:"baskin31",t:"🍦 배스킨라빈스 31",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","psychology"],tag:"국민게임",drink:1,tool:null,src:[["pg2",6]]},
+{id:"hunmin",t:"🈶 훈민정음",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"none",dur:5,moods:["quick","conversation"],tag:null,drink:1,tool:"toolChar",src:[["pg2",7]]},
+{id:"sonbyeongho",t:"✊ 손병호 게임",cats:["drinking"],min:4,max:10,team:false,loc:"indoor",prep:"none",dur:5,moods:["psychology","conversation"],tag:null,drink:1,tool:null,src:[["pg2",8]]},
+{id:"subway",t:"🚇 지하철 게임",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"none",dur:5,moods:["knowledge","quick"],tag:null,drink:1,tool:null,src:[["pg2",9]]},
+{id:"capupdown",t:"🍾 병뚜껑 업다운",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"items",dur:3,moods:["quick","psychology"],tag:null,drink:1,tool:null,src:[["pg2",10]]},
+{id:"titanic",t:"🚢 타이타닉",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"items",dur:3,moods:["competition","funny"],tag:null,drink:2,tool:null,src:[["pg2",11]]},
+{id:"sojupong",t:"🏓 소주퐁",cats:["drinking"],min:2,max:8,team:true,loc:"indoor",prep:"items",dur:10,moods:["competition","active"],tag:null,drink:1,tool:null,src:[["pg2",12]]},
+{id:"halsudo",t:"🤲 ~할 수도 게임",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"items",dur:5,moods:["funny","conversation"],tag:"🔥 밈 출신",drink:1,tool:"toolPick",src:[["pg2",13]]},
+{id:"tissue",t:"🧻 휴지 날리기",cats:["drinking"],min:3,max:10,team:false,loc:"indoor",prep:"items",dur:3,moods:["active","funny"],tag:null,drink:1,tool:null,src:[["pg2",14]]},
+{id:"capflick",t:"🔩 병뚜껑 꼬리치기",cats:["drinking"],min:3,max:8,team:false,loc:"indoor",prep:"items",dur:5,moods:["quick","competition"],tag:"국룰",drink:1,tool:null,src:[["pg2",15]]},
+{id:"bombpass",t:"💣 폭탄 돌리기",cats:["drinking"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:3,moods:["quick","funny"],tag:null,drink:1,tool:"toolBomb",src:[["pg2",17]]},
+{id:"jokgu",t:"⚽ 족구",cats:["outdoor"],min:6,max:12,team:true,loc:"outdoor",prep:"items",dur:30,moods:["competition","active"],tag:"국민 체육",drink:0,tool:null,src:[["pg4",0]]},
+{id:"balyagu",t:"🥎 발야구",cats:["outdoor"],min:10,max:20,team:true,loc:"outdoor",prep:"items",dur:30,moods:["competition","active"],tag:null,drink:0,tool:null,src:[["pg4",1]]},
+{id:"dodgeball",t:"🤾 피구",cats:["outdoor"],min:8,max:20,team:true,loc:"outdoor",prep:"items",dur:20,moods:["competition","active"],tag:"국민게임",drink:0,tool:null,src:[["pg4",2]]},
+{id:"mugunghwa",t:"🌸 무궁화 꽃이 피었습니다",cats:["outdoor"],min:4,max:20,team:false,loc:"outdoor",prep:"none",dur:10,moods:["active","funny"],tag:null,drink:0,tool:null,src:[["pg4",3]]},
+{id:"towel",t:"🧣 수건돌리기",cats:["outdoor"],min:6,max:15,team:false,loc:"outdoor",prep:"items",dur:10,moods:["active","funny"],tag:null,drink:0,tool:null,src:[["pg4",4]]},
+{id:"tugofwar",t:"🪢 줄다리기",cats:["outdoor"],min:10,max:null,team:true,loc:"outdoor",prep:"items",dur:5,moods:["competition","active"],tag:null,drink:0,tool:null,src:[["pg4",5]]},
+{id:"relay",t:"🏃 이어달리기 (계주)",cats:["outdoor"],min:8,max:null,team:true,loc:"outdoor",prep:"items",dur:10,moods:["competition","active"],tag:null,drink:0,tool:null,src:[["pg4",6]]},
+{id:"threelegged",t:"🦵 이인삼각",cats:["outdoor"],min:4,max:null,team:true,loc:"outdoor",prep:"items",dur:10,moods:["funny","active"],tag:null,drink:0,tool:null,src:[["pg4",7]]},
+{id:"yut",t:"🪅 윷놀이",cats:["outdoor"],min:4,max:8,team:true,loc:"outdoor",prep:"items",dur:20,moods:["competition","conversation"],tag:null,drink:0,tool:null,src:[["pg4",8]]},
+{id:"jegi",t:"🔴 제기차기",cats:["outdoor"],min:1,max:null,team:false,loc:"outdoor",prep:"items",dur:5,moods:["active","competition"],tag:null,drink:0,tool:null,src:[["pg4",9]]},
+{id:"frisbee",t:"🥏 원반던지기 (프리스비)",cats:["outdoor"],min:2,max:null,team:false,loc:"outdoor",prep:"items",dur:15,moods:["active","competition"],tag:null,drink:0,tool:null,src:[["pg4",10]]},
+{id:"waterballoon",t:"💧 물풍선 폭탄",cats:["outdoor"],min:4,max:null,team:true,loc:"outdoor",prep:"items",dur:10,moods:["funny","active"],tag:null,drink:0,tool:null,src:[["pg4",11]]},
+{id:"badminton",t:"🏸 배드민턴",cats:["outdoor"],min:2,max:4,team:false,loc:"outdoor",prep:"items",dur:20,moods:["active","competition"],tag:null,drink:0,tool:null,src:[["pg4",12]]},
+{id:"treasure",t:"🗺️ 보물찾기",cats:["outdoor"],min:null,max:null,team:false,loc:"outdoor",prep:"items",dur:15,moods:["active","funny"],tag:null,drink:0,tool:null,src:[["pg4",13]]},
+];
+/* ===== Tool Registry — 도구는 '게임 진행을 돕는 유틸리티' (본문 22항) =====
+   group: people(사람) | draw(뽑기) | flow(진행) | quiz(출제)
+   gameOf: 값이 있으면 그 게임의 '실행 컴포넌트'이므로 도구 목록에 노출하지 않는다 (중복 제거) */
+const TOOLS=[
+{id:"toolCount",  g:"people",t:"👥 참가 인원",     gameOf:null},
+{id:"toolTeam",   g:"people",t:"👥 팀 나누기",     gameOf:null},
+{id:"toolPick",   g:"draw",  t:"🎲 랜덤 뽑기 5종",  gameOf:null},
+{id:"toolLots",   g:"draw",  t:"🎫 제비뽑기",      gameOf:null},
+{id:"toolDice",   g:"draw",  t:"🎲 주사위 · 동전",  gameOf:null},
+{id:"toolBottle", g:"draw",  t:"🍾 병 돌리기",     gameOf:null},
+{id:"toolTimer",  g:"flow",  t:"⏱️ 타이머 챌린지",  gameOf:null},
+{id:"toolPenalty",g:"flow",  t:"🎰 벌칙 룰렛",     gameOf:null},
+{id:"toolChar",   g:"quiz",  t:"🔤 글자 출제기",    gameOf:null},
+{id:"toolSpeed",  g:"quiz",  t:"🗣 스피드 제시어",   gameOf:null},
+{id:"toolPerson", g:"quiz",  t:"👑 인물 카드 뽑기",  gameOf:null},
+{id:"toolIntro",  g:"quiz",  t:"🎵 인트로 퀴즈",    gameOf:null},
+{id:"homeQuiz",   g:"quiz",  t:"🧠 상식 퀴즈",     gameOf:null},
+{id:"toolMafia",  g:"flow",  t:"🃏 마피아 배정기",   gameOf:"mafia"},
+{id:"toolSpy",    g:null,    t:"🕵️ 라이어게임",     gameOf:"liar"},
+{id:"toolRank",   g:null,    t:"🏆 순위 정하기",    gameOf:"rank"},
+{id:"toolBalance",g:null,    t:"⚖️ 밸런스 게임",    gameOf:"balance"},
+{id:"toolImageQ", g:null,    t:"👉 이미지 게임",    gameOf:"imagegame"},
+{id:"toolTod",    g:null,    t:"🎯 진실 혹은 도전",  gameOf:"truthdare"},
+{id:"toolTele",   g:null,    t:"🔮 텔레파시 게임",   gameOf:"telepathy"},
+{id:"toolYang",   g:null,    t:"🎭 양세찬 게임",    gameOf:"yangsechan"},
+{id:"toolRainbow",g:null,    t:"🌈 무지개 찾기",    gameOf:"rainbow"},
+{id:"toolSilent", g:null,    t:"🤐 침묵 속 대화",   gameOf:"silent"},
+{id:"toolBomb",   g:null,    t:"💣 폭탄 돌리기",    gameOf:"bombpass"},
+{id:"toolSong",   g:null,    t:"🎧 연대별 노래 맞추기",gameOf:"songquiz"},
+{id:"toolFour",   g:null,    t:"🔠 글자 맞추기",    gameOf:"wordguess"},
+{id:"toolFeedback",g:null,   t:"💬 피드백 · 건의함", gameOf:null}
+];
+const TOOL_GROUPS=[{k:"people",n:"👥 사람"},{k:"draw",n:"🎲 뽑기"},{k:"flow",n:"⏱ 진행"},{k:"quiz",n:"🧠 출제"}];
+
 
 /* ===== 게임 리스트(아코디언): 쭉 나열 → 클릭 시 규칙 펼침 ===== */
 function buildAccordion(pageId){
@@ -1800,6 +1969,153 @@ function closeGame(){
   m.classList.remove("on");document.body.style.overflow="";
 }
 
+/* ===== P1: Hash Router + 화면 이탈 cleanup (부록 Core-6 / D-6) ===== */
+const IVS=new Set(),TOS=new Set();
+(function(){const si=window.setInterval,ci=window.clearInterval,st=window.setTimeout,ct=window.clearTimeout;
+ window.setInterval=function(){const id=si.apply(window,arguments);IVS.add(id);return id;};
+ window.clearInterval=function(id){IVS.delete(id);return ci.call(window,id);};
+ window.setTimeout=function(){const id=st.apply(window,arguments);TOS.add(id);return id;};
+ window.clearTimeout=function(id){TOS.delete(id);return ct.call(window,id);};
+ window.__ci=ci;window.__ct=ct;})();
+function stopAllPlay(){
+  IVS.forEach(id=>window.__ci.call(window,id));IVS.clear();
+  TOS.forEach(id=>window.__ct.call(window,id));TOS.clear();
+  try{rolling=false;}catch(e){}
+  try{bombOn=false;}catch(e){}
+  try{introOn=false;}catch(e){}
+  try{charRolling=false;}catch(e){}
+  try{personRolling=false;}catch(e){}
+  try{if(typeof WHEEL!=="undefined")WHEEL.spinning=false;}catch(e){}
+  try{if(typeof photoBusy!=="undefined")photoBusy=false;}catch(e){}
+}
+const ROUTES={home:"pg0",games:"pgGames",random:"pgRandom",tools:"pg3"};
+let curRoute="home";
+function go(r,push){ location.hash="#/"+r; }
+function showRoute(r){
+  const pid=ROUTES[r]||ROUTES.home; curRoute=ROUTES[r]?r:"home";
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+  const pg=document.getElementById(pid); if(pg)pg.classList.add("on");
+  document.querySelectorAll(".bnav-i").forEach(b=>b.classList.toggle("on",b.dataset.r===curRoute));
+  if(curRoute==="games"){
+    document.querySelectorAll("#gameFilters .cat-pick").forEach(b=>b.classList.toggle("on",b.dataset.f===gameFilter));
+    renderGames();
+  }
+  if(curRoute==="random"&&typeof wheelPrepare==="function")wheelPrepare();
+  window.scrollTo({top:0,behavior:"instant"in document.documentElement.style?"instant":"auto"});
+}
+function routeApply(){
+  const h=(location.hash||"#/home").replace(/^#\/?/,"");
+  const [head,arg]=h.split("/");
+  stopAllPlay(); closeGame(); closeSheet();
+  if(head==="game"&&arg){ const g=GAMES.find(x=>x.id===arg);
+    if(g){showRoute("games");openGameDetail(g.id);return;} }
+  if(head==="tool"&&arg){ const t=document.getElementById(arg);
+    if(t){showRoute("tools");openToolPopup(t);return;} }
+  showRoute(head||"home");
+}
+window.addEventListener("hashchange",routeApply);
+
+/* ===== P1: 게임 목록 (Registry 기반 · 검색/필터) ===== */
+let gameFilter="all";
+function setGameFilter(btn){
+  gameFilter=btn.dataset.f;
+  document.querySelectorAll("#gameFilters .cat-pick").forEach(b=>b.classList.toggle("on",b===btn));
+  beep(500,.03,.08,"square"); renderGames();
+}
+const MOOD_KO={funny:"웃긴",psychology:"심리전",competition:"경쟁",conversation:"대화",quick:"빠른",active:"활동적",knowledge:"지식"};
+const PREP_KO={none:"준비물 없음",phone:"폰만 있으면 OK",items:"준비물 필요"};
+function gameSub(g){
+  const pl=(g.min==null)?"인원 제한없음":(g.max?g.min+"~"+g.max+"명":g.min+"명~");
+  const md=g.moods.length?MOOD_KO[g.moods[0]]:null;
+  return [pl,g.dur+"분",md].filter(Boolean).join(" · ");
+}
+/* 검색: 이름 + metadata (인원 숫자, 분위기, 준비물, 장소, 술) */
+function gameMatch(g,q){
+  if(!q)return true;
+  q=q.trim().toLowerCase();
+  if(g.t.toLowerCase().includes(q))return true;
+  const n=q.match(/^(\d+)\s*명?$/);
+  if(n){const v=+n[1];return (g.min==null||v>=g.min)&&(g.max==null||v<=g.max);}
+  const bag=[g.id,...g.moods.map(m=>MOOD_KO[m]),PREP_KO[g.prep],
+    g.loc==="outdoor"?"야외":"실내", g.drink?"술":"논알콜 술없이",
+    ...(g.cats.map(c=>({gathering:"모임",drinking:"술게임",outdoor:"야외"}[c]))), g.tag||""].join(" ").toLowerCase();
+  return bag.includes(q)||q.split(/\s+/).every(w=>bag.includes(w));
+}
+function renderGames(){
+  const box=$("gameList"); if(!box)return;
+  const q=($("gameSearch")&&$("gameSearch").value)||"";
+  let list=GAMES.filter(g=>gameFilter==="all"||g.cats.includes(gameFilter));
+  const hit=list.filter(g=>gameMatch(g,q));
+  let html="",fallback=null;
+  if(!hit.length){
+    fallback=GAMES.filter(g=>gameMatch(g,q)).slice(0,5);
+    if(!fallback.length)fallback=GAMES.slice().sort(()=>Math.random()-.5).slice(0,5);
+    html+='<div class="glist-h">조건에 딱 맞는 게임이 없어요 — 이런 게임은 어때요?</div>';
+    html+=fallback.map(gcardHtml).join("");
+  }else{
+    html+='<div class="glist-h">'+hit.length+'개 게임</div>'+hit.map(gcardHtml).join("");
+  }
+  box.innerHTML=html;
+}
+function gcardHtml(g){
+  const m=g.t.match(/^(\S+)\s*(.*)$/)||[null,"🎮",g.t];
+  return '<button class="gcard" onclick="location.hash=\'#/game/'+g.id+'\'">'+
+    '<span class="gcard-ic">'+m[1]+'</span><span class="gcard-b">'+
+    '<span class="gcard-t">'+esc(m[2]||g.t)+'</span>'+
+    '<span class="gcard-s">'+esc(gameSub(g))+'</span></span>'+
+    (g.tag?'<span class="gcard-tag">'+esc(g.tag)+'</span>':'')+
+    '<span class="gcard-ar">›</span></button>';
+}
+/* P1: 게임 상세는 기존 규칙 카드를 팝업으로 (Game Detail은 P2에서 신설) */
+function openGameDetail(id){
+  const g=GAMES.find(x=>x.id===id); if(!g)return;
+  const body=$("modalBody"); if(!body)return;
+  body.innerHTML="";
+  g.src.forEach(([pg,i])=>{
+    const c=document.querySelectorAll("#"+pg+" > .g")[i]; if(!c)return;
+    const cl=c.cloneNode(true); cl.classList.add("open"); body.appendChild(cl);
+  });
+  if(g.tool){
+    const btn=document.createElement("button");
+    btn.className="big-btn"; btn.style.cssText="font-size:17px;padding:15px 34px;margin-top:10px";
+    btn.textContent="▶ 게임 시작";
+    btn.onclick=()=>{location.hash="#/tool/"+g.tool;};
+    body.appendChild(btn);
+  }
+  $("gameModal").classList.add("on"); document.body.style.overflow="hidden";
+  logEvent("game_open",g.t);
+}
+/* ===== P1: 설정 시트 ===== */
+function openSheet(){
+  $("setBody").innerHTML=
+    '<div class="set-row" onclick="toggleSnd()">🔊 효과음<b id="sndState">'+(sndOK()?"ON":"OFF")+'</b></div>'+
+    '<div class="set-row" onclick="closeSheet();location.hash=\'#/tool/toolFeedback\'">💬 피드백 · 건의함<span>›</span></div>'+
+    '<div class="set-row" onclick="closeSheet();openAccount()">👤 계정 · 통계<span>›</span></div>';
+  $("setSheet").classList.add("on"); document.body.style.overflow="hidden";
+}
+function closeSheet(){const e=$("setSheet");if(!e)return;e.classList.remove("on");
+  if(!$("gameModal").classList.contains("on"))document.body.style.overflow="";}
+function toggleSnd(){const el=$("sndOn");if(el){el.checked=!el.checked;$("sndState").textContent=el.checked?"ON":"OFF";if(el.checked)beep(700,.05,.15);}}
+
+/* ===== P1: 홈 — 인원 + 즉시 1개 추천 (부록 B-1: 연출 없음, 룰렛과 역할 분리) ===== */
+let HOME_N=6;
+function setHomeN(d){HOME_N=Math.max(2,Math.min(20,HOME_N+d));$("homeN").textContent=HOME_N;beep(500,.03,.08,"square");}
+function fitN(g,n){return (g.min==null||n>=g.min)&&(g.max==null||n<=g.max);}
+function pickForMe(){
+  let pool=GAMES.filter(g=>fitN(g,HOME_N));
+  let note="";
+  if(pool.length<3){pool=GAMES;note="이 인원에 딱 맞는 게임이 적어 전체에서 골랐어요";}
+  const g=pool[Math.floor(Math.random()*pool.length)];
+  $("homePick").innerHTML='<div class="home-pick"><div class="hint">오늘은 이거!</div>'+
+    '<div class="home-pick-t">'+esc(g.t)+'</div>'+
+    '<div class="hint">'+esc(gameSub(g))+' · '+esc(PREP_KO[g.prep])+'</div>'+
+    (note?'<div class="hint" style="color:var(--orange)">'+note+'</div>':'')+
+    '<button class="big-btn b2" style="margin-top:10px" onclick="location.hash=\'#/game/'+g.id+'\'">시작하기</button>'+
+    '<button class="big-btn b3" style="margin-top:10px" onclick="pickForMe()">다시 뽑기</button>'+
+    '<div><span class="home-more" onclick="go(\'random\')">🎡 룰렛으로 돌리기 →</span></div></div>';
+  winJingle();logEvent("play","홈추천-"+g.t);
+}
+function goCat(c){gameFilter=c;go("games");}
 /* ===== sound engine ===== */
 let AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC;}
@@ -1868,19 +2184,15 @@ let rolling=false;
 /* 실제 게임 카드에서 게임 목록 인덱스 구성 (뽑기 → 설명 연동용) */
 let GAME_INDEX=[],lastRolledGame=null;
 function buildGameIndex(){
-  GAME_INDEX=[];
-  ["pg1","pg2","pg4"].forEach(pg=>{
-    const page=document.getElementById(pg);if(!page)return;
-    page.querySelectorAll(":scope > .g").forEach(card=>{
-      const h3=card.querySelector("h3");
-      if(h3)GAME_INDEX.push({name:h3.textContent.trim(),page:pg,card:card});
-    });
-  });
+  /* P1: DOM 파싱 → Registry 기반 (단일 데이터 소스) */
+  GAME_INDEX=GAMES.map(g=>{
+    const [pg,i]=g.src[0];
+    const card=document.querySelectorAll("#"+pg+" > .g")[i]||null;
+    return {id:g.id,name:g.t,page:pg,card:card,cats:g.cats,min:g.min,max:g.max};
+  }).filter(x=>x.card);
 }
 function openGameCard(pg,card){
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
   document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
-  const tab=document.querySelector('[data-p="'+pg+'"]');if(tab)tab.classList.add("on");
   const page=document.getElementById(pg);if(!page)return;page.classList.add("on");
   page.querySelectorAll(":scope > .g.open").forEach(o=>o.classList.remove("open"));
   card.classList.add("open");
@@ -1898,7 +2210,7 @@ function openRolledGame(){
   $("gameModal").classList.add("on");document.body.style.overflow="hidden";
   logEvent("game_open",lastRolledGame.name);
 }
-function goPage(p){const t=document.querySelector('[data-p="'+p+'"]');if(t)t.click();}
+function goPage(p){const m={pg0:"home",pg3:"tools",pgGames:"games",pgRandom:"random"};go(m[p]||"home");}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 /* ===== 홈 룰렛: 선택한 카테고리에서 랜덤 게임 ===== */
 function toggleCat(btn){btn.classList.toggle("on");beep(500,.03,.08,"square");wheelPrepare();}
@@ -3608,7 +3920,7 @@ const ADSENSE_SLOT="";    /* 승인 후 '광고 단위' 만들면 나오는 슬�
 function initAdsense(){
   const box=document.getElementById("adBanner");if(!box)return;
   if(!/^\d{6,}$/.test(ADSENSE_SLOT)){
-    box.innerHTML='<div style="font-size:11px;color:var(--sub);opacity:.65;border:1px dashed var(--line);border-radius:10px;padding:12px">📢 광고 영역 · 애드센스 검토·승인 후 표시됩니다</div>';
+    box.style.display="none";   /* 본문 41항: 미로드 시 placeholder 노출 금지 */
     return;
   }
   try{
@@ -4041,10 +4353,35 @@ sbRestore(); /* 로그인 세션 복원 + 통계 */
 initAdsense(); /* 애드센스 배너 (설정 시) */
 (function(){var n=songPlayable().length;if(n)$("songRes").textContent="전체 · 재생가능 "+n+"곡 — 출제하세요 🎵";})();
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
+/* ===== P1: IA 재배치 — 1) 노드 이동 → 2) 카드 빌드 → 3) 그룹 정렬 ===== */
+(function relocate(){
+  const pg0=$("pg0"),pgR=$("pgRandom"),pg3=$("pg3");
+  const wheelCard=$("wheelCv")&&$("wheelCv").closest(".t-card");
+  if(wheelCard&&pgR)pgR.appendChild(wheelCard);                 /* 룰렛 → 랜덤 탭 */
+  const quiz=$("homeQuiz"); if(quiz&&pg3)pg3.appendChild(quiz); /* 상식퀴즈 → 도구>출제 (부록 B-3) */
+  if(pg0)[...pg0.querySelectorAll(":scope > .t-card")].forEach(c=>{
+    if(/도구 열기/.test(c.textContent)&&!c.id)c.remove();});     /* 하단 네비와 중복 제거 */
+  const foot=document.querySelector("#pg3 > .foot");
+  if(foot&&pg3&&pg3.parentNode)pg3.parentNode.appendChild(foot); /* 공통 푸터 밖으로 */
+})();
+
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildToolList("pg3");
-buildGameIndex(); /* 게임 뽑기 → 설명 연동용 인덱스 */
-spyBuildUI(); /* 라이어게임 주제 버튼 생성 */
-wheelPrepare(); /* 룰렛 휠 초기 렌더 */
+buildGameIndex(); /* Registry 기반 인덱스 */
+spyBuildUI();
+
+(function arrangeTools(){
+  const pg3=$("pg3"); if(!pg3)return;
+  TOOLS.filter(t=>t.gameOf).forEach(t=>{const e=$(t.id);if(e)e.classList.add("t-hidden");}); /* 게임 실행 도구는 목록에서 숨김(DOM 보존) */
+  TOOL_GROUPS.forEach(gr=>{
+    const list=TOOLS.filter(t=>t.g===gr.k&&!t.gameOf).map(t=>$(t.id)).filter(Boolean);
+    if(!list.length)return;
+    const h=document.createElement("div");h.className="glist-h tgrp";h.textContent=gr.n;
+    pg3.appendChild(h); list.forEach(e=>pg3.appendChild(e));
+  });
+  const fb=$("toolFeedback"); if(fb)pg3.appendChild(fb);
+  const ab=$("acctBtn"); if(ab)ab.setAttribute("onclick","openSheet()"); /* 계정 진입점 통합 */
+})();
+routeApply(); /* 초기 라우트 적용 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
 $("adModal").addEventListener("click",e=>{if(e.target.id==="adModal")adCancel();});
