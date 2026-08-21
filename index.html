@@ -181,7 +181,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 /* 도구: 격자 타일 (세로 2열 · 가로/넓은 화면 4열) */
 .page.tmode{display:none}
 .page.tmode.on{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;align-items:stretch}
-.page.tmode > :not(.t-card){grid-column:1/-1}
+.page.tmode > :not(.t-card):not(.t-tile){grid-column:1/-1}
 .page.tmode > .t-card{margin:0;padding:18px 8px;display:flex;align-items:center;justify-content:center;min-height:66px;cursor:pointer}
 .page.tmode > .t-card:active{transform:scale(.96)}
 .page.tmode > .t-card > h3{font-size:14.5px;padding:0;line-height:1.3;word-break:keep-all}
@@ -603,6 +603,15 @@ body.focus{padding-bottom:0}
 .glist-h{margin:9px 0 5px}
 .bnav-i{min-height:52px;font-size:11px}
 .bnav-i span{font-size:20px}
+/* ===== 2.5-P2: 도구 타일 (지연 렌더) ===== */
+.t-tile{display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:60px;padding:12px 8px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-card);color:var(--txt);font-size:14.5px;font-weight:800;
+  line-height:1.3;word-break:keep-all;cursor:pointer}
+.t-tile:active{transform:scale(.96)}
+.t-tile.t-fb{grid-column:1/-1;min-height:70px;font-size:16px;color:#ffc3d5;
+  background:linear-gradient(135deg,rgba(255,95,143,.32),rgba(255,179,64,.2));
+  border:2px solid #ff5f8f;box-shadow:0 6px 20px rgba(255,95,143,.25);margin-top:8px}
 </style>
 </head>
 <body>
@@ -726,7 +735,7 @@ body.focus{padding-bottom:0}
 </div>
 
 <!-- ================= 모임게임 ================= -->
-<div class="page" id="pg1">
+<template id="tpl_pg1">
 
 
 <div class="g"><div class="g-top"><h3>🕵️ 라이어게임</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
@@ -969,10 +978,10 @@ body.focus{padding-bottom:0}
 <li><b>전원 일치가 목표</b> — 실패 라운드마다 전원 한 모금(또는 스쿼트 5개)</li>
 <li>일치 성공 시 컨페티급 환호 보장. 협동형이라 분위기 순화용으로 최적</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%EC%9D%BC%EC%8B%AC%EB%8F%99%EC%B2%B4%20%EA%B2%8C%EC%9E%84" target="_blank">📺 영상으로 배우기</a></div>
-</div>
+</template>
 
 <!-- ================= 술게임 ================= -->
-<div class="page" id="pg2">
+<template id="tpl_pg2">
 
 
 <div class="g"><div class="g-top"><h3>💀 더 게임 오브 데스</h3><div class="badges"><span class="bd easy">국민게임</span></div></div>
@@ -1145,10 +1154,10 @@ body.focus{padding-bottom:0}
 <li>변형: 폭탄 들고 있는 동안 삼행시·아무말 대잔치 의무</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%ED%8F%AD%ED%83%84%EB%8F%8C%EB%A6%AC%EA%B8%B0%20%EA%B2%8C%EC%9E%84" target="_blank">📺 영상으로 배우기</a>
 <span class="golink" onclick="goTool('toolBomb')">⚡ 폭탄 점화하러 가기 →</span></div>
-</div>
+</template>
 
 <!-- ================= 야외놀이 ================= -->
-<div class="page" id="pg4">
+<template id="tpl_pg4">
 
 
 <div class="g"><div class="g-top"><h3>⚽ 족구</h3><div class="badges"><span class="bd trend">국민 체육</span><span class="bd easy">팀전</span></div></div>
@@ -1279,11 +1288,10 @@ body.focus{padding-bottom:0}
 <li>찾은 쪽지에 적힌 <b>상품·미션·벌칙</b> 수행</li>
 <li>밤 MT·소풍 마무리 이벤트로 국룰</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=보물찾기+게임" target="_blank">📺 영상으로 배우기</a></div>
-</div>
+</template>
 
 <!-- ================= 도구 ================= -->
 <div class="page" id="pg3">
-<label class="snd-toggle sndrow" style="display:none"><input type="checkbox" id="sndOn" checked> 🔊 효과음</label>
 
 <div class="t-card" id="toolCount">
   <h3>👥 참가 인원</h3>
@@ -1802,6 +1810,8 @@ body.focus{padding-bottom:0}
   </div>
 </div>
 
+<div id="toolPark" hidden aria-hidden="true"></div>
+<label class="snd-toggle sndrow" style="display:none"><input type="checkbox" id="sndOn" checked> 🔊 효과음</label>
 <nav class="bnav" id="bnav">
   <button class="bnav-i on" data-r="home"   onclick="go('home')"><span>🏠</span>홈</button>
   <button class="bnav-i"    data-r="games"  onclick="go('games')"><span>🎮</span>게임</button>
@@ -1880,23 +1890,22 @@ function buildToolList(pageId){
 let toolPop=null,toolPopAnchor=null;
 function openToolPopup(card){
   if(!card)return;
-  closeGame(); /* 이전 팝업/도구 원복 */
+  closeGame(); /* 이전 팝업 정리 */
   document.body.classList.add("focus");   /* 게임 실행 중 집중 모드 (본문 20항) */
   const body=$("modalBody");if(!body)return;
-  toolPopAnchor=document.createElement("div");toolPopAnchor.style.display="none";
-  card.parentNode.insertBefore(toolPopAnchor,card);
+  toolPopAnchor=null;
   toolPop=card;card.classList.add("in-pop");
   body.innerHTML="";body.appendChild(card);
+  if(card.id==="toolSpy"&&typeof spyBuildUI==="function"&&!card.querySelector("#spyCats .cat-pick"))spyBuildUI();
   $("gameModal").classList.add("on");$("gameModal").scrollTop=0;
   document.body.style.overflow="hidden";
   beep(660,.04,.12,"square");
   const h3=card.querySelector("h3");if(h3)logEvent("tool_open",h3.textContent.trim());
 }
 function goTool(id){
-  if(document.getElementById(id)&&location.hash!=="#/tool/"+id){location.hash="#/tool/"+id;return;}
-  const el=document.getElementById(id);
-  const card=el?(el.classList.contains("t-card")?el:el.closest(".t-card")):null;
-  if(card)openToolPopup(card);
+  const node=toolNode(id);
+  if(node&&location.hash!=="#/tool/"+id){location.hash="#/tool/"+id;return;}
+  if(node)openToolPopup(node.classList.contains("t-card")?node:node.closest(".t-card"));
 }
 const $=id=>document.getElementById(id);
 /* ===== Game Registry — 탐색·추천·검색 metadata layer (Single Source of Truth) =====
@@ -2141,9 +2150,11 @@ function addSwipe(el,pageId){
 function closeGame(){
   const m=$("gameModal");if(!m)return;
   /* 팝업으로 옮겨온 도구 노드를 원래 자리로 복귀 */
-  if(toolPop&&toolPopAnchor){
-    toolPopAnchor.parentNode.insertBefore(toolPop,toolPopAnchor);
-    toolPopAnchor.remove();toolPop.classList.remove("in-pop");
+  if(toolPop){
+    toolPop.classList.remove("in-pop");
+    /* 문서 내 숨김 보관소로 이동 — 지연 콜백이 요소를 계속 찾을 수 있게 (null 참조 방지) */
+    const park=$("toolPark"); if(park)park.appendChild(toolPop);
+    else if(toolPop.parentNode)toolPop.parentNode.removeChild(toolPop);
     toolPop=null;toolPopAnchor=null;
   }
   m.classList.remove("on");document.body.style.overflow="";
@@ -2191,7 +2202,7 @@ function routeApply(){
   stopAllPlay(); closeGame(); closeSheet();
   if(head==="game"&&arg){ const g=GAMES.find(x=>x.id===arg);
     if(g){showRoute("games");openGameDetail(g.id);return;} }
-  if(head==="tool"&&arg){ const t=document.getElementById(arg);
+  if(head==="tool"&&arg){ const t=toolNode(arg);
     if(t){showRoute("tools");openToolPopup(t);return;} }
   showRoute(head||"home");
 }
@@ -2263,6 +2274,17 @@ function gcardHtml(g,reason){
 }
 /* ===== P2: Game Detail — 상단 '게임 시작' + Progressive Disclosure ===== */
 const LOC_KO={indoor:"실내",outdoor:"야외"};
+/* ===== 2.5-P2: 게임 규칙 카드 조회 단일 지점 =====
+   규칙 카드는 <template> 안에 보관되어 초기 DOM에 렌더되지 않는다.
+   조회는 반드시 이 함수를 통한다. */
+const RULE_TPL={};
+function ruleCard(pg,i){
+  const t=RULE_TPL[pg];
+  /* DocumentFragment 에서는 :scope 가 동작하지 않아 직계 자식으로 직접 필터 */
+  if(t)return [...t.content.children].filter(e=>e.classList.contains("g"))[i]||null;
+  return document.querySelectorAll("#"+pg+" > .g")[i]||null;   /* template 미적용 시 폴백 */
+}
+function gameRuleCards(g){ return g.src.map(([pg,i])=>ruleCard(pg,i)).filter(Boolean); }
 function detailChips(g){
   const pl=(g.min==null)?"인원 자유":(g.max?g.min+"~"+g.max+"명":g.min+"명 이상");
   const c=[pl,"약 "+g.dur+"분",PREP_KO[g.prep],LOC_KO[g.loc]];
@@ -2284,8 +2306,7 @@ function openGameDetail(id){
   h+='<button class="gd-fav'+(isFav(g.id)?" on":"")+'" onclick="toggleFav(\''+g.id+'\')">'+(isFav(g.id)?"♥ 즐겨찾기":"♡ 즐겨찾기")+'</button>';
   h+='</div>';
   const steps=[];
-  g.src.forEach(([pg,i])=>{const c=document.querySelectorAll("#"+pg+" > .g")[i]; if(!c)return;
-    c.querySelectorAll(".how li").forEach(li=>steps.push(li.textContent.trim()));});
+  gameRuleCards(g).forEach(c=>c.querySelectorAll(".how li").forEach(li=>steps.push(li.textContent.trim())));
   if(steps.length)h+='<div class="gd-sec">게임 방법</div><ol class="gd-steps">'+
     steps.slice(0,4).map(t=>'<li>'+esc(t.replace(/\s+/g," ").slice(0,60))+'</li>').join("")+'</ol>';
   const helpers=gameHelpers(g);
@@ -2295,10 +2316,8 @@ function openGameDetail(id){
   h+='<div id="gdFull" style="display:none"></div>';
   body.innerHTML=h;
   const full=$("gdFull");
-  g.src.forEach(([pg,i])=>{const c=document.querySelectorAll("#"+pg+" > .g")[i]; if(!c)return;
-    const cl=c.cloneNode(true); cl.classList.add("open");
-    cl.querySelectorAll(".golink").forEach(x=>x.remove());
-    full.appendChild(cl);});
+  gameRuleCards(g).forEach(c=>{const cl=c.cloneNode(true); cl.classList.add("open");
+    cl.querySelectorAll(".golink").forEach(x=>x.remove()); full.appendChild(cl);});
   $("gameModal").classList.add("on"); $("gameModal").scrollTop=0;
   document.body.style.overflow="hidden";
   logEvent("game_open",g.t);
@@ -2319,7 +2338,7 @@ const HELPERS={
  mugunghwa:["toolTimer"], towel:["toolTimer"], jegi:["toolTimer"], rainbow:["toolTimer"]
 };
 function gameHelpers(g){
-  const ids=(HELPERS[g.id]||[]).filter(id=>id!==g.tool&&document.getElementById(id));
+  const ids=(HELPERS[g.id]||[]).filter(id=>id!==g.tool&&toolNode(id));
   return ids.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
 }
 function toggleFullRules(btn){
@@ -2749,7 +2768,7 @@ function buildGameIndex(){
   /* P1: DOM 파싱 → Registry 기반 (단일 데이터 소스) */
   GAME_INDEX=GAMES.map(g=>{
     const [pg,i]=g.src[0];
-    const card=document.querySelectorAll("#"+pg+" > .g")[i]||null;
+    const card=ruleCard(pg,i);
     return {id:g.id,name:g.t,page:pg,card:card,cats:g.cats,min:g.min,max:g.max};
   }).filter(x=>x.card);
 }
@@ -4939,20 +4958,35 @@ initAdsense(); /* 애드센스 배너 (설정 시) */
   if(foot&&pg3&&pg3.parentNode)pg3.parentNode.appendChild(foot); /* 공통 푸터 밖으로 */
 })();
 
-buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildToolList("pg3");
+/* 규칙 카드는 template 안에 있으므로 초기 렌더 없음 — 아코디언 불필요 */
+["pg1","pg2","pg4"].forEach(k=>{const t=document.getElementById("tpl_"+k); if(t)RULE_TPL[k]=t;});
+buildToolList("pg3");
 buildGameIndex(); /* Registry 기반 인덱스 */
 spyBuildUI();
 
+/* ===== 2.5-P2: 도구 지연 렌더 =====
+   실제 t-card 노드를 문서에서 분리해 보관(TOOL_POOL)하고, 목록에는 가벼운 타일만 렌더한다.
+   열 때 실제 노드를 모달에 붙이고, 닫으면 다시 분리 보관 → 상태·핸들러 그대로 유지. */
+const TOOL_POOL={};
+function toolNode(id){
+  return document.getElementById(id) || TOOL_POOL[id] || null;
+}
 (function arrangeTools(){
   const pg3=$("pg3"); if(!pg3)return;
   TOOLS.filter(t=>t.gameOf).forEach(t=>{const e=$(t.id);if(e)e.classList.add("t-hidden");}); /* 게임 실행 도구는 목록에서 숨김(DOM 보존) */
+  /* 실제 도구 노드를 전부 분리 보관 (초기 DOM에서 제거) */
+  TOOLS.forEach(t=>{const e=$(t.id); if(e){TOOL_POOL[t.id]=e; if(e.parentNode)e.parentNode.removeChild(e);}});
+  /* 목록에는 가벼운 타일만 렌더 */
+  let html="";
   TOOL_GROUPS.forEach(gr=>{
-    const list=TOOLS.filter(t=>t.g===gr.k&&!t.gameOf).map(t=>$(t.id)).filter(Boolean);
+    const list=TOOLS.filter(t=>t.g===gr.k&&!t.gameOf&&TOOL_POOL[t.id]);
     if(!list.length)return;
-    const h=document.createElement("div");h.className="glist-h tgrp";h.textContent=gr.n;
-    pg3.appendChild(h); list.forEach(e=>pg3.appendChild(e));
+    html+='<div class="glist-h tgrp">'+esc(gr.n)+'</div>';
+    html+=list.map(t=>'<button class="t-tile" onclick="location.hash=\'#/tool/'+t.id+'\'">'+esc(t.t)+'</button>').join("");
   });
-  const fb=$("toolFeedback"); if(fb)pg3.appendChild(fb);
+  const fb=TOOLS.find(t=>t.id==="toolFeedback");
+  if(fb&&TOOL_POOL[fb.id])html+='<button class="t-tile t-fb" onclick="location.hash=\'#/tool/toolFeedback\'">'+esc(fb.t)+'</button>';
+  pg3.innerHTML=html;
 })();
 stripToolBadges();
 try{setSndMode(SND_MODE);}catch(e){}
