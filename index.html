@@ -579,10 +579,21 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
 .rec-more{display:block;width:100%;min-height:44px;margin-top:2px;background:none;border:1px dashed var(--line);
   border-radius:var(--r-card);color:var(--sub);font-size:13px;font-weight:800;cursor:pointer}
 .rec-more:active{opacity:.7}
+/* ===== 2차-B: MY 탭 ===== */
+.my-head{text-align:center;padding:18px 12px 14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card)}
+.my-ic{font-size:40px;line-height:1}
+.my-nm{font-size:18px;font-weight:900;margin-top:6px}
+.my-role{font-size:12.5px;color:var(--sub);font-weight:700;margin-top:3px}
+.my-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:2px 12px}
+.my-card .set-row{border-bottom:1px dashed var(--line)}
+.my-card .set-row:last-child{border-bottom:none}
+.set-right{color:var(--sub);font-size:13px;font-weight:800}
+.my-empty{font-size:12.5px;color:var(--sub);padding:14px;text-align:center;
+  border:1px dashed var(--line);border-radius:var(--r-card)}
+.my-admin span:first-child{color:#ffb340}
 </style>
 </head>
 <body>
-<button id="acctBtn" class="acct-btn" onclick="openAccount()" title="계정 · 통계">👤 계정</button>
 <div class="wrap">
 
 <header>
@@ -605,6 +616,9 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
 
 <!-- 랜덤 탭 (룰렛 이동 대상) -->
 <div class="page" id="pgRandom"></div>
+
+<!-- MY 탭 -->
+<div class="page" id="pgMy"><div id="myBody"></div></div>
 
 <!-- ================= 홈 (룰렛 · 도구 · 상식퀴즈) ================= -->
 <div class="page on" id="pg0">
@@ -1781,6 +1795,7 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
   <button class="bnav-i"    data-r="games"  onclick="go('games')"><span>🎮</span>게임</button>
   <button class="bnav-i"    data-r="random" onclick="go('random')"><span>🎲</span>랜덤</button>
   <button class="bnav-i"    data-r="tools"  onclick="go('tools')"><span>⚡</span>도구</button>
+  <button class="bnav-i"    data-r="my"     onclick="go('my')"><span>👤</span>MY</button>
 </nav>
 
 <div class="sheet" id="setSheet" onclick="if(event.target===this)closeSheet()">
@@ -2138,7 +2153,7 @@ function stopAllPlay(){
   try{if(typeof WHEEL!=="undefined")WHEEL.spinning=false;}catch(e){}
   try{if(typeof photoBusy!=="undefined")photoBusy=false;}catch(e){}
 }
-const ROUTES={home:"pg0",games:"pgGames",random:"pgRandom",tools:"pg3"};
+const ROUTES={home:"pg0",games:"pgGames",random:"pgRandom",tools:"pg3",my:"pgMy"};
 let curRoute="home";
 function go(r,push){ location.hash="#/"+r; }
 function showRoute(r){
@@ -2151,6 +2166,7 @@ function showRoute(r){
     renderGames();
   }
   if(curRoute==="random"&&typeof wheelPrepare==="function")wheelPrepare();
+  if(curRoute==="my")renderMy();
   window.scrollTo({top:0,behavior:"instant"in document.documentElement.style?"instant":"auto"});
 }
 function routeApply(){
@@ -2306,14 +2322,41 @@ function startGame(id){
     const btn=document.querySelector(".gd-more"); if(btn)btn.textContent="📕 규칙 접기";
     f.scrollIntoView({behavior:"smooth",block:"start"});}
 }
-/* ===== 설정 시트 ===== */
-function openSheet(){
-  $("setBody").innerHTML=
-    '<div class="set-row" onclick="toggleSnd()">🔊 효과음<b id="sndState">'+(sndOK()?"ON":"OFF")+'</b></div>'+
-    '<div class="set-row" onclick="closeSheet();location.hash=\'#/tool/toolFeedback\'">💬 피드백 · 건의함<span>›</span></div>'+
-    '<div class="set-row" onclick="closeSheet();openAccount()">👤 계정 · 통계<span>›</span></div>';
-  $("setSheet").classList.add("on"); document.body.style.overflow="hidden";
+/* ===== 2차-B: MY 탭 ===== */
+function myRow(icon,label,right,onclick,cls){
+  return '<div class="set-row'+(cls?" "+cls:"")+'"'+(onclick?' onclick="'+onclick+'"':'')+'>'+
+    '<span>'+icon+' '+label+'</span><span class="set-right">'+(right||"›")+'</span></div>';
 }
+function renderMy(){
+  const box=$("myBody"); if(!box)return;
+  const admin=(typeof effRole==="function")&&sbUser&&effRole()==="admin";
+  const nm=(sbUser&&sbProfile&&sbProfile.nickname)||null;
+  const role=sbUser?(effRole()==="admin"?"👑 관리자":effRole()==="vip"?"💎 VIP":"🙂 일반"):null;
+  let h='<div class="my-head"><div class="my-ic">'+(admin?"👑":sbUser?"🙂":"👤")+'</div>'+
+    '<div class="my-nm">'+(nm?esc(nm):"로그인 안 함")+'</div>'+
+    (role?'<div class="my-role">'+role+'</div>':'<div class="my-role">로그인하면 통계가 저장돼요</div>')+'</div>';
+  /* 즐겨찾기 */
+  h+='<div class="glist-h">❤️ 즐겨찾기'+(FAVS.length?' ('+FAVS.length+')':'')+'</div>';
+  h+= FAVS.length? FAVS.map(id=>{const g=GAMES.find(x=>x.id===id);return g?gcardHtml(g):"";}).join("")
+    : '<div class="my-empty">아직 없어요 — 게임 상세에서 ♡ 를 눌러 담아보세요</div>';
+  /* 최근 플레이 */
+  h+='<div class="glist-h">🕒 최근 플레이</div>';
+  h+= RECENT.length? RECENT.map(id=>{const g=GAMES.find(x=>x.id===id);return g?gcardHtml(g):"";}).join("")
+    : '<div class="my-empty">아직 없어요 — 게임을 시작하면 여기에 쌓여요</div>';
+  /* 설정 */
+  h+='<div class="glist-h">⚙️ 설정</div><div class="my-card">';
+  h+=myRow("📊","플레이 통계","›","goStats()");
+  h+=myRow("🔊","효과음",'<b id="mySndState">'+sndLabel()+'</b>',"cycleSnd()");
+  h+=myRow("🎧","효과음 테스트","▶","sfx('confirm')");
+  h+=myRow("💬","피드백 · 건의함","›","location.hash='#/tool/toolFeedback'");
+  if(admin)h+=myRow("👑","관리자","›","goStats()","my-admin");
+  h+='</div>';
+  h+='<p class="hint" style="margin-top:10px">아이폰 무음 모드에서는 일부 효과음이 들리지 않을 수 있어요.</p>';
+  box.innerHTML=h;
+}
+function goStats(){ openAccount(); }
+/* ===== 설정 시트 ===== */
+function openSheet(){ go("my"); }   /* 설정은 MY 탭으로 일원화 */
 function closeSheet(){const e=$("setSheet");if(!e)return;e.classList.remove("on");
   if(!$("gameModal").classList.contains("on"))document.body.style.overflow="";}
 function toggleSnd(){const el=$("sndOn");if(el){el.checked=!el.checked;$("sndState").textContent=el.checked?"ON":"OFF";if(el.checked)beep(700,.05,.15);}}
@@ -2503,6 +2546,7 @@ function renderRecs(){
     '<button class="rec-more" onclick="toggleRecMore()">'+(recMore?"접기":"추천 더 보기")+'</button>';
 }
 function renderHomeExtras(){
+  try{if(curRoute==="my")renderMy();}catch(e){}   /* MY 탭도 즉시 갱신 */
   const r=$("homeRecent");
   if(r){
     if(RECENT.length){
@@ -2521,7 +2565,38 @@ function renderHomeExtras(){
 /* ===== sound engine ===== */
 let AC=null;
 function ac(){if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC;}
-function sndOK(){const el=$("sndOn");return !el||el.checked;}
+/* 효과음 모드: full(기본) | min(최소) | off(끔) — 기존 boolean 체크박스와 양방향 호환 */
+const SND_KEY="aoki_snd_v1";
+let SND_MODE=(function(){
+  try{const v=localStorage.getItem(SND_KEY);
+    if(v==="full"||v==="min"||v==="off")return v;
+    /* 구버전 boolean 마이그레이션 */
+    const old=localStorage.getItem("aoki_snd_on");
+    if(old==="0"||old==="false")return "off";
+  }catch(e){}
+  return "full";
+})();
+function setSndMode(m){
+  SND_MODE=m;
+  try{localStorage.setItem(SND_KEY,m);}catch(e){}
+  const el=$("sndOn"); if(el)el.checked=(m!=="off");
+  const st=$("mySndState"); if(st)st.textContent=sndLabel();
+}
+function sndLabel(){return SND_MODE==="full"?"기본":SND_MODE==="min"?"최소":"끔";}
+function cycleSnd(){
+  setSndMode(SND_MODE==="full"?"min":SND_MODE==="min"?"off":"full");
+  if(SND_MODE!=="off")sfx("select");
+}
+/* 최소 모드에서 허용할 핵심 이벤트 */
+const SND_CORE={bombTick:1,bombWarning:1,bombExplode:1,timerTick:1,timerFinish:1,
+  countdown:1,countdownFinal:1,rouletteStop:1,winner:1,correct:1,wrong:1,success:1,fail:1,reveal:1};
+function sndOK(level){
+  if(SND_MODE==="off")return false;
+  if(SND_MODE==="min"&&level&&!SND_CORE[level])return false;
+  const el=$("sndOn"); if(el&&!el.checked)return false;
+  return true;
+}
+function toggleSnd(){cycleSnd();}
 function beep(freq,dur,vol=0.25,type="sine",when=0){
   if(!sndOK())return;
   try{const a=ac(),o=a.createOscillator(),g=a.createGain();
@@ -4393,6 +4468,7 @@ function renderAuth(){
   const er=effRole();
   document.body.classList.toggle("vip",!!sbUser&&er==="vip");
   document.body.classList.toggle("isadmin",!!sbUser&&er==="admin");
+  try{if(curRoute==="my")renderMy();}catch(e){}
   const ab=$("acctBtn");
   if(ab){
     if(sbUser){const nm=(sbProfile&&sbProfile.nickname)||"계정";
@@ -4786,9 +4862,9 @@ spyBuildUI();
     pg3.appendChild(h); list.forEach(e=>pg3.appendChild(e));
   });
   const fb=$("toolFeedback"); if(fb)pg3.appendChild(fb);
-  const ab=$("acctBtn"); if(ab)ab.setAttribute("onclick","openSheet()"); /* 계정 진입점 통합 */
 })();
 stripToolBadges();
+try{setSndMode(SND_MODE);}catch(e){}
 loadPrefs();renderHomeExtras();renderRecs();
 try{$("homeN").textContent=HOME_N;}catch(e){}
 routeApply(); /* 초기 라우트 적용 */
