@@ -128,7 +128,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .rank-name{flex:1;text-align:left;font-weight:700;font-size:15.5px}
 .rank-pts{color:var(--sub);font-size:12.5px;font-weight:800}
 .rank-row .ubtn{padding:5px 11px;font-size:13px}
-/* 🕵️ 스파이게임 */
+/* 🕵️ 라이어게임 */
 .spy-sec{font-size:12.5px;font-weight:800;color:var(--sub);margin:14px 0 2px;letter-spacing:.02em}
 .spy-pass{border:2px dashed var(--line);border-radius:20px;padding:26px 16px;cursor:pointer;
   background:linear-gradient(160deg,#2a1b46,#1e1436);transition:.15s}
@@ -546,17 +546,17 @@ body.gated{overflow:hidden}
 <div class="page" id="pg1">
 <p class="notice">2026 트렌드: 단순 박자게임 → <b>심리전·가치관 공유형</b>으로 이동 중. 텐션 강요 없이, 술 없이도 돌아가는 게임 위주로 구성.</p>
 
-<div class="g"><div class="g-top"><h3>🕵️ 스파이게임 (라이어)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
-<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b> · 모드 <b>스파이 / 바보</b></p>
+<div class="g"><div class="g-top"><h3>🕵️ 라이어게임</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b> · 모드 <b>라이어 / 바보</b></p>
 <div class="how"><ol>
-<li>도구의 <b>스파이게임</b>에서 모드·인원·주제·난이도를 고르고 시작</li>
-<li>폰을 돌려가며 각자 제시어 확인 — <b>🕵️스파이 모드</b>는 1명만 "당신은 스파이", <b>🤪바보 모드</b>는 1명만 비슷한 다른 단어 (본인은 모름!)</li>
+<li>도구의 <b>라이어게임</b>에서 모드·인원·주제·난이도를 고르고 시작</li>
+<li>폰을 돌려가며 각자 제시어 확인 — <b>🕵️라이어 모드</b>는 1명만 "당신은 라이어", <b>🤪바보 모드</b>는 1명만 비슷한 다른 단어 (본인은 모름!)</li>
 <li>랜덤으로 지정된 사람부터 시계 방향으로 <b>제시어를 말하지 않고</b> 한 문장 힌트</li>
 <li>한 바퀴 후 토론 → <b>비밀 투표</b>로 범인 지목 (동점이면 재투표)</li>
-<li>스파이가 걸려도 <b>제시어를 맞히면 역전승</b> · 바보는 결과에서 처음 공개</li></ol></div>
+<li>라이어가 걸려도 <b>제시어를 맞히면 역전승</b> · 바보는 결과에서 처음 공개</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%EB%9D%BC%EC%9D%B4%EC%96%B4%EA%B2%8C%EC%9E%84%20%ED%95%98%EB%8A%94%EB%B2%95" target="_blank">📺 영상으로 배우기</a>
-<p class="punish">⚡ 스파이 승리 → 시민 전원 벌칙 / 스파이 패배 → 스파이 벌칙 2배</p>
-<span class="golink" onclick="goTool('toolSpy')">⚡ 스파이게임 열기 →</span></div>
+<p class="punish">⚡ 라이어 승리 → 시민 전원 벌칙 / 라이어 패배 → 라이어 벌칙 2배</p>
+<span class="golink" onclick="goTool('toolSpy')">⚡ 라이어게임 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🏆 순위 정하기</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대</b> · 소요 <b>약 5분</b></p>
@@ -1297,15 +1297,15 @@ body.gated{overflow:hidden}
 </div>
 
 <div class="t-card" id="toolSpy">
-  <h3>🕵️ 스파이게임</h3>
+  <h3>🕵️ 라이어게임</h3>
   <div id="spyPnSetup">
     <p class="hint">폰 1대를 돌려가며 각자 제시어 확인 → 힌트 → 토론 → 비밀투표!</p>
     <div class="spy-sec">게임 모드</div>
     <div class="cat-picks" id="spyModes">
-      <button class="cat-pick on" data-m="spy" onclick="spySetMode('spy')">🕵️ 스파이 모드</button>
+      <button class="cat-pick on" data-m="spy" onclick="spySetMode('spy')">🕵️ 라이어 모드</button>
       <button class="cat-pick" data-m="fool" onclick="spySetMode('fool')">🤪 바보 모드</button>
     </div>
-    <p class="hint" id="spyModeDesc">무작위 1명만 <b>스파이</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어.</p>
+    <p class="hint" id="spyModeDesc">무작위 1명만 <b>라이어</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어.</p>
     <div class="spy-sec">인원</div>
     <div class="pcount-mini"><button onclick="spySetN(-1)">−</button><span class="pm-n"><span id="spyN">6</span>명</span><button onclick="spySetN(1)">+</button></div>
     <div class="spy-sec">주제</div>
@@ -2662,7 +2662,7 @@ function tmMain(){
   }
 }
 
-/* ===== 🕵️ 스파이게임 데이터 ===== */
+/* ===== 🕵️ 라이어게임 데이터 ===== */
 const SPY_CATS=[
  {k:"game",n:"🎮 게임"},{k:"sports",n:"⚽ 스포츠"},{k:"country",n:"🌎 나라"},
  {k:"food",n:"🍔 음식"},{k:"thing",n:"📦 물건"},{k:"animal",n:"🐶 동물"},
@@ -2708,7 +2708,7 @@ function spySetMode(m){
   document.querySelectorAll("#spyModes .cat-pick").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
   $("spyDiffRow").style.display=(m==="fool")?"block":"none";
   $("spyModeDesc").innerHTML=(m==="spy")
-    ?"무작위 1명만 <b>스파이</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어."
+    ?"무작위 1명만 <b>라이어</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어."
     :"무작위 1명만 <b>비슷하지만 다른 제시어</b>를 받아요. 본인은 끝까지 모릅니다 🤫";
   beep(560,.03,.08,"square");
 }
@@ -2768,7 +2768,7 @@ function spyStart(){
     for(let i=0;i<SPY.n;i++)SPY.cards.push(i===SPY.special?SPY.wordB:SPY.word);
   }
   SPY.idx=0;SPY.votes=[];SPY.voter=0;
-  logEvent("play","스파이게임-"+(SPY.mode==="spy"?"스파이":"바보"));
+  logEvent("play","라이어게임-"+(SPY.mode==="spy"?"라이어":"바보"));
   spyPassRender();
 }
 function spyPassRender(){
@@ -2787,7 +2787,7 @@ function spyShowCard(){
   $("spyCardNum").textContent="PLAYER "+(SPY.idx+1);
   if(w===null){
     $("spyCardLabel").textContent="";
-    $("spyCardWord").innerHTML="당신은<br>스파이입니다 🕵️";
+    $("spyCardWord").innerHTML="당신은<br>라이어입니다 🕵️";
     $("spyCardWord").className="spy-word spy-is";
     $("spyCardSub").textContent="제시어를 모릅니다 — 눈치껏 아는 척하세요!";
   }else{
@@ -2831,14 +2831,14 @@ function spyResult(accused){
   const sp=SPY.special,caught=(accused===sp);
   let h='<div class="spy-res-line">🗳 지목된 사람: <b>PLAYER '+(accused+1)+'</b></div>';
   if(SPY.mode==="spy"){
-    h+='<div class="spy-res-big">🕵️ 스파이는 <b>PLAYER '+(sp+1)+'</b>!</div>';
+    h+='<div class="spy-res-big">🕵️ 라이어는 <b>PLAYER '+(sp+1)+'</b>!</div>';
     h+='<div class="spy-res-word">제시어 「'+esc(SPY.word)+'」</div>';
     if(caught){
-      h+='<div class="spy-res-line" style="margin-top:10px">스파이를 잡았어요! 마지막 <b>역전 기회</b>를 줍니다 👇</div>';
-      h+='<div class="hint" style="margin-top:4px">스파이가 제시어를 맞히면 <b>역전승</b>!</div>';
+      h+='<div class="spy-res-line" style="margin-top:10px">라이어를 잡았어요! 마지막 <b>역전 기회</b>를 줍니다 👇</div>';
+      h+='<div class="hint" style="margin-top:4px">라이어가 제시어를 맞히면 <b>역전승</b>!</div>';
       h+='<div id="spyGuessBox">'+spyGuessBtns()+'</div>';
     }else{
-      h+='<div class="spy-res-win">🕵️ 스파이 승리!</div><div class="hint">시민들이 스파이를 못 찾았어요</div>';
+      h+='<div class="spy-res-win">🕵️ 라이어 승리!</div><div class="hint">시민들이 라이어를 못 찾았어요</div>';
     }
   }else{
     h+='<div class="spy-res-big">🤪 바보는 <b>PLAYER '+(sp+1)+'</b> 였습니다!</div>';
@@ -2858,8 +2858,8 @@ function spyGuessBtns(){
 function spyGuess(w){
   const ok=(w===SPY.word);
   $("spyGuessBox").innerHTML=ok
-    ?'<div class="spy-res-win">🕵️ 스파이 역전 승리!</div><div class="hint">제시어 「'+esc(SPY.word)+'」를 맞혔습니다</div>'
-    :'<div class="spy-res-win">🎉 시민 승리!</div><div class="hint">스파이의 답 「'+esc(w)+'」 — 정답은 「'+esc(SPY.word)+'」</div>';
+    ?'<div class="spy-res-win">🕵️ 라이어 역전 승리!</div><div class="hint">제시어 「'+esc(SPY.word)+'」를 맞혔습니다</div>'
+    :'<div class="spy-res-win">🎉 시민 승리!</div><div class="hint">라이어의 답 「'+esc(w)+'」 — 정답은 「'+esc(SPY.word)+'」</div>';
   if(ok){confetti();winJingle();}else{beep(160,.35,.22,"sawtooth");confetti();}
 }
 function spyAgain(){$("spyVoteNote").textContent="";spyStart();}
@@ -4043,7 +4043,7 @@ initAdsense(); /* 애드센스 배너 (설정 시) */
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildToolList("pg3");
 buildGameIndex(); /* 게임 뽑기 → 설명 연동용 인덱스 */
-spyBuildUI(); /* 스파이게임 주제 버튼 생성 */
+spyBuildUI(); /* 라이어게임 주제 버튼 생성 */
 wheelPrepare(); /* 룰렛 휠 초기 렌더 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
