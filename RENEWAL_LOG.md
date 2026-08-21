@@ -937,3 +937,40 @@ Phase 3(추천)·4(Detail/Focus)·5(MY)·6(Sound)은 2차에서 이미 완료 �
 | console error 0 · duplicate id 0 · 가로 스크롤 0 | ✅ |
 
 **2.5차 정밀 리팩토링 완료.**
+
+---
+
+## 마피아 전면 개편 (폰 단독 진행)
+
+### 문제
+1. **인원 조정 버튼이 먹통** — `setN()` 이 `document.getElementById("nDisp").textContent=N` 을 가드 없이 호출.
+   Lazy Render 로 `toolCount` 가 `#toolPark` 로 빠져 있을 때 `#nDisp` 가 없어 예외가 나고 함수가 중단 →
+   `N` 값은 바뀌지만 화면 표기(`.nRef`)는 갱신되지 않음.
+   재현: `클릭 전 N: 6 / ERR: Cannot set properties of null / 클릭 후 N: 7, 표시: 6`
+2. **마피아가 "역할 배정기" 수준** — 카드 한 장씩 확인만 가능하고, 밤/낮·능력·투표·승패는 전부 오프라인 진행 필요.
+
+### 조치
+- `setN()` 에 null 가드 추가 + `.nRef` 전체 갱신 + `TOOL_POOL` 안(미부착) 도구의 `.nRef` 까지 동기화.
+- 마피아를 폰 하나로 완주 가능한 게임 엔진으로 재작성.
+  - 패널: `mafPnSetup / Pass / Role / Night / Day / Vote / Result`
+  - 엔진: `MAF_ROLE`(마피아·경찰·의사·시민), `MAF` 상태, `mafStart → mafPassRender → mafShowRole →
+    mafNight(마피아→경찰→의사) → mafDay(의사 치료 판정) → mafToVote(동점 시 재투표) → mafCheckEnd → mafEnd`
+  - 마피아는 동료를 지목 대상에서 제외, 경찰 조사 결과는 즉시 표시, 의사 치료 성공 시 밤 사망 없음.
+  - 승패: 마피아 0 → 시민 승 / 마피아 ≥ 나머지 → 마피아 승. 종료 시 전원 역할 공개.
+- 레거시 `mafRoles/mafIdx/mafShown/mafBoxSet/mafTap` 및 `#mafBox` 제거.
+- Registry: `t:"🃏 마피아"`, `min:4,max:10`, `pref:[6,7,8]`, GDESC 갱신. 모임게임 규칙 카드 5단계로 재작성.
+
+### 검증
+| 스위트 | 결과 |
+|---|---|
+| `maf_test.js` | 31/31 ✅ (인원 ±, 6인 구성 마피아2·경찰1·의사1·시민2, 동료 표시, 밤 3단계, 낮 공개, 투표·처형, 승패·역할 공개) |
+| `p1_reg.js` | 전항목 ✅ (마피아 케이스 신 API 로 교체) |
+| `play_all.js` | 전항목 ✅ / JS 에러 0 |
+| `p7_test.js` | duplicate id 0, DOM 263노드, 누적 없음, 4기기 가로스크롤 0 |
+| `pd_test.js` | 터치 44px, Focus Mode, JS 에러 0 |
+| 스트레스 | 4~10명 × 12판 = 84판 전부 완주, 에러 0 |
+
+### 참고 — 승률 분포 (스트레스 84판)
+`4명 시민9:마피아3 · 5명 8:4 · 6명 4:8 · 7명 2:10 · 8명 5:7 · 9명 2:10 · 10명 4:8`
+무작위 투표 기준이라 실제 플레이(추리·토론)와는 다르지만, 6명 이상에서 마피아 쪽이 유리한 편.
+밸런스 조정은 별도 요청 시 `mafCompOf()` 구성 비율로 대응.

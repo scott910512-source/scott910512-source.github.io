@@ -612,6 +612,14 @@ body.focus{padding-bottom:0}
 .t-tile.t-fb{grid-column:1/-1;min-height:70px;font-size:16px;color:#ffc3d5;
   background:linear-gradient(135deg,rgba(255,95,143,.32),rgba(255,179,64,.2));
   border:2px solid #ff5f8f;box-shadow:0 6px 20px rgba(255,95,143,.25);margin-top:8px}
+/* ===== 마피아: 폰 완결형 ===== */
+.maf-phase{font-size:clamp(20px,5.5vmin,28px);font-weight:900;margin:6px 0 10px;padding:10px;border-radius:var(--r-card)}
+.maf-night{background:linear-gradient(160deg,#1b2a5a,#141a38);color:#a9c4ff;border:1px solid #2f4a8a}
+.maf-day{background:linear-gradient(160deg,#5a3a12,#3a2810);color:#ffd79a;border:1px solid #8a6a2f}
+.maf-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
+.maf-p{font-size:12.5px;font-weight:800;padding:6px 11px;border-radius:var(--r-pill);
+  background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.maf-p.dead{opacity:.4;text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -825,16 +833,16 @@ body.focus{padding-bottom:0}
 <p class="punish">⚡ 못 찾은 사람 벌칙</p>
 <span class="golink" onclick="goTool('toolRainbow')">⚡ 무지개 찾기 열기 →</span></div>
 
-<div class="g"><div class="g-top"><h3>🃏 마피아 (6인 축소판)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
-<p class="meta">인원 <b>6</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b> · 구성 <b>마피아2 · 경찰1 · 의사1 · 시민2</b></p>
+<div class="g"><div class="g-top"><h3>🃏 마피아</h3><div class="badges"><span class="bd trend">심리전</span></div></div>
+<p class="meta">인원 <b>4~10</b> · 준비물 <b>폰 1대</b> · 소요 <b>15~20분</b></p>
 <div class="how"><ol>
-<li><b>마피아 배정기</b>로 각자 직업 비밀 확인, 사회자 없이 셀프 진행 가능</li>
-<li>밤: 전원 눈 감기 → 마피아 2명 눈 뜨고 제거 대상 무언 합의 → 의사가 살릴 사람 지목 → 경찰이 1명 조사(마피아 여부 끄덕임 확인은 진행자 or 정직 룰)</li>
-<li>낮: 사망 발표 → 3분 토론 → 투표로 1명 처형</li>
-<li>마피아 전멸 = 시민 승 / 마피아 수 ≥ 시민 수 = 마피아 승</li></ol></div>
-<a class="vid" href="https://www.youtube.com/results?search_query=%EB%A7%88%ED%94%BC%EC%95%84%EA%B2%8C%EC%9E%84%20%EA%B7%9C%EC%B9%99%20%EC%84%A4%EB%AA%85" target="_blank">📺 영상으로 배우기</a>
-<p class="punish">⚡ 진 팀 전원 벌칙. 6인은 2~3라운드면 끝나서 템포 빠름</p>
-<span class="golink" onclick="goTool('toolMafia')">⚡ 마피아 배정기 열기 →</span></div>
+<li>도구의 <b>마피아</b>에서 인원을 정하고 시작 — 인원에 맞춰 마피아·경찰·의사·시민이 자동 배정</li>
+<li>폰을 돌려가며 각자 역할 확인 (마피아는 동료가 누구인지 함께 표시)</li>
+<li><b>🌙 밤</b>: 마피아가 제거할 사람 지목 → 경찰이 한 명 조사 → 의사가 한 명 치료</li>
+<li><b>☀️ 낮</b>: 밤 결과 공개 → 토론 → 비밀 투표로 처형 (동점이면 재투표)</li>
+<li>마피아를 모두 찾으면 <b>시민 승리</b>, 마피아 수가 시민과 같아지면 <b>마피아 승리</b></li></ol></div>
+<p class="punish">⚡ 진 팀 벌칙</p>
+<span class="golink" onclick="goTool('toolMafia')">⚡ 마피아 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🤐 침묵 속 대화</h3><div class="badges"><span class="bd trend">🔥 신규</span><span class="bd hard">웃참</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>2명 대결 + 관전</b> · 준비물 <b>폰 1대 (도구 탭)</b></p>
@@ -1562,11 +1570,55 @@ body.focus{padding-bottom:0}
 </div>
 
 <div class="t-card" id="toolMafia">
-  <h3>🃏 마피아 배정기</h3>
-  <p class="hint" id="mafHint">인원에 맞춰 직업 자동 구성 — 폰 돌리며 비밀 확인</p>
-  <div class="pcount-mini"><span class="lbl">👥 시작 전 인원</span><button onclick="setN(-1)">−</button><span class="pm-n"><span class="nRef">6</span>명</span><button onclick="setN(1)">+</button></div>
-  <div class="secret" id="mafBox" onclick="mafTap()"><div class="s-main">🎲 시작을 누르세요</div><div class="s-sub"></div></div>
-  <button class="big-btn" onclick="mafStart()">🃏 <span class="nRef">6</span>인 배정 시작</button>
+  <h3>🃏 마피아</h3>
+  <div id="mafPnSetup">
+    <p class="hint" id="mafHint">인원에 맞춰 직업 자동 구성 — 폰만으로 밤·낮 진행</p>
+    <div class="pcount-mini"><span class="lbl">👥 인원</span><button onclick="setN(-1)">−</button><span class="pm-n"><span class="nRef">6</span>명</span><button onclick="setN(1)">+</button></div>
+    <button class="big-btn" style="font-size:18px;padding:16px 40px" onclick="mafStart()">🃏 <span class="nRef">6</span>인 게임 시작</button>
+  </div>
+  <div id="mafPnPass" style="display:none">
+    <div class="spy-pass" onclick="mafShowRole()">
+      <div class="spy-pass-n" id="mafPassNum">PLAYER 1</div>
+      <div style="font-size:52px;margin:10px 0">📱</div>
+      <div class="spy-pass-t" id="mafPassTxt">화면을 눌러 역할 확인</div>
+      <div class="hint" style="margin-top:8px">다른 사람이 보지 않게 하세요!</div>
+    </div>
+  </div>
+  <div id="mafPnRole" style="display:none">
+    <div class="spy-card">
+      <div class="spy-card-n" id="mafRoleNum">PLAYER 1</div>
+      <div class="spy-card-l">당신의 역할</div>
+      <div class="spy-word" id="mafRoleName">?</div>
+      <div class="hint" id="mafRoleSub"></div>
+      <div class="hint" id="mafMates" style="color:#ff7fab;font-weight:800"></div>
+    </div>
+    <button class="big-btn b2" style="font-size:17px;padding:15px 34px" onclick="mafRoleDone()">✅ 확인 완료</button>
+  </div>
+  <div id="mafPnNight" style="display:none">
+    <div class="maf-phase maf-night">🌙 <span id="mafDayNo">1</span>번째 밤</div>
+    <div class="hint" id="mafNightWho" style="font-size:15px;font-weight:800;color:var(--orange)"></div>
+    <p class="hint" id="mafNightAsk"></p>
+    <div id="mafNightBtns"></div>
+    <div class="hint" id="mafNightNote" style="min-height:20px"></div>
+  </div>
+  <div id="mafPnDay" style="display:none">
+    <div class="maf-phase maf-day">☀️ <span id="mafDayNo2">1</span>번째 낮</div>
+    <div id="mafDayNews" style="font-size:clamp(16px,4.5vmin,22px);font-weight:900;margin:10px 0"></div>
+    <div id="mafAlive" class="maf-list"></div>
+    <p class="hint">토론 후 처형할 사람을 투표로 정하세요</p>
+    <button class="big-btn" onclick="mafToVote()">🗳 투표 시작</button>
+  </div>
+  <div id="mafPnVote" style="display:none">
+    <div class="hint" id="mafVoteNote" style="color:var(--orange);font-weight:800"></div>
+    <div class="spy-card-n" id="mafVoteNum">PLAYER 1 투표</div>
+    <p class="hint">처형할 사람을 <b>몰래</b> 선택하세요</p>
+    <div id="mafVoteBtns"></div>
+  </div>
+  <div id="mafPnResult" style="display:none">
+    <div id="mafResBox"></div>
+    <button class="big-btn" style="margin-top:10px" onclick="mafStart()">🔄 같은 인원으로 다시</button>
+    <button class="big-btn b3" onclick="mafPanel('mafPnSetup')">⚙️ 인원 변경</button>
+  </div>
 </div>
 
 <div class="t-card" id="toolIntro">
@@ -1925,7 +1977,7 @@ const GAMES=[
 {id:"telepathy2",t:"🧠 텔레파시 일치 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"none",dur:5,moods:["conversation"],tag:null,drink:0,tool:"toolTele",src:[["pg1",24]]},
 {id:"yangsechan",t:"🎭 양세찬 게임",cats:["gathering"],min:2,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["funny","psychology"],tag:"인기",drink:0,tool:"toolYang",src:[["pg1",7]]},
 {id:"rainbow",t:"🌈 무지개 찾기",cats:["gathering"],min:2,max:10,team:false,loc:"indoor",prep:"items",dur:5,moods:["quick","active"],tag:null,drink:0,tool:"toolRainbow",src:[["pg1",8]]},
-{id:"mafia",t:"🃏 마피아 (6인 축소판)",cats:["gathering"],min:6,max:null,team:false,loc:"indoor",prep:"phone",dur:20,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolMafia",src:[["pg1",9]]},
+{id:"mafia",t:"🃏 마피아",cats:["gathering"],min:4,max:10,team:false,loc:"indoor",prep:"phone",dur:20,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolMafia",src:[["pg1",9]]},
 {id:"silent",t:"🤐 침묵 속 대화",cats:["gathering"],min:2,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["funny","psychology"],tag:"🔥 신규",drink:0,tool:"toolSilent",src:[["pg1",10]]},
 {id:"mario",t:"🍄 슈퍼마리오 코인 게임",cats:["gathering"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:"🔥 요즘 대학가",drink:0,tool:null,src:[["pg1",12]]},
 {id:"apart",t:"🏢 아파트 게임",cats:["gathering"],min:4,max:8,team:false,loc:"indoor",prep:"none",dur:3,moods:["quick","funny"],tag:"APT 재유행",drink:0,tool:null,src:[["pg1",13]]},
@@ -2015,7 +2067,7 @@ telepathy:"동시에 답 외치기 — 혼자만 다른 답이면 벌칙! (경�
 telepathy2:"전원이 똑같은 답을 외치면 성공! (협동형)",
 yangsechan:"서로가 낼 인물을 몰래 정하고 질문으로 맞혀요.",
 rainbow:"빨주노초파남보 순서로 그 색 물건을 찾아오세요.",
-mafia:"밤엔 마피아가, 낮엔 시민이 움직입니다.",
+mafia:"밤엔 마피아가 사냥하고, 낮엔 투표로 색출합니다.",
 silent:"웃으면 지는 무표정 대화 배틀.",
 mario:"코인 소리에 맞춰 박자를 놓치지 마세요.",
 apart:"손을 겹쳐 쌓고, 부른 층에 걸리면 벌칙!",
@@ -2458,7 +2510,7 @@ telepathy:{active:"all",pref:[4,5,6],pop:4,alias:["텔레파시","텔레파시�
 telepathy2:{active:"all",pref:[4,5,6],pop:3,alias:["텔레파시일치","일치","협동"]},
 yangsechan:{active:2,pop:5,alias:["양세찬","양세찬게임","인물맞추기"]},
 rainbow:{active:"all",pop:3,alias:["무지개","무지개찾기","색깔"]},
-mafia:{active:"all",pref:[6],pop:5,alias:["마피아","마피아게임"]},
+mafia:{active:"all",pref:[6,7,8],pop:5,alias:["마피아","마피아게임","마피아배정"]},
 silent:{active:2,pop:4,alias:["침묵","침묵대화","웃참"]},
 mario:{active:"all",pref:[5,6,7],pop:4,alias:["슈퍼마리오","마리오","코인"]},
 apart:{active:"all",pref:[5,6,7,8],pop:5,alias:["아파트","apt"]},
@@ -2745,13 +2797,17 @@ function mafCompOf(n){
 }
 function setN(d){
   N=Math.min(10,Math.max(3,N+d));
-  document.getElementById("nDisp").textContent=N;
+  /* 지연 렌더로 일부 도구가 문서에 없을 수 있으므로 전 구간 널 가드 */
+  const nd=$("nDisp"); if(nd)nd.textContent=N;
   document.querySelectorAll(".nRef").forEach(e=>e.textContent=N);
   const c=mafCompOf(N);
   const txt="마피아 "+c.m+" · 경찰 "+c.p+(c.doc?" · 의사 "+c.doc:"")+" · 시민 "+c.cit;
-  document.getElementById("mafComp").textContent="🃏 마피아 구성: "+txt;
-  document.getElementById("mafHint").textContent=txt+" — 폰 돌리며 비밀 확인";
-  beep(700,.05,.15,"square");
+  const mc=$("mafComp"); if(mc)mc.textContent="🃏 마피아 구성: "+txt;
+  const mh=$("mafHint"); if(mh)mh.textContent=txt+" — 폰만으로 진행";
+  /* 보관 중인 도구의 인원 표시도 동기화 */
+  try{Object.keys(TOOL_POOL).forEach(k=>{const el=TOOL_POOL[k];
+    if(el&&!el.isConnected)el.querySelectorAll(".nRef").forEach(e=>e.textContent=N);});}catch(e){}
+  sfx("select");
 }
 
 /* ===== roulette ===== */
@@ -3774,38 +3830,160 @@ function spyBuildUI(){
     '" onclick="spySetCat(\''+c.k+'\',this)">'+c.n+'</button>').join("");
 }
 
-/* ===== mafia assigner ===== */
-let mafRoles=[],mafIdx=0,mafShown=false;
+/* ===== 마피아: 폰 1대로 완주하는 게임 엔진 =====
+   역할 확인 → (밤: 마피아 지목 → 경찰 조사 → 의사 치료) → 낮: 결과 공개·투표 → 승패 판정 */
+const MAF_ROLE={
+  mafia:{n:"🔫 마피아",d:"밤에 한 명을 지목해 제거합니다. 낮에는 정체를 숨기세요."},
+  police:{n:"👮 경찰",d:"밤마다 한 명의 정체를 확인할 수 있습니다."},
+  doctor:{n:"💉 의사",d:"밤마다 한 명을 지목해 살릴 수 있습니다."},
+  citizen:{n:"👤 시민",d:"토론과 투표로 마피아를 찾아내세요."}
+};
+let MAF={n:0,roles:[],alive:[],idx:0,day:1,step:0,kill:-1,save:-1,votes:[],voter:0,cands:[],over:false};
+function mafPanel(id){["Setup","Pass","Role","Night","Day","Vote","Result"].forEach(x=>{
+  const e=$("mafPn"+x); if(e)e.style.display=("mafPn"+x===id)?"block":"none";});}
+function mafName(i){return "PLAYER "+(i+1);}
+function mafAliveIdx(){return MAF.alive.map((a,i)=>a?i:-1).filter(i=>i>=0);}
+function mafRoleIdx(r){return MAF.roles.map((x,i)=>x===r?i:-1).filter(i=>i>=0);}
+function mafAliveOf(r){return mafRoleIdx(r).filter(i=>MAF.alive[i]);}
+
 function mafStart(){
   const c=mafCompOf(N),arr=[];
-  for(let i=0;i<c.m;i++)arr.push("🔫 마피아");
-  for(let i=0;i<c.p;i++)arr.push("👮 경찰");
-  for(let i=0;i<c.doc;i++)arr.push("💉 의사");
-  for(let i=0;i<c.cit;i++)arr.push("👤 시민");
-  mafRoles=arr.sort(()=>Math.random()-0.5);
-  mafIdx=0;mafShown=false;
-  $("mafBox").className="secret";
-  mafBoxSet("👆 1번 사람이 탭해서 확인","확인 후 다시 탭해서 숨기고 다음 사람에게");
-  beep(880,.1,.25);
+  for(let i=0;i<c.m;i++)arr.push("mafia");
+  for(let i=0;i<c.p;i++)arr.push("police");
+  for(let i=0;i<c.doc;i++)arr.push("doctor");
+  for(let i=0;i<c.cit;i++)arr.push("citizen");
+  MAF={n:N,roles:shuffle(arr),alive:Array(N).fill(true),idx:0,day:1,step:0,
+       kill:-1,save:-1,votes:[],voter:0,cands:[],over:false};
+  logEvent("play","마피아");sfx("confirm");
+  mafPassRender();
 }
-function mafBoxSet(main,sub){
-  $("mafBox").innerHTML=`<div class="s-main">${main}</div><div class="s-sub">${sub}</div>`;
+function mafPassRender(){
+  if(MAF.idx>=MAF.n){mafNight();return;}
+  $("mafPassNum").textContent=mafName(MAF.idx);
+  $("mafPassTxt").textContent=MAF.idx===0?"화면을 눌러 역할 확인":mafName(MAF.idx)+"에게 휴대폰을 넘겨주세요";
+  mafPanel("mafPnPass");
 }
-function mafTap(){
-  if(!mafRoles.length)return;
-  if(mafIdx>=mafRoles.length){mafBoxSet("✅ 배정 완료","전원 눈 감고 첫 번째 밤 시작");return;}
-  if(!mafShown){
-    const r=mafRoles[mafIdx];
-    $("mafBox").className="secret "+(r.includes("마피아")?"liar":"reveal");
-    mafBoxSet(r,"기억했으면 탭해서 숨기기");
-    mafShown=true;beep(660,.08,.2);
-  }else{
-    mafIdx++;mafShown=false;
-    $("mafBox").className="secret";
-    if(mafIdx>=mafRoles.length){mafBoxSet("✅ 전원 확인 완료","전원 눈 감기 — 첫 번째 밤이 시작됩니다");confetti();}
-    else mafBoxSet("👆 "+(mafIdx+1)+"번 사람이 탭해서 확인","확인 후 다시 탭해서 숨기기");
-    beep(440,.06,.15);
+function mafShowRole(){
+  const r=MAF.roles[MAF.idx],info=MAF_ROLE[r];
+  $("mafRoleNum").textContent=mafName(MAF.idx);
+  $("mafRoleName").textContent=info.n;
+  $("mafRoleSub").textContent=info.d;
+  /* 마피아는 동료를 알 수 있다 */
+  const mates=mafRoleIdx("mafia").filter(i=>i!==MAF.idx);
+  $("mafMates").textContent=(r==="mafia"&&mates.length)?("동료 마피아: "+mates.map(mafName).join(", ")):"";
+  mafPanel("mafPnRole");sfx("reveal");
+}
+function mafRoleDone(){MAF.idx++;sfx("tap");mafPassRender();}
+
+/* ---- 밤 ---- */
+function mafNight(){
+  MAF.step=0;MAF.kill=-1;MAF.save=-1;
+  $("mafDayNo").textContent=MAF.day;
+  mafPanel("mafPnNight");sfx("roundStart");
+  mafNightStep();
+}
+function mafNightStep(){
+  const note=$("mafNightNote");note.textContent="";
+  /* 0: 마피아, 1: 경찰, 2: 의사 */
+  while(MAF.step<3){
+    const role=["mafia","police","doctor"][MAF.step];
+    if(mafAliveOf(role).length)break;
+    MAF.step++;
   }
+  if(MAF.step>=3){mafDay();return;}
+  const role=["mafia","police","doctor"][MAF.step];
+  const actors=mafAliveOf(role).map(mafName).join(", ");
+  $("mafNightWho").textContent=MAF_ROLE[role].n+" — "+actors+" 차례";
+  const ask={mafia:"제거할 사람을 고르세요 (다른 사람은 눈 감기!)",
+             police:"정체를 확인할 사람을 고르세요",
+             doctor:"살릴 사람을 고르세요"}[role];
+  $("mafNightAsk").textContent=ask;
+  const targets=mafAliveIdx().filter(i=>role==="mafia"?MAF.roles[i]!=="mafia":true);
+  $("mafNightBtns").innerHTML=targets.map(i=>
+    '<button class="quiz-choice" onclick="mafNightPick('+i+')">'+mafName(i)+'</button>').join("");
+}
+function mafNightPick(i){
+  const role=["mafia","police","doctor"][MAF.step];
+  sfx("vote");
+  if(role==="mafia"){MAF.kill=i;MAF.step++;mafNightStep();return;}
+  if(role==="police"){
+    const isM=MAF.roles[i]==="mafia";
+    $("mafNightBtns").innerHTML='<div class="spy-res-word">'+mafName(i)+' → '+(isM?"🔫 마피아 입니다!":"👤 마피아가 아닙니다")+'</div>'+
+      '<button class="big-btn b2" onclick="mafNightNext()">확인 완료 → 다음</button>';
+    $("mafNightNote").textContent="경찰만 보세요. 확인 후 넘기세요.";
+    sfx("reveal");return;
+  }
+  MAF.save=i;MAF.step++;mafNightStep();
+}
+function mafNightNext(){MAF.step++;sfx("tap");mafNightStep();}
+
+/* ---- 낮 ---- */
+function mafDay(){
+  let news;
+  if(MAF.kill>=0&&MAF.kill===MAF.save){news="🛡 밤사이 아무도 죽지 않았습니다! (의사가 살렸어요)";sfx("success");}
+  else if(MAF.kill>=0){MAF.alive[MAF.kill]=false;
+    news="💀 "+mafName(MAF.kill)+" 님이 밤사이 사망했습니다";sfx("fail");}
+  else{news="밤사이 아무 일도 없었습니다";}
+  if(mafCheckEnd())return;
+  $("mafDayNo2").textContent=MAF.day;
+  $("mafDayNews").textContent=news;
+  mafRenderAlive("mafAlive");
+  mafPanel("mafPnDay");
+}
+function mafRenderAlive(id){
+  $(id).innerHTML=MAF.roles.map((r,i)=>
+    '<span class="maf-p'+(MAF.alive[i]?"":" dead")+'">'+mafName(i)+'</span>').join("");
+}
+function mafToVote(){
+  MAF.voter=0;MAF.votes=[];MAF.cands=mafAliveIdx();
+  $("mafVoteNote").textContent="";sfx("roundStart");mafVoteRender();
+}
+function mafVoteRender(){
+  const voters=mafAliveIdx();
+  if(MAF.voter>=voters.length){mafTally();return;}
+  const me=voters[MAF.voter];
+  $("mafVoteNum").textContent=mafName(me)+" 투표";
+  $("mafVoteBtns").innerHTML=MAF.cands.filter(i=>i!==me||MAF.cands.length===1)
+    .map(i=>'<button class="quiz-choice" onclick="mafVotePick('+i+')">'+mafName(i)+'</button>').join("");
+  mafPanel("mafPnVote");
+}
+function mafVotePick(i){MAF.votes.push(i);MAF.voter++;sfx("vote");mafVoteRender();}
+function mafTally(){
+  const t={};MAF.votes.forEach(v=>t[v]=(t[v]||0)+1);
+  let max=0;Object.values(t).forEach(c=>{if(c>max)max=c;});
+  const top=Object.keys(t).filter(k=>t[k]===max).map(Number);
+  if(top.length>1&&MAF.cands.length>top.length){
+    MAF.cands=top;MAF.voter=0;MAF.votes=[];
+    $("mafVoteNote").innerHTML="⚖️ 동점! <b>"+top.map(mafName).join(", ")+"</b> 중 재투표";
+    mafVoteRender();return;
+  }
+  const out=top[Math.floor(Math.random()*top.length)];
+  MAF.alive[out]=false;
+  const wasM=MAF.roles[out]==="mafia";
+  sfx(wasM?"success":"fail");
+  if(mafCheckEnd(mafName(out)+" 처형 — "+(wasM?"🔫 마피아였습니다!":"😢 "+MAF_ROLE[MAF.roles[out]].n+" 였습니다")))return;
+  MAF.day++;
+  $("mafDayNews").textContent=mafName(out)+" 처형 — "+(wasM?"🔫 마피아였습니다!":"😢 "+MAF_ROLE[MAF.roles[out]].n+" 였습니다");
+  setTimeout(()=>mafNight(),1200);
+  mafRenderAlive("mafAlive");mafPanel("mafPnDay");
+}
+/* ---- 승패 ---- */
+function mafCheckEnd(extra){
+  const m=mafAliveOf("mafia").length;
+  const others=mafAliveIdx().length-m;
+  if(m===0)return mafEnd("🎉 시민 승리!","마피아를 모두 찾아냈습니다",extra);
+  if(m>=others)return mafEnd("🔫 마피아 승리!","마피아 수가 시민과 같아졌습니다",extra);
+  return false;
+}
+function mafEnd(title,sub,extra){
+  MAF.over=true;
+  let h=extra?('<div class="spy-res-line">'+esc(extra)+'</div>'):"";
+  h+='<div class="spy-res-win">'+title+'</div><div class="hint">'+sub+'</div>';
+  h+='<div class="gd-sec">전체 역할 공개</div><div class="maf-list">'+
+     MAF.roles.map((r,i)=>'<span class="maf-p'+(MAF.alive[i]?"":" dead")+'">'+mafName(i)+' '+MAF_ROLE[r].n+'</span>').join("")+'</div>';
+  $("mafResBox").innerHTML=h;
+  mafPanel("mafPnResult");confetti();sfx("winner");
+  return true;
 }
 
 /* ===== bottle spin ===== */
