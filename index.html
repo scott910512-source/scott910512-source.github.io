@@ -1981,7 +1981,7 @@ let RL_ITEMS=[];
 function rlRender(){
   const box=$("rlItems");if(!box)return;
   box.innerHTML=RL_ITEMS.map(it=>'<span class="rl-chip">🎯 '+esc(it.name)+
-    '<button title="제거" onclick="rlRemove('+JSON.stringify(it.id)+')">✕</button></span>').join("");
+    '<button title="제거" onclick="rlRemove('+JSON.stringify(it.id).replace(/"/g,"&quot;")+')">✕</button></span>').join("");
   if(typeof wheelPrepare==="function")wheelPrepare();
 }
 async function rlLoad(){
