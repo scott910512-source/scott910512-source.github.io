@@ -1912,7 +1912,8 @@ const GAMES=[
 {id:"balance",t:"⚖️ 밸런스 게임",cats:["gathering"],min:null,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["conversation","funny"],tag:null,drink:0,tool:"toolBalance",src:[["pg1",3],["pg1",11]]},
 {id:"imagegame",t:"👉 이미지 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:5,moods:["psychology","funny"],tag:null,drink:0,tool:"toolImageQ",src:[["pg1",4]]},
 {id:"truthdare",t:"🎯 진실 혹은 도전",cats:["gathering"],min:2,max:10,team:false,loc:"indoor",prep:"phone",dur:10,moods:["conversation","funny"],tag:null,drink:0,tool:"toolTod",src:[["pg1",5]]},
-{id:"telepathy",t:"🔮 텔레파시 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:5,moods:["conversation","quick"],tag:null,drink:0,tool:"toolTele",src:[["pg1",6],["pg1",24]]},
+{id:"telepathy",t:"🔮 텔레파시 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"phone",dur:5,moods:["conversation","quick"],tag:null,drink:0,tool:"toolTele",src:[["pg1",6]]},
+{id:"telepathy2",t:"🧠 텔레파시 일치 게임",cats:["gathering"],min:3,max:10,team:false,loc:"indoor",prep:"none",dur:5,moods:["conversation"],tag:null,drink:0,tool:"toolTele",src:[["pg1",24]]},
 {id:"yangsechan",t:"🎭 양세찬 게임",cats:["gathering"],min:2,max:null,team:false,loc:"indoor",prep:"phone",dur:5,moods:["funny","psychology"],tag:"인기",drink:0,tool:"toolYang",src:[["pg1",7]]},
 {id:"rainbow",t:"🌈 무지개 찾기",cats:["gathering"],min:2,max:10,team:false,loc:"indoor",prep:"items",dur:5,moods:["quick","active"],tag:null,drink:0,tool:"toolRainbow",src:[["pg1",8]]},
 {id:"mafia",t:"🃏 마피아 (6인 축소판)",cats:["gathering"],min:6,max:null,team:false,loc:"indoor",prep:"phone",dur:20,moods:["psychology","conversation"],tag:null,drink:0,tool:"toolMafia",src:[["pg1",9]]},
@@ -2001,7 +2002,8 @@ nunchi:"눈치껏 한 명씩 숫자를 외쳐요. 겹치면 벌칙!",
 balance:"둘 중 하나만! 취향이 갈리는 양자택일.",
 imagegame:"'가장 ○○할 것 같은 사람'을 동시에 지목해요.",
 truthdare:"진실을 말하거나, 도전을 수행하거나.",
-telepathy:"셋 세면 동시에 답 외치기. 같은 답이면 생존!",
+telepathy:"동시에 답 외치기 — 혼자만 다른 답이면 벌칙! (경쟁형)",
+telepathy2:"전원이 똑같은 답을 외치면 성공! (협동형)",
 yangsechan:"서로가 낼 인물을 몰래 정하고 질문으로 맞혀요.",
 rainbow:"빨주노초파남보 순서로 그 색 물건을 찾아오세요.",
 mafia:"밤엔 마피아가, 낮엔 시민이 움직입니다.",
@@ -2433,7 +2435,8 @@ nunchi:{active:"all",pref:[5,6,7,8],pop:5,alias:["눈치","눈치 게임"]},
 balance:{active:"all",pop:5,alias:["밸런스","밸런스게임","양자택일"]},
 imagegame:{active:"all",pref:[5,6,7,8],pop:4,alias:["이미지","이미지게임","지목"]},
 truthdare:{active:"all",pop:4,alias:["진실","도전","트루스","truth"]},
-telepathy:{active:"all",pref:[4,5,6],pop:4,alias:["텔레파시","텔레파시일치","일치"]},
+telepathy:{active:"all",pref:[4,5,6],pop:4,alias:["텔레파시","텔레파시게임"]},
+telepathy2:{active:"all",pref:[4,5,6],pop:3,alias:["텔레파시일치","일치","협동"]},
 yangsechan:{active:2,pop:5,alias:["양세찬","양세찬게임","인물맞추기"]},
 rainbow:{active:"all",pop:3,alias:["무지개","무지개찾기","색깔"]},
 mafia:{active:"all",pref:[6],pop:5,alias:["마피아","마피아게임"]},
@@ -2626,6 +2629,7 @@ function boom(){ sfx("bombExplode"); }
    AudioContext 는 기존 ac() 하나만 공유. 볼륨/길이는 본문 48·49항 기준. */
 const SFX_CD={}, SFX_COOLDOWN=45;          /* 중첩 방지 (본문 50항) */
 function tone(f,dur,vol,type,when,f2){
+  if(!sndOK())return;
   try{
     const a=ac(),o=a.createOscillator(),g=a.createGain();
     o.type=type||"sine";
@@ -2640,6 +2644,7 @@ function tone(f,dur,vol,type,when,f2){
   }catch(e){}
 }
 function noise(dur,vol,cut,when){
+  if(!sndOK())return;
   try{
     const a=ac(),n=Math.floor(a.sampleRate*dur),buf=a.createBuffer(1,n,a.sampleRate),d=buf.getChannelData(0);
     for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
@@ -2650,7 +2655,7 @@ function noise(dur,vol,cut,when){
     src.start(a.currentTime+(when||0));
   }catch(e){}
 }
-function seq(list){ list.forEach(x=>tone(x[0],x[1],x[2],x[3]||"sine",x[4]||0,x[5])); }
+function seq(list){ if(!sndOK())return; list.forEach(x=>tone(x[0],x[1],x[2],x[3]||"sine",x[4]||0,x[5])); }
 function vib(pattern){ try{ if(navigator.vibrate&&SND_MODE!=="off")navigator.vibrate(pattern); }catch(e){} }
 
 const SFX={
