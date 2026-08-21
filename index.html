@@ -591,6 +591,18 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
 .my-empty{font-size:12.5px;color:var(--sub);padding:14px;text-align:center;
   border:1px dashed var(--line);border-radius:var(--r-card)}
 .my-admin span:first-child{color:#ffb340}
+/* ===== 2차-D: Focus Mode + compact ===== */
+body.focus .bnav{transform:translateY(110%);transition:transform .18s ease;pointer-events:none}
+.bnav{transition:transform .18s ease}
+body.focus{padding-bottom:0}
+/* 카드 5~10% compact — 터치 영역 48px 유지 (본문 62항) */
+.gcard{padding:11px 13px;min-height:56px;margin-bottom:7px}
+.gcard-ic{font-size:22px;width:28px}
+.gcard-t{font-size:15px}
+.gcard-s{font-size:11.5px}
+.glist-h{margin:9px 0 5px}
+.bnav-i{min-height:52px;font-size:11px}
+.bnav-i span{font-size:20px}
 </style>
 </head>
 <body>
@@ -1869,6 +1881,7 @@ let toolPop=null,toolPopAnchor=null;
 function openToolPopup(card){
   if(!card)return;
   closeGame(); /* 이전 팝업/도구 원복 */
+  document.body.classList.add("focus");   /* 게임 실행 중 집중 모드 (본문 20항) */
   const body=$("modalBody");if(!body)return;
   toolPopAnchor=document.createElement("div");toolPopAnchor.style.display="none";
   card.parentNode.insertBefore(toolPopAnchor,card);
@@ -2132,6 +2145,7 @@ function closeGame(){
     toolPop=null;toolPopAnchor=null;
   }
   m.classList.remove("on");document.body.style.overflow="";
+  document.body.classList.remove("focus");
 }
 
 /* ===== P1: Hash Router + 화면 이탈 cleanup (부록 Core-6 / D-6) ===== */
