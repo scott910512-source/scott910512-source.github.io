@@ -527,6 +527,12 @@ header h1{font-size:27px}
 .gd-steps li{margin-bottom:3px}
 .gd-more{font-size:13.5px;padding:11px 22px}
 #gdFull .g{margin-top:12px}
+/* ===== P3 ===== */
+.gd-help{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:6px}
+.gd-hbtn{font-size:13.5px;padding:11px 18px;margin:0}
+.wheel-n{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;font-size:13px;color:var(--sub);font-weight:700}
+.wheel-n button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--txt);font-size:15px;font-weight:900;cursor:pointer}
+.wheel-n .wn-v{min-width:52px;text-align:center;color:var(--orange);font-weight:900}
 </style>
 </head>
 <body>
@@ -571,6 +577,10 @@ header h1{font-size:27px}
     <h3 style="font-size:21px">🎡 랜덤 게임 룰렛</h3>
     <button class="rl-addbtn" onclick="rlPanelToggle()">＋ 추가</button>
     <p class="hint" id="rlHint">카테고리를 켜고 <b>돌리기!</b> — 룰렛이 돌아가며 하나를 뽑아요</p>
+    <div class="wheel-n">👥 인원
+      <button onclick="setWheelN(-1)">−</button><span class="wn-v" id="wheelN">전체</span><button onclick="setWheelN(1)">+</button>
+      <button onclick="setWheelN(0)" style="width:auto;padding:0 10px;font-size:12px">전체</button>
+    </div>
     <div class="cat-picks">
       <button class="cat-pick on" data-cat="pg1" onclick="toggleCat(this)">🎉 모임게임</button>
       <button class="cat-pick on" data-cat="pg2" onclick="toggleCat(this)">🍻 술게임</button>
@@ -1947,6 +1957,10 @@ waterballoon:"물풍선을 터뜨리지 않고 멀리서 주고받기.",
 badminton:"랠리를 오래 이어가는 라켓 게임.",
 treasure:"숨겨진 쪽지를 먼저 찾는 팀이 승리."
 };
+/* P3: '도구연계' 태그 제거 — 실제 도우미 버튼으로 대체 (본문 23항) */
+function stripToolBadges(){
+  document.querySelectorAll(".bd.tool").forEach(b=>{if(/도구연계/.test(b.textContent))b.remove();});
+}
 const TOOL_GROUPS=[{k:"people",n:"👥 사람"},{k:"draw",n:"🎲 뽑기"},{k:"flow",n:"⏱ 진행"},{k:"quiz",n:"🧠 출제"}];
 
 
@@ -2163,6 +2177,9 @@ function openGameDetail(id){
     c.querySelectorAll(".how li").forEach(li=>steps.push(li.textContent.trim()));});
   if(steps.length)h+='<div class="gd-sec">게임 방법</div><ol class="gd-steps">'+
     steps.slice(0,4).map(t=>'<li>'+esc(t.replace(/\s+/g," ").slice(0,60))+'</li>').join("")+'</ol>';
+  const helpers=gameHelpers(g);
+  if(helpers.length)h+='<div class="gd-sec">게임 도우미</div><div class="gd-help">'+
+    helpers.map(t=>'<button class="big-btn b2 gd-hbtn" onclick="location.hash=\'#/tool/'+t.id+'\'">'+esc(t.t)+'</button>').join("")+'</div>';
   h+='<button class="big-btn b3 gd-more" onclick="toggleFullRules(this)">📖 전체 규칙 보기</button>';
   h+='<div id="gdFull" style="display:none"></div>';
   body.innerHTML=h;
@@ -2174,6 +2191,25 @@ function openGameDetail(id){
   $("gameModal").classList.add("on"); $("gameModal").scrollTop=0;
   document.body.style.overflow="hidden";
   logEvent("game_open",g.t);
+}
+/* 게임 상세 → 관련 도구 딥링크 (본문 23항: "도구연계" 태그 대신 실제 버튼) */
+const HELPERS={
+ mafia:["toolCount"], nunchi:["toolCount"],
+ catchmind:["toolSpeed","toolTimer"], charades:["toolSpeed","toolTimer"], silentshout:["toolSpeed"],
+ postit:["toolPerson"], headcount:["toolCount"],
+ jokgu:["toolTeam"], balyagu:["toolTeam"], dodgeball:["toolTeam"], tugofwar:["toolTeam"],
+ relay:["toolTeam"], threelegged:["toolTeam"], yut:["toolTeam"], frisbee:["toolTeam"],
+ waterballoon:["toolTeam"], treasure:["toolTeam"], badminton:["toolTeam"],
+ titanic:["toolPenalty"], sojupong:["toolPenalty"], capupdown:["toolPenalty"], capflick:["toolPenalty"],
+ deathgame:["toolPick","toolPenalty"], bunny:["toolPenalty"], strawberry:["toolPenalty"],
+ threeword:["toolPenalty"], eomok:["toolPenalty"], n369:["toolPenalty"], baskin31:["toolPenalty"],
+ sonbyeongho:["toolPenalty"], subway:["toolPenalty"], tissue:["toolPenalty"],
+ mario:["toolPenalty"], apart:["toolPenalty"], anonchat:["toolPick"], truthdare:["toolPenalty"],
+ mugunghwa:["toolTimer"], towel:["toolTimer"], jegi:["toolTimer"], rainbow:["toolTimer"]
+};
+function gameHelpers(g){
+  const ids=(HELPERS[g.id]||[]).filter(id=>id!==g.tool&&document.getElementById(id));
+  return ids.map(id=>TOOLS.find(t=>t.id===id)).filter(Boolean);
 }
 function toggleFullRules(btn){
   const f=$("gdFull"); if(!f)return;
@@ -2324,10 +2360,18 @@ function rlPanelToggle(){const p=$("rlPanel");if(!p)return;p.style.display=p.sty
 /* ===== 룰렛 휠 (캔버스) ===== */
 const WHEEL={segs:[],angle:0,spinning:false};
 const WHEEL_COLORS=["#4fc3ff","#ff5f5f","#ffe9c9","#ffb340","#3ce8b0","#ff8a2b","#a78bfa","#ff7fab"];
+let WHEEL_N=0; /* 0 = 전체 게임 (인원 무시) */
+function setWheelN(d){
+  if(d===0)WHEEL_N=0; else WHEEL_N=Math.max(2,Math.min(20,(WHEEL_N||6)+d));
+  const el=$("wheelN"); if(el)el.textContent=WHEEL_N?WHEEL_N+"명":"전체";
+  wheelPrepare(); beep(500,.03,.08,"square");
+}
 function wheelPrepare(){
   if(WHEEL.spinning)return;
   const cats=[...document.querySelectorAll('.cat-pick[data-cat].on')].map(b=>b.dataset.cat);
-  const g=(typeof GAME_INDEX!=="undefined"?GAME_INDEX:[]).filter(x=>cats.includes(x.page)).map(x=>({name:x.name,game:x}));
+  let g=(typeof GAME_INDEX!=="undefined"?GAME_INDEX:[]).filter(x=>cats.includes(x.page));
+  if(WHEEL_N)g=g.filter(x=>(x.min==null||WHEEL_N>=x.min)&&(x.max==null||WHEEL_N<=x.max));
+  g=g.map(x=>({name:x.name,game:x}));
   const c=RL_ITEMS.map(it=>({name:it.name,custom:true}));
   let segs;
   if(g.length+c.length<=14)segs=c.concat(g);
@@ -4487,6 +4531,7 @@ spyBuildUI();
   const fb=$("toolFeedback"); if(fb)pg3.appendChild(fb);
   const ab=$("acctBtn"); if(ab)ab.setAttribute("onclick","openSheet()"); /* 계정 진입점 통합 */
 })();
+stripToolBadges();
 routeApply(); /* 초기 라우트 적용 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
