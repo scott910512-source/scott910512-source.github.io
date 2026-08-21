@@ -2606,7 +2606,6 @@ function goStats(){ openAccount(); }
 function openSheet(){ go("my"); }   /* 설정은 MY 탭으로 일원화 */
 function closeSheet(){const e=$("setSheet");if(!e)return;e.classList.remove("on");
   if(!$("gameModal").classList.contains("on"))document.body.style.overflow="";}
-function toggleSnd(){const el=$("sndOn");if(el){el.checked=!el.checked;$("sndState").textContent=el.checked?"ON":"OFF";if(el.checked)beep(700,.05,.15);}}
 
 /* ===== P1: 홈 — 인원 + 즉시 1개 추천 (부록 B-1: 연출 없음, 룰렛과 역할 분리) ===== */
 let HOME_N=6;
@@ -2670,7 +2669,7 @@ telepathy:{active:"all",pref:[4,5,6],pop:4,alias:["텔레파시","텔레파시�
 telepathy2:{active:"all",pref:[4,5,6],pop:3,alias:["텔레파시일치","일치","협동"]},
 yangsechan:{active:2,pop:5,alias:["양세찬","양세찬게임","인물맞추기"]},
 rainbow:{active:"all",pop:3,alias:["무지개","무지개찾기","색깔"]},
-mafia:{active:"all",pref:[7,8,9],pop:5,alias:["마피아","마피아게임","사회자없는마피아","mafia"]},
+mafia:{active:"all",pref:[6,7,8,9],pop:5,alias:["마피아","마피아게임","사회자없는마피아","mafia"]},
 silent:{active:2,pop:4,alias:["침묵","침묵대화","웃참"]},
 mario:{active:"all",pref:[5,6,7],pop:4,alias:["슈퍼마리오","마리오","코인"]},
 apart:{active:"all",pref:[5,6,7,8],pop:5,alias:["아파트","apt"]},
@@ -3896,6 +3895,7 @@ function spyStart(){
   spyPassRender();
 }
 function spyPassRender(){
+  if(!$("spyPassNum"))return;   /* 지연 렌더로 도구 노드가 아직 없을 때 방어 */
   if(SPY.idx>=SPY.n){
     SPY.starter=Math.floor(Math.random()*SPY.n);
     $("spyStartTxt").innerHTML="🎤 <b>PLAYER "+(SPY.starter+1)+"</b> 부터 시작!";
@@ -3907,6 +3907,7 @@ function spyPassRender(){
   spyPanel("spyPnPass");
 }
 function spyShowCard(){
+  if(!$("spyCardWord"))return;
   const w=SPY.cards[SPY.idx];
   $("spyCardNum").textContent="PLAYER "+(SPY.idx+1);
   if(w===null){
@@ -3930,6 +3931,7 @@ function spyToVote(){
   spyVoteRender();
 }
 function spyVoteRender(){
+  if(!$("spyVoteBtns"))return;
   if(SPY.voter>=SPY.n){spyTally();return;}
   $("spyVoteNum").textContent="PLAYER "+(SPY.voter+1)+" 투표";
   $("spyVoteBtns").innerHTML=SPY.cands.filter(i=>i!==SPY.voter||SPY.cands.length===1)
@@ -3952,6 +3954,7 @@ function spyTally(){
   spyResult(accused);
 }
 function spyResult(accused){
+  if(!$("spyResBox"))return;
   const sp=SPY.special,caught=(accused===sp);
   let h='<div class="spy-res-line">🗳 지목된 사람: <b>PLAYER '+(accused+1)+'</b></div>';
   if(SPY.mode==="spy"){
@@ -5603,13 +5606,6 @@ function renderAuth(){
   document.body.classList.toggle("vip",!!sbUser&&er==="vip");
   document.body.classList.toggle("isadmin",!!sbUser&&er==="admin");
   try{if(curRoute==="my")renderMy();}catch(e){}
-  const ab=$("acctBtn");
-  if(ab){
-    if(sbUser){const nm=(sbProfile&&sbProfile.nickname)||"계정";
-      const ic=er==="admin"?"👑":er==="vip"?"💎":"👤";
-      ab.innerHTML=ic+" "+esc(nm.length>6?nm.slice(0,6)+"…":nm);}
-    else ab.innerHTML="👤 계정";
-  }
   if(sbUser){
     $("authLogin").style.display="none";$("authUser").style.display="block";
     const nm=(sbProfile&&sbProfile.nickname)||"사용자";
