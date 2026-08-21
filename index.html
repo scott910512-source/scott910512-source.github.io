@@ -572,6 +572,13 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
   border-radius:var(--r-pill);padding:9px 18px;font-size:13.5px;font-weight:800;cursor:pointer;min-height:44px}
 .gd-fav.on{color:#ff7fab;border-color:#ff5f8f}
 .gd-fav:active{transform:scale(.94)}
+/* 2차: 추천 이유 · 더 보기 */
+.gcard-why{flex:0 0 auto;font-size:10.5px;font-weight:800;padding:4px 9px;border-radius:var(--r-pill);
+  background:rgba(60,232,176,.14);color:#7ef0c8;border:1px solid rgba(60,232,176,.3);max-width:42%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-more{display:block;width:100%;min-height:44px;margin-top:2px;background:none;border:1px dashed var(--line);
+  border-radius:var(--r-card);color:var(--sub);font-size:13px;font-weight:800;cursor:pointer}
+.rec-more:active{opacity:.7}
 </style>
 </head>
 <body>
@@ -608,7 +615,7 @@ body.vip .acct-btn,body.isadmin .acct-btn{background:linear-gradient(135deg,#ff5
     <div id="homePick"></div>
   </div>
   <details class="setup" id="setupBox">
-    <summary>🎯 우리 상황에 맞춰 추천</summary>
+    <summary>🎯 조건 골라 추천받기<span style="margin-left:auto;color:var(--sub)">›</span></summary>
     <div class="setup-r"><span class="setup-l">장소</span>
       <button class="cat-pick on" onclick="setSetup('loc','any',this)">상관없음</button>
       <button class="cat-pick" onclick="setSetup('loc','indoor',this)">🏠 실내</button>
@@ -2185,9 +2192,12 @@ function gameMatch(g,q){
   if(!q)return true;
   q=q.trim().toLowerCase();
   if(g.t.toLowerCase().includes(q))return true;
-  const n=q.match(/^(\d+)\s*명?$/);
-  if(n){const v=+n[1];return (g.min==null||v>=g.min)&&(g.max==null||v<=g.max);}
-  const bag=[g.id,...g.moods.map(m=>MOOD_KO[m]),PREP_KO[g.prep],
+  /* 숫자는 '명' 표기가 있거나 30 이하일 때만 인원수로 해석 (예: "369"는 게임 이름) */
+  const n=q.match(/^(\d+)\s*(명?)$/);
+  if(n&&(n[2]||+n[1]<=30)){const v=+n[1];return (g.min==null||v>=g.min)&&(g.max==null||v<=g.max);}
+  /* 별칭 우선 매칭 (본문 14항: 통합 후에도 검색 호환 유지) */
+  if((g.alias||[]).some(a=>{const x=a.toLowerCase();return x===q||x.includes(q)||q.includes(x);}))return true;
+  const bag=[g.id,...(g.alias||[]),...g.moods.map(m=>MOOD_KO[m]),PREP_KO[g.prep],
     g.loc==="outdoor"?"야외":"실내", g.drink?"술":"논알콜 술없이",
     ...(g.cats.map(c=>({gathering:"모임",drinking:"술게임",outdoor:"야외"}[c]))), g.tag||""].join(" ").toLowerCase();
   return bag.includes(q)||q.split(/\s+/).every(w=>bag.includes(w));
@@ -2208,14 +2218,16 @@ function renderGames(){
   }
   box.innerHTML=html;
 }
-function gcardHtml(g){
+function gcardHtml(g,reason){
   const m=g.t.match(/^(\S+)\s*(.*)$/)||[null,"🎮",g.t];
+  /* 추천 이유가 있으면 이유만, 없으면 태그만 — 둘 다 노출하지 않음 (본문 63항) */
+  const right=reason?'<span class="gcard-why">✓ '+esc(reason)+'</span>'
+            :(g.tag?'<span class="gcard-tag">'+esc(g.tag)+'</span>':'');
   return '<button class="gcard" onclick="location.hash=\'#/game/'+g.id+'\'">'+
     '<span class="gcard-ic">'+m[1]+'</span><span class="gcard-b">'+
     '<span class="gcard-t">'+esc(m[2]||g.t)+'</span>'+
     '<span class="gcard-s">'+esc(gameSub(g))+'</span></span>'+
-    (g.tag?'<span class="gcard-tag">'+esc(g.tag)+'</span>':'')+
-    '<span class="gcard-ar">›</span></button>';
+    right+'<span class="gcard-ar">›</span></button>';
 }
 /* ===== P2: Game Detail — 상단 '게임 시작' + Progressive Disclosure ===== */
 const LOC_KO={indoor:"실내",outdoor:"야외"};
@@ -2352,18 +2364,120 @@ function toggleFav(id){
   beep(isFav(id)?760:420,.05,.12,"square");
 }
 /* ---- 상황 기반 추천 스코어링 (본문 10항) ---- */
-function scoreGame(g,S){
-  let s=0;
-  if(S.n){ if(g.min==null&&g.max==null)s+=1; else if(fitN(g,S.n))s+=3; else s-=4; }
-  if(S.loc!=="any"){ s+= (g.loc===S.loc)?2:-2; }
-  if(S.mood!=="any"){ s+= g.moods.includes(S.mood)?3:0; }
-  if(S.drink==="no"){ s+= (g.drink===2)?-5:(g.drink===1?0:1); }
-  else if(S.drink==="yes"){ s+= (g.drink>0)?2:0; }
-  if(S.prep==="none"){ s+= (g.prep==="none")?2:(g.prep==="phone"?1:-3); }
-  if(RECENT.indexOf(g.id)>=0)s-=1.5;      /* 최근 한 건 살짝 뒤로 */
-  if(isFav(g.id))s+=1.5;
-  if(g.tag)s+=0.5;
-  return s;
+/* ===== 2차: Registry 확장 (기존 GAMES 정의는 수정하지 않고 필드만 병합) =====
+   active : "all" = 전원 참여 | 숫자 = 핵심 플레이 인원 (나머지는 관전)
+   pref   : 이 인원수일 때 최적 (exact player bonus)
+   pop    : 인기도 1~5
+   alias  : 검색 호환용 별칭 */
+const GAME_EXTRA={
+liar:{active:"all",pref:[5,6,7,8],pop:5,alias:["라이어","스파이게임","스파이","라이어겜"]},
+rank:{active:"all",pref:[4,5,6,7],pop:4,alias:["순위","랭킹","순위정하기"]},
+nunchi:{active:"all",pref:[5,6,7,8],pop:5,alias:["눈치","눈치 게임"]},
+balance:{active:"all",pop:5,alias:["밸런스","밸런스게임","양자택일"]},
+imagegame:{active:"all",pref:[5,6,7,8],pop:4,alias:["이미지","이미지게임","지목"]},
+truthdare:{active:"all",pop:4,alias:["진실","도전","트루스","truth"]},
+telepathy:{active:"all",pref:[4,5,6],pop:4,alias:["텔레파시","텔레파시일치","일치"]},
+yangsechan:{active:2,pop:5,alias:["양세찬","양세찬게임","인물맞추기"]},
+rainbow:{active:"all",pop:3,alias:["무지개","무지개찾기","색깔"]},
+mafia:{active:"all",pref:[6],pop:5,alias:["마피아","마피아게임"]},
+silent:{active:2,pop:4,alias:["침묵","침묵대화","웃참"]},
+mario:{active:"all",pref:[5,6,7],pop:4,alias:["슈퍼마리오","마리오","코인"]},
+apart:{active:"all",pref:[5,6,7,8],pop:5,alias:["아파트","apt"]},
+anonchat:{active:"all",pref:[6,7,8],pop:3,alias:["익명","익명채팅","오픈채팅"]},
+choseong:{active:"all",pop:4,alias:["초성","초성게임"]},
+silentshout:{active:"all",pref:[6,8],pop:5,alias:["고요","고요속의외침","이어폰"]},
+catchmind:{active:"all",pref:[6,8],pop:5,alias:["캐치마인드","그림","그림맞추기"]},
+postit:{active:"all",pref:[5,6,7],pop:4,alias:["포스트잇","이마","후엠아이","whoami"]},
+charades:{active:"all",pref:[6,8],pop:5,alias:["몸으로말해요","몸으로","제스처"]},
+headcount:{active:"all",pref:[8,10],pop:3,alias:["인원수","인원수게임"]},
+songquiz:{active:"all",pop:4,alias:["노래","노래맞추기","연대별","음악퀴즈"]},
+wordguess:{active:"all",pop:4,alias:["글자","글자맞추기","네글자","다섯글자"]},
+personquiz:{active:"all",pop:4,alias:["인물","인물카드","인물퀴즈"]},
+deathgame:{active:"all",pref:[6,7,8],pop:5,alias:["더게임오브데스","데스","death"]},
+bunny:{active:"all",pref:[5,6,7],pop:5,alias:["바니바니","바니","당근"]},
+strawberry:{active:"all",pref:[5,6,7],pop:4,alias:["딸기","딸기게임"]},
+threeword:{active:"all",pref:[4,5,6],pop:4,alias:["세글자","세글자게임"]},
+eomok:{active:"all",pref:[5,6,7],pop:3,alias:["어목조동","어묵조동"]},
+n369:{active:"all",pref:[5,6,7,8],pop:5,alias:["369","삼육구","3·6·9"]},
+baskin31:{active:"all",pref:[4,5,6],pop:5,alias:["배스킨","31","배스킨라빈스"]},
+hunmin:{active:"all",pop:3,alias:["훈민정음"]},
+sonbyeongho:{active:"all",pref:[5,6,7,8],pop:4,alias:["손병호","손병호게임"]},
+subway:{active:"all",pref:[4,5,6],pop:4,alias:["지하철","지하철게임","노선"]},
+capupdown:{active:"all",pop:3,alias:["병뚜껑","업다운","뚜껑"]},
+titanic:{active:"all",pop:4,alias:["타이타닉","폭탄주"]},
+sojupong:{active:"all",pref:[4,6,8],pop:3,alias:["소주퐁","비어퐁","퐁"]},
+halsudo:{active:"all",pop:3,alias:["할수도","그럴수도"]},
+tissue:{active:"all",pop:3,alias:["휴지","휴지날리기"]},
+capflick:{active:"all",pop:4,alias:["꼬리치기","병뚜껑꼬리"]},
+bombpass:{active:"all",pref:[5,6,7,8],pop:4,alias:["폭탄","폭탄돌리기"]},
+jokgu:{active:"all",pref:[8,10],pop:5,alias:["족구"]},
+balyagu:{active:"all",pref:[12,14,16],pop:4,alias:["발야구","킥볼"]},
+dodgeball:{active:"all",pref:[10,12,14],pop:5,alias:["피구"]},
+mugunghwa:{active:"all",pref:[6,8,10],pop:5,alias:["무궁화","무궁화꽃"]},
+towel:{active:"all",pref:[8,10],pop:4,alias:["수건돌리기","수건"]},
+tugofwar:{active:"all",pref:[10,12],pop:4,alias:["줄다리기","줄"]},
+relay:{active:"all",pref:[8,10],pop:4,alias:["이어달리기","계주","릴레이"]},
+threelegged:{active:"all",pref:[4,6,8],pop:4,alias:["이인삼각","2인3각"]},
+yut:{active:"all",pref:[4,6],pop:5,alias:["윷놀이","윷"]},
+jegi:{active:"all",pop:3,alias:["제기차기","제기"]},
+frisbee:{active:2,pop:3,alias:["원반","프리스비","원반던지기"]},
+waterballoon:{active:2,pop:3,alias:["물풍선","물놀이"]},
+badminton:{active:2,pref:[2,4],pop:4,alias:["배드민턴","셔틀콕"]},
+treasure:{active:"all",pref:[8,10,12],pop:4,alias:["보물찾기","보물"]}
+};
+GAMES.forEach(g=>{const e=GAME_EXTRA[g.id]||{};
+  g.active=e.active===undefined?"all":e.active;
+  g.pref=e.pref||null; g.pop=e.pop||3; g.alias=e.alias||[];});
+
+/* ===== 2차: 추천 스코어링 재설계 =====
+   우선순위 1)플레이 가능 2)실제 참여 적합 3)정확 인원 4)분위기 5)준비물·장소 6)인기 */
+function activeCount(g,n){ return g.active==="all"?n:Math.min(g.active,n); }
+function scoreParts(g,S){
+  const n=S.n||0, P={};
+  /* 1) 플레이 가능 여부 — 가장 강한 가중치 */
+  if(g.min==null&&g.max==null)P.playerFit=2;            /* 제한없음 = 통과 */
+  else if(fitN(g,n))P.playerFit=6;
+  else P.playerFit=-20;
+  /* 2) 실제 참여 인원 적합성 */
+  if(g.active==="all")P.activeFit=5;
+  else{
+    const a=Math.min(g.active,n), ratio=n?a/n:1;
+    P.activeFit = ratio>=0.8?4 : ratio>=0.5?1 : -3-(n-a)*0.35;
+  }
+  /* 3) 정확한 인원 매칭 */
+  /* 지정 인원 폭이 좁을수록(예: 마피아 6인 전용) 더 강하게 가산 */
+  P.exact=(g.pref&&g.pref.indexOf(n)>=0)?(6+(4-Math.min(g.pref.length,4))*0.8):0;
+  /* 4) 분위기 */
+  P.mood=(S.mood!=="any")?(g.moods.includes(S.mood)?4:0):0;
+  /* 5) 장소 · 술 · 준비물 */
+  P.loc=(S.loc!=="any")?(g.loc===S.loc?2.5:-3):0;
+  P.drink=(S.drink==="no")?(g.drink===2?-8:g.drink===1?0:1)
+        :(S.drink==="yes")?(g.drink>0?2:0):0;
+  P.prep=(S.prep==="none")?(g.prep==="none"?2.5:g.prep==="phone"?1.5:-4):0;
+  P.dur=(g.dur<=10)?0.5:0;
+  /* 6) 인기 */
+  P.pop=(g.pop-3)*0.8;
+  /* 최근/즐겨찾기 */
+  const ri=RECENT.indexOf(g.id), fav=isFav(g.id);
+  P.recent = ri<0?0 : (ri===0?-2:ri===1?-1.2:-0.6)*(fav?0.5:1);
+  P.fav = fav?1:0;
+  return P;
+}
+function scoreGame(g,S){ const P=scoreParts(g,S); let s=0; for(const k in P)s+=P[k]; return s; }
+/* 추천 이유 1개 (본문 10항) */
+function recReason(g,S){
+  const n=S.n||0;
+  if(g.pref&&g.pref.indexOf(n)>=0)return "지금 인원에 딱 맞음";
+  if(g.active==="all"&&n&&fitN(g,n))return n+"명 전원 참여";
+  if(typeof g.active==="number")return "핵심 "+g.active+"명 + 나머지는 관전";
+  if(S.prep==="none"&&g.prep==="none")return "준비물 없이 바로 가능";
+  if(S.mood!=="any"&&g.moods.includes(S.mood))return MOOD_KO[S.mood]+" 분위기";
+  if(S.loc!=="any"&&g.loc===S.loc)return LOC_KO[g.loc]+"에서 하기 좋음";
+  if(S.drink==="no"&&g.drink===0)return "술 없이 가능";
+  if(isFav(g.id))return "즐겨찾기";
+  if(g.prep==="none")return "준비물 없이 바로 가능";
+  if(g.pop>=5)return "인기 게임";
+  return "약 "+g.dur+"분이면 충분";
 }
 function recommend(S,k){
   const scored=GAMES.map(g=>({g:g,s:scoreGame(g,S)})).sort((a,b)=>b.s-a.s);
@@ -2376,12 +2490,17 @@ function setSetup(key,val,el){
   const row=el.parentNode; row.querySelectorAll(".cat-pick").forEach(b=>b.classList.toggle("on",b===el));
   beep(520,.03,.08,"square"); renderRecs();
 }
+let recMore=false;
+function toggleRecMore(){recMore=!recMore;sfx("select");renderRecs();}
 function renderRecs(){
   const box=$("homeRecs"); if(!box)return;
   const strict=GAMES.filter(g=>scoreGame(g,SETUP)>0).length;
-  const list=recommend(SETUP,3);
-  box.innerHTML='<div class="glist-h">'+(strict>=3?"우리 상황 추천":"조건에 딱 맞는 게임이 적어 비슷한 걸로 추천")+'</div>'+
-    list.map(gcardHtml).join("");
+  const list=recommend(SETUP,recMore?8:3);
+  const head=strict>=3?("지금 <b>"+(SETUP.n||6)+"명</b>에게 추천")
+                      :"조건을 조금 넓혀서 추천";
+  box.innerHTML='<div class="glist-h">'+head+'</div>'+
+    list.map(g=>gcardHtml(g,recReason(g,SETUP))).join("")+
+    '<button class="rec-more" onclick="toggleRecMore()">'+(recMore?"접기":"추천 더 보기")+'</button>';
 }
 function renderHomeExtras(){
   const r=$("homeRecent");
@@ -2428,6 +2547,8 @@ function boom(){
   ng.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4);
   n.connect(ng);ng.connect(a.destination);n.start();}catch(e){}
 }
+/* 효과음 이벤트 진입점 — C단계에서 SFX 라이브러리로 확장 (없으면 기본 beep) */
+function sfx(name){ try{ if(typeof SFX!=="undefined"&&SFX[name]){SFX[name]();return;} }catch(e){} beep(560,.04,.1,"square"); }
 function winJingle(){beep(660,.12,.2);beep(880,.12,.2,"sine",.12);beep(1320,.25,.22,"sine",.24);}
 function confetti(){
   const em=["🎉","🍺","💦","🔥","🎯","🃏"];
