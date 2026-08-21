@@ -645,3 +645,56 @@ pop (pop-3)*0.8 · recent -2/-1.2/-0.6 (즐겨찾기면 절반) · fav +1
 
 ### 검증
 2-B 25항목 ✅ / 기존 회귀 222항목 ✅ / JS 에러 0
+
+## 2-C. 효과음 라이브러리 확장
+
+### Audio Event Registry (29종)
+
+| 그룹 | 이벤트 |
+|---|---|
+| UI | `tap` `select` `confirm` `cancel` |
+| 진행 | `roundStart` `roundEnd` `countdown` `countdownFinal` |
+| 결과 | `success` `fail` `correct` `wrong` `winner` |
+| 공개/긴장 | `reveal` `suspense` `vote` |
+| 룰렛 | `rouletteTick` `rouletteStop` |
+| 주사위·동전 | `diceRoll` `diceResult` `coinFlip` `coinResult` |
+| 타이머 | `timerTick` `timerFinish` |
+| 폭탄 | `bombTick` `bombWarning` `bombExplode` |
+| 기타 | `draw` `teamReveal` |
+
+- **외부 mp3 의존 없음** — Oscillator / Gain / BiquadFilter / noise buffer 로만 생성 (본문 26항)
+- **AudioContext 1개 공유** (본문 66항) · 볼륨 0.07~0.42 · 길이 0.02~0.55초 (본문 48·49항)
+- **쿨다운 45ms** — 연속 10회 호출 시 실제 재생 1회 (본문 50항)
+- 진동은 폭발 `[80,50,120]` · 룰렛 정지 `30ms` 로 제한 (본문 56항)
+
+### 게임별 연결
+
+| 게임 | Audio Flow |
+|---|---|
+| 라이어게임 | 시작 `confirm` → 역할확인 `reveal` → 다음사람 `tap` → 토론 `roundStart` → 투표 `vote` → 결과 `winner` |
+| 상식퀴즈 | 정답 `correct` / 오답 `wrong` / 다음 `tap` |
+| 룰렛 | 회전 중 `rouletteTick`(속도 연동) → 정지 `rouletteStop` |
+| 폭탄 | `bombTick` → 72% 경과 후 `bombWarning` → `bombExplode` |
+| 타이머 | `timerTick` / 목표 3초 전 `countdown` / 도달 `countdownFinal` / 종료 `timerFinish` |
+| 주사위·동전 | `diceResult` / `coinResult` |
+| 팀 나누기 | `teamReveal` (pop-pop + confirm) |
+| 순위·양세찬·무지개·제비뽑기 | `vote` `select` `reveal` `success` `fail` `winner` |
+
+### 폭탄 째깍 가속 (본문 36항)
+
+고정 400ms 인터벌 → **경과에 따라 430ms → 95ms 로 단축**, 72% 이후 `bombWarning` 으로 전환
+자동 측정: 째깍 7회 발생, 간격이 단조 감소 확인
+
+### 검증
+
+| 항목 | 결과 |
+|---|---|
+| 요구 이벤트 27종 구현 | ✅ (총 29종) |
+| 전 이벤트 실제 음 생성 | ✅ 무음 0건 |
+| AudioContext 단일 | ✅ |
+| 중첩 방지 | ✅ 10회 → 1회 |
+| 기본/최소/끔 모드 | ✅ 끔에서 오디오 노드 생성 0 |
+| 화면 전환 후 효과음 | ✅ 6회 발생 |
+| 이탈 후 유령 사운드 | ✅ 0건 |
+
+2-C 12항목 ✅ / 기존 회귀 247항목 ✅ / JS 에러 0

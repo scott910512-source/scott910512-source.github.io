@@ -2194,7 +2194,7 @@ let gameFilter="all";
 function setGameFilter(btn){
   gameFilter=btn.dataset.f;
   document.querySelectorAll("#gameFilters .cat-pick").forEach(b=>b.classList.toggle("on",b===btn));
-  beep(500,.03,.08,"square"); renderGames();
+  sfx("select"); renderGames();
 }
 const MOOD_KO={funny:"웃긴",psychology:"심리전",competition:"경쟁",conversation:"대화",quick:"빠른",active:"활동적",knowledge:"지식"};
 const PREP_KO={none:"준비물 없음",phone:"폰만 있으면 OK",items:"준비물 필요"};
@@ -2363,7 +2363,7 @@ function toggleSnd(){const el=$("sndOn");if(el){el.checked=!el.checked;$("sndSta
 
 /* ===== P1: 홈 — 인원 + 즉시 1개 추천 (부록 B-1: 연출 없음, 룰렛과 역할 분리) ===== */
 let HOME_N=6;
-function setHomeN(d){HOME_N=Math.max(2,Math.min(20,HOME_N+d));$("homeN").textContent=HOME_N;beep(500,.03,.08,"square");
+function setHomeN(d){HOME_N=Math.max(2,Math.min(20,HOME_N+d));$("homeN").textContent=HOME_N;sfx("select");
   SETUP.n=HOME_N;lsSet(LSK.setup,SETUP);renderRecs();}
 function fitN(g,n){return (g.min==null||n>=g.min)&&(g.max==null||n<=g.max);}
 function pickForMe(){
@@ -2531,7 +2531,7 @@ function recommend(S,k){
 function setSetup(key,val,el){
   SETUP[key]=val; lsSet(LSK.setup,SETUP);
   const row=el.parentNode; row.querySelectorAll(".cat-pick").forEach(b=>b.classList.toggle("on",b===el));
-  beep(520,.03,.08,"square"); renderRecs();
+  sfx("select"); renderRecs();
 }
 let recMore=false;
 function toggleRecMore(){recMore=!recMore;sfx("select");renderRecs();}
@@ -2606,24 +2606,88 @@ function beep(freq,dur,vol=0.25,type="sine",when=0){
   o.connect(g);g.connect(a.destination);
   o.start(a.currentTime+when);o.stop(a.currentTime+when+dur+0.02);}catch(e){}
 }
-function boom(){
-  if(!sndOK())return;
-  try{const a=ac();
-  const o=a.createOscillator(),g=a.createGain();
-  o.type="sawtooth";o.frequency.setValueAtTime(160,a.currentTime);
-  o.frequency.exponentialRampToValueAtTime(35,a.currentTime+0.5);
-  g.gain.setValueAtTime(0.6,a.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.7);
-  o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+0.75);
-  const len=a.sampleRate*0.4,buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
-  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
-  const n=a.createBufferSource(),ng=a.createGain();
-  n.buffer=buf;ng.gain.setValueAtTime(0.5,a.currentTime);
-  ng.gain.exponentialRampToValueAtTime(0.001,a.currentTime+0.4);
-  n.connect(ng);ng.connect(a.destination);n.start();}catch(e){}
+function boom(){ sfx("bombExplode"); }
+/* ===== 2차-C: Audio Event Registry =====
+   외부 mp3 없이 Web Audio(Oscillator/Gain/Filter)로만 생성.
+   AudioContext 는 기존 ac() 하나만 공유. 볼륨/길이는 본문 48·49항 기준. */
+const SFX_CD={}, SFX_COOLDOWN=45;          /* 중첩 방지 (본문 50항) */
+function tone(f,dur,vol,type,when,f2){
+  try{
+    const a=ac(),o=a.createOscillator(),g=a.createGain();
+    o.type=type||"sine";
+    const t0=a.currentTime+(when||0);
+    o.frequency.setValueAtTime(f,t0);
+    if(f2)o.frequency.exponentialRampToValueAtTime(Math.max(1,f2),t0+dur);
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002,vol),t0+Math.min(0.012,dur*0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g);g.connect(a.destination);
+    o.start(t0);o.stop(t0+dur+0.02);
+  }catch(e){}
 }
-/* 효과음 이벤트 진입점 — C단계에서 SFX 라이브러리로 확장 (없으면 기본 beep) */
-function sfx(name){ try{ if(typeof SFX!=="undefined"&&SFX[name]){SFX[name]();return;} }catch(e){} beep(560,.04,.1,"square"); }
+function noise(dur,vol,cut,when){
+  try{
+    const a=ac(),n=Math.floor(a.sampleRate*dur),buf=a.createBuffer(1,n,a.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+    const src=a.createBufferSource();src.buffer=buf;
+    const f=a.createBiquadFilter();f.type="lowpass";f.frequency.value=cut||1200;
+    const g=a.createGain();g.gain.value=vol;
+    src.connect(f);f.connect(g);g.connect(a.destination);
+    src.start(a.currentTime+(when||0));
+  }catch(e){}
+}
+function seq(list){ list.forEach(x=>tone(x[0],x[1],x[2],x[3]||"sine",x[4]||0,x[5])); }
+function vib(pattern){ try{ if(navigator.vibrate&&SND_MODE!=="off")navigator.vibrate(pattern); }catch(e){} }
+
+const SFX={
+  /* --- 기본 UI --- */
+  tap:        ()=>tone(520,.03,.10,"square"),
+  select:     ()=>tone(700,.04,.13,"square"),
+  confirm:    ()=>seq([[660,.09,.18,"triangle",0],[880,.09,.20,"triangle",.07],[1175,.16,.20,"triangle",.14]]),
+  cancel:     ()=>seq([[520,.07,.12,"triangle",0],[390,.10,.12,"triangle",.06]]),
+  /* --- 진행 --- */
+  roundStart: ()=>seq([[523,.10,.18,"triangle",0],[784,.16,.20,"triangle",.09]]),
+  roundEnd:   ()=>seq([[784,.10,.16,"triangle",0],[523,.18,.16,"triangle",.09]]),
+  countdown:  ()=>tone(600,.06,.16,"square"),
+  countdownFinal:()=>tone(1000,.16,.24,"square"),
+  /* --- 결과 --- */
+  success:    ()=>seq([[784,.10,.20,"triangle",0],[1047,.18,.22,"triangle",.09]]),
+  fail:       ()=>seq([[330,.12,.18,"sawtooth",0],[220,.20,.18,"sawtooth",.10]]),
+  correct:    ()=>seq([[880,.08,.20,"triangle",0],[1319,.16,.22,"triangle",.07]]),
+  wrong:      ()=>seq([[300,.14,.20,"square",0,200]]),
+  winner:     ()=>seq([[523,.10,.26,"triangle",0],[659,.10,.28,"triangle",.09],[784,.10,.30,"triangle",.18],[1047,.30,.32,"triangle",.27]]),
+  /* --- 공개 / 긴장 --- */
+  reveal:     ()=>{noise(.18,.06,2400,0);seq([[1200,.12,.16,"sine",.10],[1800,.16,.14,"sine",.16]]);},
+  suspense:   ()=>seq([[180,.55,.13,"sawtooth",0,320]]),
+  vote:       ()=>tone(620,.06,.15,"square"),
+  /* --- 룰렛 --- */
+  rouletteTick:()=>tone(1400,.02,.07,"square"),
+  rouletteStop:()=>{vib(30);seq([[880,.10,.22,"triangle",0],[1319,.22,.24,"triangle",.09]]);},
+  /* --- 주사위 / 동전 --- */
+  diceRoll:   ()=>{for(let i=0;i<4;i++)tone(300+Math.random()*500,.03,.09,"square",i*.045);},
+  diceResult: ()=>tone(420,.10,.20,"triangle",0,300),
+  coinFlip:   ()=>{for(let i=0;i<3;i++)tone(1800+Math.random()*900,.025,.08,"sine",i*.05);},
+  coinResult: ()=>tone(2100,.16,.18,"sine"),
+  /* --- 타이머 --- */
+  timerTick:  ()=>tone(880,.04,.14,"square"),
+  timerFinish:()=>{vib(60);seq([[1047,.12,.24,"triangle",0],[1319,.12,.24,"triangle",.10],[1568,.24,.26,"triangle",.20]]);},
+  /* --- 폭탄 --- */
+  bombTick:   ()=>tone(1000,.03,.13,"square"),
+  bombWarning:()=>tone(1300,.035,.19,"square"),
+  bombExplode:()=>{vib([80,50,120]);noise(.45,.42,700,0);seq([[90,.40,.34,"sawtooth",0,40],[1500,.28,.07,"sine",.12,300]]);},
+  /* --- 뽑기 / 팀 --- */
+  draw:       ()=>{noise(.10,.07,3000,0);tone(900,.07,.13,"sine",.05);},
+  teamReveal: ()=>{seq([[700,.06,.16,"triangle",0],[900,.06,.16,"triangle",.08]]);SFX.confirm();}
+};
+/* 통합 진입점 — 모드 검사 + 쿨다운 */
+function sfx(name){
+  if(!SFX[name])return;
+  if(!sndOK(name))return;
+  const now=(typeof performance!=="undefined"?performance.now():Date.now());
+  if(SFX_CD[name]&&now-SFX_CD[name]<SFX_COOLDOWN)return;
+  SFX_CD[name]=now;
+  try{SFX[name]();}catch(e){}
+}
 function winJingle(){beep(660,.12,.2);beep(880,.12,.2,"sine",.12);beep(1320,.25,.22,"sine",.24);}
 function confetti(){
   const em=["🎉","🍺","💦","🔥","🎯","🃏"];
@@ -2687,7 +2751,7 @@ function openRolledGame(){
 function goPage(p){const m={pg0:"home",pg3:"tools",pgGames:"games",pgRandom:"random"};go(m[p]||"home");}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 /* ===== 홈 룰렛: 선택한 카테고리에서 랜덤 게임 ===== */
-function toggleCat(btn){btn.classList.toggle("on");beep(500,.03,.08,"square");wheelPrepare();}
+function toggleCat(btn){btn.classList.toggle("on");sfx("select");wheelPrepare();}
 function rlPanelToggle(){const p=$("rlPanel");if(!p)return;p.style.display=p.style.display==="none"?"block":"none";if(p.style.display==="block")$("rlInput").focus();}
 /* ===== 룰렛 휠 (캔버스) ===== */
 const WHEEL={segs:[],angle:0,spinning:false};
@@ -2757,12 +2821,12 @@ function homeRoll(){
     const e=1-Math.pow(1-p,3);
     WHEEL.angle=start+delta*e;drawWheel();
     const seg=Math.floor(WHEEL.angle/a);
-    if(seg!==lastSeg){lastSeg=seg;beep(520+Math.random()*180,.02,.05,"square");}
+    if(seg!==lastSeg){lastSeg=seg;sfx("rouletteTick");}
     if(p<1)requestAnimationFrame(anim);
     else{
       WHEEL.spinning=false;
       const win=WHEEL.segs[winIdx];
-      el.textContent="🎉 "+win.name;confetti();winJingle();
+      el.textContent="🎉 "+win.name;confetti();sfx("rouletteStop");
       if(win.game){lastRolledGame=win.game;$("homeOpenBtn").style.display="inline-block";}
       else lastRolledGame=null;
       logEvent("play","룰렛-"+win.name);
@@ -2824,7 +2888,7 @@ function rankRenderList(){
     '<button class="ubtn" onclick="rankMove('+i+',-1)">▲</button>'+
     '<button class="ubtn" onclick="rankMove('+i+',1)">▼</button></div>').join("");
 }
-function rankMove(i,d){const j=i+d,a=RANK.order;if(j<0||j>=a.length)return;const t=a[i];a[i]=a[j];a[j]=t;rankRenderList();beep(500,.03,.08,"square");}
+function rankMove(i,d){const j=i+d,a=RANK.order;if(j<0||j>=a.length)return;const t=a[i];a[i]=a[j];a[j]=t;rankRenderList();sfx("tap");}
 function rankConfirmDiscuss(){rankShowResult(RANK.order.map((n,i)=>({name:n,rank:i+1})),false);}
 function rankShowCover(){$("rankCoverTxt").textContent=(RANK.cur+1)+" / "+RANK.voters+" 번째 투표자 차례";}
 function rankVoteShow(){RANK.picks=[];$("rankVoteTopic").textContent="🗳 "+RANK.topic;$("rankVotePicks").textContent="";rankRenderVoteBtns();rankPanel("rankPnVote");}
@@ -2837,7 +2901,7 @@ function rankRenderVoteBtns(){
 function rankPick(enc){
   const n=decodeURIComponent(enc);
   if(RANK.picks.includes(n)||RANK.picks.length>=3)return;
-  RANK.picks.push(n);beep(660,.04,.1,"square");
+  RANK.picks.push(n);sfx("vote");
   $("rankVotePicks").innerHTML="선택: "+RANK.picks.map((x,i)=>(i+1)+"위 "+esc(x)).join("  ·  ");
   rankRenderVoteBtns();
 }
@@ -2857,7 +2921,7 @@ function rankShowResult(ranked,withPts){
   $("rankBoard").innerHTML=ranked.map(x=>
     '<div class="rank-row"><span class="rank-medal">'+medal(x.rank)+'</span><span class="rank-name">'+esc(x.name)+'</span>'+
     (withPts?'<span class="rank-pts">'+x.pts+'점</span>':'')+'</div>').join("");
-  confetti();winJingle();rankPanel("rankPnResult");
+  confetti();sfx("winner");rankPanel("rankPnResult");
 }
 function rankReset(){rankPanel("rankPnSetup");}
 /* ===== 스몰게임 도구 모음 ===== */
@@ -2880,9 +2944,9 @@ function spinTo(el,pool,fmt){
   const win=pickRand(pool);let i=Math.floor(Math.random()*pool.length),delay=45;
   (function tick(){
     el.innerHTML=fmt(pool[i++%pool.length]);
-    beep(500+Math.random()*300,.025,.07,"square");
+    sfx("rouletteTick");
     if(delay<300){delay*=1.17;setTimeout(tick,delay);}
-    else{el.innerHTML=fmt(win);winJingle();confetti();rolling=false;}
+    else{el.innerHTML=fmt(win);sfx("winner");confetti();rolling=false;}
   })();
   return true;
 }
@@ -2903,7 +2967,7 @@ function teamGo(){
   sh.forEach((n,i)=>teams[i%TEAM_N].push(n));
   const ico=["🔴","🔵","🟢","🟡"];
   $("teamOut").innerHTML=teams.map((t,i)=>'<div class="rank-row"><span class="rank-medal">'+ico[i]+' '+(i+1)+'팀</span><span class="rank-name">'+t.map(esc).join(", ")+'</span></div>').join("");
-  confetti();winJingle();logEvent("play","팀나누기");
+  confetti();sfx("teamReveal");logEvent("play","팀나누기");
 }
 /* 벌칙 룰렛 */
 let PEN_EXTRA=[];
@@ -2923,12 +2987,12 @@ const DICE_F=["⚀","⚁","⚂","⚃","⚄","⚅"];
 function diceRoll(){
   if(rolling)return;rolling=true;const el=$("diceRes");let n=0;
   const iv=setInterval(()=>{el.textContent=DICE_F[Math.floor(Math.random()*6)];beep(500+Math.random()*200,.02,.06,"square");
-    if(++n>=10){clearInterval(iv);const v=Math.floor(Math.random()*6);el.textContent=DICE_F[v];winJingle();rolling=false;logEvent("play","주사위");}},80);
+    if(++n>=10){clearInterval(iv);const v=Math.floor(Math.random()*6);el.textContent=DICE_F[v];sfx("diceResult");rolling=false;logEvent("play","주사위");}},80);
 }
 function coinFlip(){
   if(rolling)return;rolling=true;const el=$("diceRes");let n=0;
   const iv=setInterval(()=>{el.textContent=n%2?"🌕":"🌑";beep(600,.02,.06,"square");
-    if(++n>=10){clearInterval(iv);const v=Math.random()<.5;el.textContent=v?"🌕 앞면!":"🌑 뒷면!";winJingle();rolling=false;logEvent("play","동전");}},80);
+    if(++n>=10){clearInterval(iv);const v=Math.random()<.5;el.textContent=v?"🌕 앞면!":"🌑 뒷면!";sfx("coinResult");rolling=false;logEvent("play","동전");}},80);
 }
 /* 제비뽑기 */
 let LOT={left:0,win:0};
@@ -2945,7 +3009,7 @@ function lotOpen(el){
   if(el.dataset.done)return;el.dataset.done="1";
   const win=el.dataset.w==="1";
   el.classList.add(win?"win":"lose");el.textContent=win?"🎉":"💨";
-  if(win){confetti();winJingle();}else beep(300,.12,.12,"sawtooth");
+  if(win){confetti();sfx("success");}else sfx("cancel");
 }
 /* ===== 상식 퀴즈 (7종 · 4지선다 · c[0]이 정답 · 매 판 랜덤 10문제) ===== */
 const QUIZ={
@@ -3308,14 +3372,14 @@ function quizPick(btn,ok){
   const box=$("quizChoices");if(box.dataset.done)return;box.dataset.done="1";
   const q=QZ.list[QZ.idx];
   [...box.querySelectorAll(".quiz-choice")].forEach(b=>{if(b.textContent===q.c[0])b.classList.add("qc-right");});
-  if(ok){QZ.score++;$("quizFb").innerHTML="✅ 정답!";winJingle();confetti();}
-  else{btn.classList.add("qc-wrong");$("quizFb").innerHTML="❌ 땡! 정답은 <b>"+esc(q.c[0])+"</b>";beep(160,.35,.22,"sawtooth");}
+  if(ok){QZ.score++;$("quizFb").innerHTML="✅ 정답!";sfx("correct");confetti();}
+  else{btn.classList.add("qc-wrong");$("quizFb").innerHTML="❌ 땡! 정답은 <b>"+esc(q.c[0])+"</b>";sfx("wrong");}
   const last=QZ.idx>=QZ.list.length-1;
   if(last){$("quizFb").innerHTML+="<br>🎯 끝! 최종 <b>"+QZ.score+" / "+QZ.list.length+"</b>";
     $("quizAgain").style.display="inline-block";}
   else $("quizNext").style.display="inline-block";
 }
-function quizNext(){if(QZ.idx<QZ.list.length-1){QZ.idx++;quizRender();}}
+function quizNext(){if(QZ.idx<QZ.list.length-1){QZ.idx++;sfx("tap");quizRender();}}
 function roll(type){
   if(rolling)return;rolling=true;
   const el=$("rollRes");
@@ -3361,21 +3425,12 @@ function bomb(){
   btn.style.display="none";
   msg.textContent="폭탄이 살아있다... 빨리 옆으로 넘겨!!";
   const fuse=8000+Math.random()*32000;
-  let t=0;
-  beep(660,.15,.3,"square");beep(660,.15,.3,"square",.2);
-  const iv=setInterval(()=>{
-    t+=400;const r=t/fuse;
-    face.textContent=(face.textContent==="💣")?"🧨":"💣";
-    face.style.transform=`scale(${1+Math.min(r,1)*0.5}) rotate(${(Math.random()*10-5)}deg)`;
-    beep(600+r*700,.05,.15+r*0.2,"square");
-    if(r>0.75)beep(600+r*700,.05,.25,"square",.13);
-    if(navigator.vibrate&&r>0.7)navigator.vibrate(30);
-  },400);
-  setTimeout(()=>{
-    clearInterval(iv);boom();
+  let elapsed=0;
+  sfx("roundStart");
+  function explode(){
+    boom();
     face.textContent="💥";face.style.transform="scale(1.9)";
     msg.innerHTML="<b style='color:#ff5f8f'>펑!! 지금 들고 있는 사람 벌주 🍺</b>";
-    if(navigator.vibrate)navigator.vibrate([300,100,300]);
     document.body.style.background="#5a1030";
     setTimeout(()=>{document.body.style.background="";},350);
     confetti();
@@ -3384,7 +3439,19 @@ function bomb(){
       msg.textContent="점화 후 폰을 돌리세요 — 8~40초 사이 랜덤 폭발, 들고 있는 사람 벌주!";
       btn.style.display="inline-block";bombOn=false;
     },2600);
-  },fuse);
+  }
+  /* 본문 36항: 남은 시간이 적을수록 째깍 간격이 짧아진다 */
+  (function step(){
+    if(!bombOn)return;
+    const r=Math.min(elapsed/fuse,1);
+    face.textContent=(face.textContent==="💣")?"🧨":"💣";
+    face.style.transform="scale("+(1+r*0.5)+") rotate("+(Math.random()*10-5)+"deg)";
+    if(elapsed>=fuse){explode();return;}
+    if(r>0.72){sfx("bombWarning");vib(18);} else sfx("bombTick");
+    const delay=Math.max(95,430-340*r);
+    elapsed+=delay;
+    setTimeout(step,delay);
+  })();
 }
 
 /* ===== timer challenge ===== */
@@ -3410,7 +3477,7 @@ function tmMain(){
   if(tmState==="idle"){tmNewRound();return;}
   if(tmState==="ready"){
     tmState="run";tmT0=performance.now();
-    beep(880,.1,.3,"square");
+    sfx("roundStart");
     $("tmMain").textContent="⏹ STOP";
     $("tmMain").className="big-btn";
     $("tmPlayer").textContent="⏱ "+(tmNum+1)+"번 선수 측정 중...";
@@ -3419,14 +3486,19 @@ function tmMain(){
     (function loop(){
       const el=performance.now()-tmT0;
       const sec=Math.floor(el/1000);
-      if(sec>lastSec){lastSec=sec;beep(520,.04,.12,"square");}
+      if(sec>lastSec){lastSec=sec;
+        /* 목표 3초 전부터 tick 강조 (본문 35항) */
+        const left=(tmTargetV||0)-sec;
+        if(tmTargetV&&left<=3&&left>0)sfx("countdown");
+        else if(tmTargetV&&left===0)sfx("countdownFinal");
+        else sfx("timerTick");}
       if(blind&&el>2000){$("tmClock").textContent="--:--.---";}
       else{$("tmClock").textContent=tmFmt(el);}
       tmRAF=requestAnimationFrame(loop);
     })();
   }else if(tmState==="run"){
     cancelAnimationFrame(tmRAF);
-    beep(440,.08,.3,"square");beep(330,.12,.3,"square",.09);
+    sfx("timerFinish");
     const el=performance.now()-tmT0;
     tmState="ready";tmNum++;
     $("tmClock").textContent=tmFmt(el);
@@ -3562,7 +3634,7 @@ function spyStart(){
     for(let i=0;i<SPY.n;i++)SPY.cards.push(i===SPY.special?SPY.wordB:SPY.word);
   }
   SPY.idx=0;SPY.votes=[];SPY.voter=0;
-  logEvent("play","라이어게임-"+(SPY.mode==="spy"?"라이어":"바보"));
+  logEvent("play","라이어게임-"+(SPY.mode==="spy"?"라이어":"바보"));sfx("confirm");
   spyPassRender();
 }
 function spyPassRender(){
@@ -3590,10 +3662,10 @@ function spyShowCard(){
     $("spyCardWord").className="spy-word";
     $("spyCardSub").textContent="이 단어를 직접 말하지 말고 힌트를 주세요";
   }
-  spyPanel("spyPnCard");beep(760,.06,.14,"square");
+  spyPanel("spyPnCard");sfx("reveal");
 }
-function spyCardDone(){SPY.idx++;spyPassRender();}
-function spyToDiscuss(){spyPanel("spyPnDiscuss");}
+function spyCardDone(){SPY.idx++;sfx("tap");spyPassRender();}
+function spyToDiscuss(){sfx("roundStart");spyPanel("spyPnDiscuss");}
 function spyToVote(){
   SPY.voter=0;SPY.votes=[];
   SPY.cands=Array.from({length:SPY.n},(_,i)=>i);
@@ -3607,7 +3679,7 @@ function spyVoteRender(){
   spyPanel("spyPnVote");
 }
 function spyVotePick(i){
-  SPY.votes.push(i);SPY.voter++;beep(700,.05,.12,"square");spyVoteRender();
+  SPY.votes.push(i);SPY.voter++;sfx("vote");spyVoteRender();
 }
 function spyTally(){
   const t={};SPY.votes.forEach(v=>t[v]=(t[v]||0)+1);
@@ -3641,7 +3713,7 @@ function spyResult(accused){
     h+=caught?'<div class="spy-res-win">🎉 시민 승리!</div>':'<div class="spy-res-win">🤪 바보 승리!</div>';
   }
   $("spyResBox").innerHTML=h;
-  spyPanel("spyPnResult");confetti();winJingle();
+  spyPanel("spyPnResult");confetti();sfx("winner");
 }
 function spyGuessBtns(){
   const pool=(SPY_WORDS[SPY.catUsed]||[]).filter(w=>w!==SPY.word);
@@ -4756,7 +4828,7 @@ function yangShowInput(){
 function yangDone(){
   const v=$("yangName").value.trim();
   if(!v){alert("인물 이름을 입력해주세요");return;}
-  YANG.names[YANG.step]=v.slice(0,20);YANG.step++;beep(720,.05,.12,"square");
+  YANG.names[YANG.step]=v.slice(0,20);YANG.step++;sfx("select");
   if(YANG.step<2)yangCover();
   else{YANG.shown=false;$("yangBoard").style.display="none";$("yangRevealBtn").textContent="👁 전체 공개 (관객용)";yangPanel("yangPnGame");winJingle();}
 }
@@ -4767,7 +4839,7 @@ function yangToggle(){
     $("yangOvN1").textContent=YANG.names[1];
     $("yangOvN2").textContent=YANG.names[0];
     ov.classList.add("on");document.body.style.overflow="hidden";
-    $("yangRevealBtn").textContent="🙈 다시 가리기";beep(880,.08,.15);
+    $("yangRevealBtn").textContent="🙈 다시 가리기";sfx("reveal");
   }else{
     ov.classList.remove("on");document.body.style.overflow="";
     $("yangRevealBtn").textContent="👁 전체 공개 (관객용)";beep(400,.06,.1,"square");
@@ -4791,7 +4863,7 @@ function rbStart(){
 }
 function rbNext(){
   if(!RB.on)return;
-  RB.i++;winJingle();rbRender();
+  RB.i++;sfx("success");rbRender();
 }
 function rbFail(){
   if(!RB.on)return;RB.on=false;
@@ -4801,7 +4873,7 @@ function rbFail(){
   $("rbResult").style.display="block";
   $("rbStartBtn").style.display="inline-block";$("rbStartBtn").textContent="🌈 다시 시작!";
   $("rbNextBtn").style.display="none";$("rbFailBtn").style.display="none";
-  beep(160,.4,.25,"sawtooth");confetti();
+  sfx("fail");confetti();
 }
 /* 정답 공개 ↔ 다시 가리기 토글 (사회자 확인용) */
 function photoToggle(){
