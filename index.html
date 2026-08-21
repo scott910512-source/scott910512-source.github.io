@@ -128,6 +128,25 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .rank-name{flex:1;text-align:left;font-weight:700;font-size:15.5px}
 .rank-pts{color:var(--sub);font-size:12.5px;font-weight:800}
 .rank-row .ubtn{padding:5px 11px;font-size:13px}
+/* 🕵️ 스파이게임 */
+.spy-sec{font-size:12.5px;font-weight:800;color:var(--sub);margin:14px 0 2px;letter-spacing:.02em}
+.spy-pass{border:2px dashed var(--line);border-radius:20px;padding:26px 16px;cursor:pointer;
+  background:linear-gradient(160deg,#2a1b46,#1e1436);transition:.15s}
+.spy-pass:active{transform:scale(.97)}
+.spy-pass-n{font-size:clamp(22px,6vmin,32px);font-weight:900;color:var(--orange)}
+.spy-pass-t{font-size:clamp(15px,4vmin,21px);font-weight:800}
+.spy-card{border:2px solid #ff5f8f;border-radius:22px;padding:26px 16px;margin:6px 0 12px;
+  background:linear-gradient(160deg,#3a1b3d,#241640)}
+.spy-card-n{font-size:15px;font-weight:900;color:var(--sub)}
+.spy-card-l{font-size:13px;font-weight:800;color:var(--sub);margin-top:6px}
+.spy-word{font-size:clamp(38px,12vmin,86px);font-weight:900;line-height:1.15;margin:6px 0 8px;
+  color:#ffb340;text-shadow:0 3px 18px rgba(255,95,143,.4);word-break:keep-all}
+.spy-word.spy-is{font-size:clamp(26px,8vmin,54px);color:#ff7fab}
+.spy-res-line{font-size:15px;font-weight:700;color:var(--sub);margin:4px 0}
+.spy-res-big{font-size:clamp(22px,6vmin,34px);font-weight:900;margin:10px 0 4px;color:#ff7fab}
+.spy-res-word{font-size:clamp(17px,4.6vmin,25px);font-weight:800;color:#ffb340;margin:3px 0}
+.spy-res-win{font-size:clamp(24px,6.5vmin,38px);font-weight:900;margin:12px 0 2px;
+  background:linear-gradient(92deg,#3ce8b0,#4fc3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
 /* 제비뽑기 */
 .lot-card{width:64px;height:80px;border-radius:12px;border:1.5px solid var(--line);background:linear-gradient(135deg,#3a2a6a,#241847);
   color:#fff;font-size:26px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -264,7 +283,7 @@ h1{font-size:clamp(30px,8.5vw,46px);font-weight:900;line-height:1.15;letter-spac
 .tile-b{display:flex;flex-wrap:wrap;gap:4px}
 .tile-go{display:inline-block;align-self:flex-start;font-size:10.5px;font-weight:800;color:#101334;
  background:linear-gradient(90deg,#4fc3ff,#3ce8b0);padding:3px 8px;border-radius:999px}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(8,4,20,.74);backdrop-filter:blur(5px);
+.modal{position:fixed;inset:0;z-index:100;background:rgba(8,4,20,.96);backdrop-filter:blur(9px);
  display:none;align-items:flex-start;justify-content:center;padding:18px 14px;overflow-y:auto}
 .modal.on{display:flex;animation:pop .2s ease}
 .modal-inner{position:relative;max-width:620px;width:100%;margin:auto}
@@ -527,16 +546,17 @@ body.gated{overflow:hidden}
 <div class="page" id="pg1">
 <p class="notice">2026 트렌드: 단순 박자게임 → <b>심리전·가치관 공유형</b>으로 이동 중. 텐션 강요 없이, 술 없이도 돌아가는 게임 위주로 구성.</p>
 
-<div class="g"><div class="g-top"><h3>🕵️ 라이어 게임</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
-<p class="meta">인원 <b>4~8</b> · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b></p>
+<div class="g"><div class="g-top"><h3>🕵️ 스파이게임 (라이어)</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
+<p class="meta">인원 <b>3~10</b> · 준비물 <b>폰 1대</b> · 소요 <b>라운드당 5분</b> · 모드 <b>스파이 / 바보</b></p>
 <div class="how"><ol>
-<li>도구 탭의 <b>라이어 배정기</b>로 폰을 돌려가며 각자 제시어 확인 — 단 1명은 "라이어"만 뜸</li>
-<li>순서대로 제시어에 대해 <b>한 문장씩</b> 설명 (라이어는 아는 척 연기)</li>
-<li>한 바퀴 후 동시에 라이어 지목 → 최다 득표자 정체 공개</li>
-<li>라이어가 걸려도 <b>제시어를 맞추면 역전승</b></li></ol></div>
+<li>도구의 <b>스파이게임</b>에서 모드·인원·주제·난이도를 고르고 시작</li>
+<li>폰을 돌려가며 각자 제시어 확인 — <b>🕵️스파이 모드</b>는 1명만 "당신은 스파이", <b>🤪바보 모드</b>는 1명만 비슷한 다른 단어 (본인은 모름!)</li>
+<li>랜덤으로 지정된 사람부터 시계 방향으로 <b>제시어를 말하지 않고</b> 한 문장 힌트</li>
+<li>한 바퀴 후 토론 → <b>비밀 투표</b>로 범인 지목 (동점이면 재투표)</li>
+<li>스파이가 걸려도 <b>제시어를 맞히면 역전승</b> · 바보는 결과에서 처음 공개</li></ol></div>
 <a class="vid" href="https://www.youtube.com/results?search_query=%EB%9D%BC%EC%9D%B4%EC%96%B4%EA%B2%8C%EC%9E%84%20%ED%95%98%EB%8A%94%EB%B2%95" target="_blank">📺 영상으로 배우기</a>
-<p class="punish">⚡ 라이어 승리 → 시민 전원 벌칙 / 라이어 패배 → 라이어 벌칙 2배</p>
-<span class="golink" onclick="goTool('toolLiar')">⚡ 라이어 배정기 열기 →</span></div>
+<p class="punish">⚡ 스파이 승리 → 시민 전원 벌칙 / 스파이 패배 → 스파이 벌칙 2배</p>
+<span class="golink" onclick="goTool('toolSpy')">⚡ 스파이게임 열기 →</span></div>
 
 <div class="g"><div class="g-top"><h3>🏆 순위 정하기</h3><div class="badges"><span class="bd trend">심리전</span><span class="bd tool">도구연계</span></div></div>
 <p class="meta">인원 <b>제한없음</b> · 준비물 <b>폰 1대</b> · 소요 <b>약 5분</b></p>
@@ -1276,13 +1296,78 @@ body.gated{overflow:hidden}
   <div id="silentMsg" style="margin-top:8px;font-size:clamp(16px,4.6vw,20px);font-weight:800;min-height:1.4em"></div>
 </div>
 
-<div class="t-card" id="toolLiar">
-  <h3>🕵️ 라이어 배정기</h3>
-  <p class="hint">설정된 인원만큼 폰을 돌리며 확인 — 1명만 라이어. 카테고리는 전원 공개</p>
-  <div class="pcount-mini"><span class="lbl">👥 시작 전 인원</span><button onclick="setN(-1)">−</button><span class="pm-n"><span class="nRef">6</span>명</span><button onclick="setN(1)">+</button></div>
-  <div id="liarCat" style="font-size:13px;color:var(--orange);font-weight:800;margin-bottom:6px"></div>
-  <div class="secret" id="liarBox" onclick="liarTap()"><div class="s-main">🎲 시작을 누르세요</div><div class="s-sub"></div></div>
-  <button class="big-btn" onclick="liarStart()">🕵️ <span class="nRef">6</span>인 배정 시작</button>
+<div class="t-card" id="toolSpy">
+  <h3>🕵️ 스파이게임</h3>
+  <div id="spyPnSetup">
+    <p class="hint">폰 1대를 돌려가며 각자 제시어 확인 → 힌트 → 토론 → 비밀투표!</p>
+    <div class="spy-sec">게임 모드</div>
+    <div class="cat-picks" id="spyModes">
+      <button class="cat-pick on" data-m="spy" onclick="spySetMode('spy')">🕵️ 스파이 모드</button>
+      <button class="cat-pick" data-m="fool" onclick="spySetMode('fool')">🤪 바보 모드</button>
+    </div>
+    <p class="hint" id="spyModeDesc">무작위 1명만 <b>스파이</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어.</p>
+    <div class="spy-sec">인원</div>
+    <div class="pcount-mini"><button onclick="spySetN(-1)">−</button><span class="pm-n"><span id="spyN">6</span>명</span><button onclick="spySetN(1)">+</button></div>
+    <div class="spy-sec">주제</div>
+    <div class="cat-picks" id="spyCats"></div>
+    <div id="spyDiffRow" style="display:none">
+      <div class="spy-sec">난이도 <span style="font-weight:600;color:var(--sub)">(두 제시어가 얼마나 비슷한지)</span></div>
+      <div class="cat-picks" id="spyDiffs">
+        <button class="cat-pick" onclick="spySetDiff(1,this)">🟢 쉬움</button>
+        <button class="cat-pick on" onclick="spySetDiff(2,this)">🟡 보통</button>
+        <button class="cat-pick" onclick="spySetDiff(3,this)">🔴 어려움</button>
+      </div>
+    </div>
+    <button class="big-btn" style="font-size:18px;padding:16px 40px;margin-top:12px" onclick="spyStart()">🎮 게임 시작</button>
+  </div>
+
+  <div id="spyPnPass" style="display:none">
+    <div class="spy-pass" onclick="spyShowCard()">
+      <div class="spy-pass-n" id="spyPassNum">PLAYER 1</div>
+      <div style="font-size:52px;margin:10px 0">📱</div>
+      <div class="spy-pass-t" id="spyPassTxt">화면을 눌러 제시어 확인</div>
+      <div class="hint" style="margin-top:8px">다른 사람이 보지 않게 하세요!</div>
+    </div>
+  </div>
+
+  <div id="spyPnCard" style="display:none">
+    <div class="spy-card">
+      <div class="spy-card-n" id="spyCardNum">PLAYER 1</div>
+      <div class="spy-card-l" id="spyCardLabel">제시어</div>
+      <div class="spy-word" id="spyCardWord">?</div>
+      <div class="hint" id="spyCardSub"></div>
+    </div>
+    <button class="big-btn b2" style="font-size:17px;padding:15px 34px" onclick="spyCardDone()">✅ 확인 완료</button>
+  </div>
+
+  <div id="spyPnStart" style="display:none">
+    <div style="font-size:54px">🎤</div>
+    <div id="spyStartTxt" style="font-size:clamp(22px,6vmin,34px);font-weight:900;margin:8px 0;color:var(--orange)"></div>
+    <div id="spyStartCat" style="font-size:15px;font-weight:800;color:var(--sub);margin-bottom:6px"></div>
+    <p class="hint">제시어를 <b>직접 말하지 말고</b> 한 문장·짧은 단어로 힌트를 주세요.<br>시계 방향으로 한 명씩 돌아가며 힌트!</p>
+    <button class="big-btn" onclick="spyToDiscuss()">💬 모두 힌트 완료 → 토론</button>
+  </div>
+
+  <div id="spyPnDiscuss" style="display:none">
+    <div style="font-size:54px">🔍</div>
+    <div style="font-size:clamp(20px,5.5vmin,30px);font-weight:900;margin:8px 0">누가 수상한가요?</div>
+    <p class="hint">서로 토론한 뒤 범인을 선택하세요</p>
+    <button class="big-btn b2" style="font-size:17px;padding:15px 34px" onclick="spyToVote()">🗳 투표하기</button>
+    <button class="big-btn b3" style="font-size:13px;padding:9px 18px" onclick="spyPanel('spyPnStart')">↩ 힌트 화면으로</button>
+  </div>
+
+  <div id="spyPnVote" style="display:none">
+    <div class="hint" id="spyVoteNote" style="color:var(--orange);font-weight:800"></div>
+    <div class="spy-card-n" id="spyVoteNum">PLAYER 1 투표</div>
+    <p class="hint">의심되는 사람을 <b>몰래</b> 선택하세요 (다른 사람이 안 보이게!)</p>
+    <div id="spyVoteBtns"></div>
+  </div>
+
+  <div id="spyPnResult" style="display:none">
+    <div id="spyResBox"></div>
+    <button class="big-btn" style="margin-top:10px" onclick="spyAgain()">🔄 같은 설정으로 다시하기</button>
+    <button class="big-btn b3" onclick="spyReset()">⚙️ 설정 변경</button>
+  </div>
 </div>
 
 <div class="t-card" id="toolMafia">
@@ -2577,45 +2662,212 @@ function tmMain(){
   }
 }
 
-/* ===== liar assigner ===== */
-const LIAR_SETS=[
-["음식","삼겹살","마라탕","김치찌개","치킨","냉면","떡볶이","초밥","족발"],
-["장소","찜질방","편의점","헬스장","놀이공원","캠핑장","노래방","공항","PC방"],
-["직업","소방관","유튜버","교사","의사","프로게이머","택배기사","바리스타","군인"],
-["물건","에어팟","셀카봉","보조배터리","텀블러","우산","고데기","차키","모기향"],
-["스포츠","축구","야구","볼링","골프","수영","탁구","클라이밍","당구"],
-["회사생활","주간회의","회식","연차","승진","야근","워크숍","성과급","점심메뉴"]];
-let liarRoles=[],liarIdx=0,liarShown=false;
-function liarStart(){
-  const n=N;
-  const set=LIAR_SETS[Math.floor(Math.random()*LIAR_SETS.length)];
-  const cat=set[0],word=set[1+Math.floor(Math.random()*(set.length-1))];
-  const liarAt=Math.floor(Math.random()*n);
-  liarRoles=Array.from({length:n},(_,i)=>i===liarAt?null:word);
-  liarIdx=0;liarShown=false;
-  $("liarCat").textContent="📂 카테고리: "+cat+" (전원 공개 정보)";
-  liarBoxSet("👆 1번 사람이 탭해서 확인","확인 후 다시 탭해서 숨기고 다음 사람에게");
-  $("liarBox").className="secret";
-  beep(880,.1,.25);
+/* ===== 🕵️ 스파이게임 데이터 ===== */
+const SPY_CATS=[
+ {k:"game",n:"🎮 게임"},{k:"sports",n:"⚽ 스포츠"},{k:"country",n:"🌎 나라"},
+ {k:"food",n:"🍔 음식"},{k:"thing",n:"📦 물건"},{k:"animal",n:"🐶 동물"},
+ {k:"movie",n:"🎬 영화/드라마"},{k:"job",n:"👨‍💼 직업"},{k:"place",n:"🏠 장소"},
+ {k:"vehicle",n:"🚗 탈것"},{k:"celeb",n:"🧑 유명인"},{k:"music",n:"🎵 음악"},
+ {k:"random",n:"🎲 랜덤"}
+];
+const SPY_WORDS={
+game:["마인크래프트","로블록스","배틀그라운드","리그오브레전드","오버워치","스타크래프트","디아블로","메이플스토리","던전앤파이터","서든어택","카트라이더","크레이지아케이드","애니팡","쿠키런","브롤스타즈","클래시로얄","포트나이트","발로란트","피파온라인","테트리스","팩맨","슈퍼마리오","젤다의전설","포켓몬스터","동물의숲","커비","소닉","콜오브듀티","GTA","심즈","앵그리버드","캔디크러시","플래피버드","슈퍼셀","리니지","바람의나라","라그나로크","블레이드앤소울","검은사막","로스트아크","원신","붕괴3rd","클래시오브클랜","모두의마블","윷놀이","보드게임","젠가","우노","할리갈리","루미큐브","블루마블","체스","장기","바둑","오목","알까기","공기놀이","딱지치기","구슬치기","제기차기","숨바꼭질","술래잡기","무궁화꽃이피었습니다","가위바위보","묵찌빠","369게임","눈치게임","마피아","라이어게임","젠가탑","다트","당구","볼링","탁구게임","인형뽑기","두더지잡기","펌프","리듬게임","비트세이버","저스트댄스","링피트","위스포츠","마리오카트","스매시브라더스","별의커비","슈퍼마리오파티","테라리아","스타듀밸리","among us","폴가이즈","배드민턴게임","좀비고등학교","쿠키런킹덤","세븐나이츠","서머너즈워","라이즈오브킹덤즈","클래시미니","프리스타일","오디션","사이퍼즈","엘소드","마비노기"],
+sports:["축구","야구","농구","배구","탁구","배드민턴","테니스","골프","볼링","당구","수영","다이빙","서핑","스키","스노보드","스케이트","아이스하키","컬링","봅슬레이","루지","마라톤","단거리달리기","높이뛰기","멀리뛰기","장대높이뛰기","포환던지기","원반던지기","창던지기","해머던지기","허들","계주","철인3종","사이클","BMX","산악자전거","승마","펜싱","양궁","사격","태권도","유도","검도","합기도","킥복싱","복싱","레슬링","씨름","주짓수","무에타이","이종격투기","체조","리듬체조","트램폴린","요가","필라테스","웨이트트레이닝","크로스핏","클라이밍","암벽등반","등산","트래킹","스카이다이빙","패러글라이딩","번지점프","래프팅","카약","조정","요트","윈드서핑","수구","싱크로나이즈드","핸드볼","럭비","미식축구","크리켓","하키","라크로스","소프트볼","풋살","족구","피구","줄다리기","달리기","줄넘기","훌라후프","제기차기","스쿼시","라켓볼","패들보드","치어리딩","브레이킹","스케이트보드","인라인스케이트","킥보드","e스포츠","다트","스누커","론볼","세팍타크로","카바디"],
+country:["한국","북한","일본","중국","대만","홍콩","몽골","베트남","태국","필리핀","인도네시아","말레이시아","싱가포르","캄보디아","라오스","미얀마","인도","네팔","파키스탄","방글라데시","스리랑카","카자흐스탄","우즈베키스탄","터키","이란","이라크","사우디아라비아","아랍에미리트","카타르","이스라엘","요르단","레바논","이집트","모로코","알제리","튀니지","리비아","수단","에티오피아","케냐","탄자니아","우간다","나이지리아","가나","남아프리카공화국","마다가스카르","러시아","우크라이나","폴란드","체코","슬로바키아","헝가리","루마니아","불가리아","그리스","이탈리아","스페인","포르투갈","프랑스","독일","오스트리아","스위스","벨기에","네덜란드","룩셈부르크","영국","아일랜드","덴마크","스웨덴","노르웨이","핀란드","아이슬란드","에스토니아","라트비아","리투아니아","크로아티아","세르비아","슬로베니아","보스니아","알바니아","몰타","모나코","바티칸","미국","캐나다","멕시코","쿠바","자메이카","과테말라","코스타리카","파나마","브라질","아르헨티나","칠레","페루","콜롬비아","베네수엘라","우루과이","볼리비아","호주","뉴질랜드","피지"],
+food:["김치찌개","된장찌개","순두부찌개","부대찌개","김치볶음밥","비빔밥","돌솥비빔밥","불고기","제육볶음","삼겹살","목살","갈비","LA갈비","닭갈비","찜닭","치킨","양념치킨","간장치킨","후라이드치킨","족발","보쌈","삼계탕","설렁탕","곰탕","갈비탕","육개장","해장국","순대국밥","돼지국밥","콩나물국밥","떡국","만둣국","떡만둣국","라면","짜파게티","비빔면","냉면","물냉면","비빔냉면","막국수","칼국수","잔치국수","콩국수","우동","소바","짜장면","짬뽕","탕수육","깐풍기","마라탕","마라샹궈","훠궈","떡볶이","순대","튀김","김밥","참치김밥","주먹밥","유부초밥","초밥","회","연어회","광어회","물회","회덮밥","장어구이","고등어구이","갈치조림","코다리조림","꽁치조림","알탕","해물찜","아구찜","곱창","막창","대창","닭발","오돌뼈","계란찜","계란말이","김치전","파전","해물파전","감자전","부추전","호떡","붕어빵","계란빵","와플","마카롱","크로플","티라미수","치즈케이크","피자","햄버거","파스타","리조또","스테이크","샐러드","샌드위치","토스트","핫도그"],
+thing:["볼펜","연필","샤프","지우개","형광펜","자","가위","풀","테이프","스테이플러","노트","다이어리","포스트잇","클립","칼","책","공책","교과서","가방","백팩","크로스백","지갑","동전지갑","열쇠고리","우산","양산","모자","선글라스","안경","마스크","장갑","목도리","시계","팔찌","반지","목걸이","귀걸이","휴대폰","케이스","보조배터리","충전기","이어폰","헤드폰","스피커","노트북","태블릿","키보드","마우스","모니터","프린터","USB","카메라","삼각대","셀카봉","드론","TV","리모컨","냉장고","전자레인지","에어프라이어","밥솥","전기포트","커피머신","믹서기","토스터기","세탁기","건조기","청소기","로봇청소기","다리미","선풍기","에어컨","히터","가습기","제습기","공기청정기","드라이기","고데기","면도기","칫솔","치약","비누","샴푸","수건","거울","빗","화장품","향수","베개","이불","매트리스","소파","의자","책상","옷장","서랍장","텀블러","도시락통","물티슈","휴지","쓰레기통"],
+animal:["강아지","고양이","햄스터","토끼","기니피그","고슴도치","페럿","앵무새","십자매","금붕어","구피","거북이","도마뱀","이구아나","카멜레온","뱀","개구리","두꺼비","올챙이","소","돼지","닭","오리","거위","양","염소","말","당나귀","낙타","알파카","라마","사자","호랑이","표범","치타","재규어","퓨마","늑대","여우","곰","북극곰","판다","레서판다","코끼리","코뿔소","하마","기린","얼룩말","사슴","고라니","멧돼지","너구리","오소리","족제비","수달","비버","다람쥐","청설모","두더지","박쥐","원숭이","고릴라","침팬지","오랑우탄","캥거루","코알라","웜뱃","주머니쥐","나무늘보","개미핥기","아르마딜로","미어캣","펭귄","독수리","매","부엉이","올빼미","까치","까마귀","참새","비둘기","제비","백조","학","황새","플라밍고","공작","타조","펠리컨","갈매기","고래","돌고래","상어","가오리","문어","오징어","해파리","불가사리","게","새우"],
+movie:["기생충","올드보이","부산행","극한직업","명량","베테랑","도둑들","암살","신과함께","국제시장","해운대","괴물","살인의추억","추격자","아저씨","타짜","친구","엽기적인그녀","건축학개론","늑대소년","광해","왕의남자","변호인","택시운전사","1987","공조","범죄도시","신세계","내부자들","마약왕","서울의봄","파묘","존윅","어벤져스","아이언맨","스파이더맨","배트맨","슈퍼맨","조커","타이타닉","아바타","인터스텔라","인셉션","다크나이트","매트릭스","터미네이터","쥬라기공원","스타워즈","해리포터","반지의제왕","캐리비안의해적","미션임파서블","007","분노의질주","트랜스포머","겨울왕국","토이스토리","니모를찾아서","라이온킹","알라딘","미녀와야수","인사이드아웃","코코","라푼젤","모아나","슈렉","쿵푸팬더","마다가스카","미니언즈","라라랜드","조조래빗","기묘한이야기","오징어게임","도깨비","태양의후예","별에서온그대","응답하라1988","슬기로운의사생활","이태원클라쓰","사랑의불시착","킹덤","펜트하우스","스카이캐슬","미생","시그널","비밀의숲","이상한변호사우영우","더글로리","무빙","눈물의여왕","선재업고튀어","모범택시","빈센조","호텔델루나","W","알함브라궁전","시크릿가든","커피프린스","꽃보다남자","상속자들"],
+job:["의사","치과의사","한의사","수의사","약사","간호사","응급구조사","물리치료사","영양사","교사","교수","유치원교사","학원강사","연구원","과학자","엔지니어","프로그래머","웹디자이너","데이터분석가","해커","건축가","인테리어디자이너","도시계획가","측량사","목수","용접공","전기기사","배관공","페인트공","미장공","경찰","형사","교도관","소방관","군인","해경","보안요원","경비원","판사","검사","변호사","법무사","세무사","회계사","노무사","변리사","공무원","외교관","통역사","번역사","기자","아나운서","PD","작가","시나리오작가","카피라이터","편집자","사서","큐레이터","학예사","요리사","제빵사","파티시에","바리스타","바텐더","소믈리에","조주사","영양교사","농부","어부","축산업자","임업인","양봉업자","조경사","플로리스트","미용사","네일아티스트","메이크업아티스트","피부관리사","마사지사","패션디자이너","모델","스타일리스트","사진작가","영상편집자","성우","배우","가수","아이돌","댄서","개그맨","마술사","서커스단원","운동선수","코치","심판","트레이너","요가강사","조종사","승무원","기관사","택시기사"],
+place:["집","아파트","빌라","주택","원룸","고시원","기숙사","호텔","모텔","리조트","펜션","게스트하우스","캠핑장","글램핑장","학교","초등학교","중학교","고등학교","대학교","도서관","학원","독서실","스터디카페","유치원","회사","사무실","공장","연구소","창고","공사장","병원","치과","약국","한의원","보건소","동물병원","경찰서","소방서","우체국","은행","시청","구청","주민센터","법원","교도소","군부대","공항","기차역","지하철역","버스터미널","항구","휴게소","주차장","주유소","세차장","마트","백화점","편의점","시장","전통시장","아울렛","면세점","쇼핑몰","식당","고깃집","횟집","분식집","카페","베이커리","술집","포차","호프집","이자카야","클럽","노래방","PC방","만화방","보드게임카페","찜질방","목욕탕","사우나","헬스장","수영장","요가원","골프연습장","볼링장","당구장","스크린골프장","영화관","극장","공연장","콘서트홀","미술관","박물관","동물원","수족관","놀이공원","워터파크","경기장","야구장","공원","놀이터","캠핑카"],
+vehicle:["자동차","승용차","경차","SUV","트럭","덤프트럭","레미콘","탱크로리","버스","시내버스","광역버스","마을버스","고속버스","관광버스","스쿨버스","2층버스","택시","모범택시","콜밴","구급차","소방차","경찰차","순찰차","견인차","청소차","우편차","푸드트럭","캠핑카","리무진","스포츠카","전기차","수소차","하이브리드차","자율주행차","오토바이","스쿠터","전동킥보드","전기자전거","자전거","산악자전거","외발자전거","세발자전거","인라인스케이트","스케이트보드","킥보드","롤러스케이트","휠체어","유모차","손수레","지게차","굴착기","불도저","크레인","트랙터","경운기","콤바인","기차","고속열차","KTX","SRT","무궁화호","새마을호","화물열차","증기기관차","지하철","전철","경전철","모노레일","트램","케이블카","곤돌라","리프트","엘리베이터","에스컬레이터","비행기","여객기","화물기","전투기","헬리콥터","경비행기","글라이더","열기구","비행선","우주선","로켓","우주왕복선","인공위성","배","여객선","화물선","유람선","크루즈","페리","요트","보트","고무보트","카누","카약","뗏목","잠수함","어선","군함"],
+celeb:["유재석","강호동","신동엽","김구라","이경규","박명수","정준하","하하","노홍철","전현무","김성주","서장훈","이수근","은지원","송은이","김숙","박나래","장도연","이영자","김신영","안영미","조세호","양세형","양세찬","유병재","이국주","홍진경","김희철","이광수","차태현","백종원","기안84","침착맨","임영웅","아이유","비","싸이","지드래곤","태양","탑","대성","슈가","제이홉","정국","진","뷔","RM","지민","제니","리사","로제","지수","카리나","윈터","닝닝","장원영","안유진","하니","민지","해린","김연아","손흥민","박지성","이강인","김민재","황희찬","조규성","류현진","김하성","오타니","박찬호","이승엽","김연경","안세영","황선홍","차범근","박세리","고진영","최경주","진종오","이대호","양현종","페이커","데프트","쇼메이커","봉준호","박찬욱","송강호","최민식","이병헌","마동석","전지현","김혜수","손예진","현빈","공유","박서준","김수현","이정재","정우성","차은우","박보검"],
+music:["발라드","힙합","랩","알앤비","트로트","포크송","록","메탈","펑크","재즈","블루스","클래식","오페라","뮤지컬","EDM","하우스","테크노","레게","컨트리","보사노바","케이팝","제이팝","팝송","인디음악","국악","판소리","민요","동요","캐롤","자장가","교가","군가","응원가","축가","떼창","합창","독창","듀엣","아카펠라","비트박스","피아노","전자피아노","기타","일렉기타","베이스","드럼","바이올린","첼로","비올라","콘트라베이스","플루트","클라리넷","색소폰","트럼펫","트롬본","호른","오보에","하프","아코디언","하모니카","우쿨렐레","만돌린","가야금","거문고","해금","대금","단소","장구","꽹과리","징","북","소고","실로폰","탬버린","캐스터네츠","트라이앵글","마라카스","신디사이저","턴테이블","마이크","앰프","이어폰모니터","악보","오선지","음표","박자","리듬","멜로디","화음","코드","템포","음정","조율","노래방","콘서트","페스티벌","버스킹","오케스트라","밴드","아이돌그룹"]
+};
+/* 바보 모드용 연관 단어 Pair — [A, B, 난이도(1쉬움/2보통/3어려움)] */
+const SPY_PAIRS={
+game:[["축구게임","야구게임",1],["보드게임","카드게임",1],["오목","바둑",2],["체스","장기",2],["윷놀이","보드게임",1],["숨바꼭질","술래잡기",3],["가위바위보","묵찌빠",3],["딱지치기","구슬치기",2],["마인크래프트","로블록스",3],["배틀그라운드","포트나이트",3],["리그오브레전드","발로란트",3],["오버워치","서든어택",2],["카트라이더","마리오카트",3],["애니팡","캔디크러시",3],["메이플스토리","던전앤파이터",3],["테트리스","퍼즐게임",2],["슈퍼마리오","소닉",2],["포켓몬스터","디지몬",3],["동물의숲","스타듀밸리",3],["젠가","루미큐브",2],["다트","당구",1],["인형뽑기","두더지잡기",2],["369게임","눈치게임",2],["마피아","라이어게임",3]],
+sports:[["축구","야구",1],["농구","배구",2],["축구","풋살",3],["야구","소프트볼",3],["탁구","배드민턴",3],["스키","스노보드",3],["테니스","스쿼시",3],["복싱","킥복싱",3],["유도","레슬링",2],["태권도","합기도",3],["씨름","레슬링",2],["수영","다이빙",2],["마라톤","단거리달리기",2],["멀리뛰기","높이뛰기",2],["양궁","사격",2],["펜싱","검도",3],["골프","파크골프",3],["볼링","당구",1],["사이클","산악자전거",3],["요가","필라테스",3],["클라이밍","등산",2],["서핑","윈드서핑",3],["핸드볼","럭비",1],["피겨스케이팅","아이스하키",1]],
+country:[["한국","일본",1],["미국","캐나다",2],["중국","대만",3],["프랑스","이탈리아",2],["호주","뉴질랜드",3],["스페인","포르투갈",3],["독일","오스트리아",3],["스웨덴","노르웨이",3],["태국","베트남",2],["인도","네팔",2],["영국","아일랜드",2],["러시아","우크라이나",2],["브라질","아르헨티나",2],["이집트","모로코",2],["케냐","탄자니아",3],["싱가포르","홍콩",3],["멕시코","쿠바",1],["스위스","벨기에",2],["폴란드","체코",3],["그리스","터키",2],["필리핀","인도네시아",2],["몽골","카자흐스탄",2],["네덜란드","덴마크",2],["칠레","페루",3]],
+food:[["짜장면","짬뽕",1],["라면","우동",2],["콜라","사이다",3],["피자","햄버거",1],["삼겹살","목살",3],["김밥","초밥",2],["떡볶이","순대",1],["치킨","족발",1],["된장찌개","김치찌개",2],["물냉면","비빔냉면",3],["칼국수","잔치국수",3],["설렁탕","곰탕",3],["짜파게티","비빔면",2],["탕수육","깐풍기",3],["마라탕","훠궈",3],["파전","김치전",2],["붕어빵","호떡",2],["와플","크로플",3],["아메리카노","라떼",3],["소주","맥주",3],["막걸리","동동주",3],["김치볶음밥","비빔밥",2],["갈비탕","육개장",2],["회","물회",3]],
+thing:[["볼펜","샤프",3],["의자","소파",1],["노트북","태블릿",3],["이어폰","헤드폰",3],["냉장고","김치냉장고",3],["세탁기","건조기",3],["선풍기","에어컨",1],["가습기","제습기",3],["칫솔","치약",1],["샴푸","린스",3],["안경","선글라스",2],["시계","팔찌",1],["지갑","동전지갑",3],["우산","양산",3],["가방","백팩",2],["휴대폰","태블릿",2],["마우스","키보드",1],["텀블러","보온병",3],["청소기","로봇청소기",3],["다리미","고데기",2],["거울","빗",1],["베개","쿠션",3],["카메라","캠코더",3],["USB","외장하드",3]],
+animal:[["강아지","고양이",1],["호랑이","사자",2],["늑대","여우",2],["악어","도마뱀",2],["개구리","두꺼비",3],["고래","돌고래",3],["문어","오징어",3],["나비","나방",3],["까치","까마귀",3],["부엉이","올빼미",3],["원숭이","침팬지",3],["표범","치타",3],["말","당나귀",2],["소","물소",3],["양","염소",3],["낙타","알파카",2],["다람쥐","청설모",3],["햄스터","기니피그",3],["거북이","자라",3],["펭귄","오리",1],["코끼리","코뿔소",1],["곰","북극곰",2],["새우","게",1],["상어","가오리",1]],
+movie:[["어벤져스","저스티스리그",3],["아이언맨","배트맨",1],["스파이더맨","슈퍼맨",1],["겨울왕국","라푼젤",2],["토이스토리","슈렉",1],["기생충","올드보이",1],["부산행","킹덤",3],["오징어게임","기묘한이야기",2],["도깨비","호텔델루나",3],["응답하라1988","슬기로운의사생활",2],["넷플릭스","디즈니플러스",3],["범죄도시","베테랑",2],["명량","한산",3],["해리포터","반지의제왕",2],["스타워즈","스타트렉",3],["타이타닉","아바타",1],["인터스텔라","인셉션",3],["미션임파서블","007",3],["라이온킹","마다가스카",2],["코코","인사이드아웃",2],["더글로리","펜트하우스",2],["사랑의불시착","별에서온그대",2],["미생","시그널",1],["쿵푸팬더","마다가스카",3]],
+job:[["의사","간호사",1],["의사","한의사",3],["약사","의사",2],["경찰","형사",3],["소방관","경찰",1],["판사","검사",3],["변호사","검사",3],["회계사","세무사",3],["교사","교수",3],["요리사","제빵사",2],["바리스타","바텐더",2],["가수","아이돌",3],["배우","성우",2],["개그맨","마술사",1],["기자","아나운서",2],["PD","작가",2],["프로그래머","웹디자이너",2],["건축가","인테리어디자이너",3],["미용사","네일아티스트",2],["모델","스타일리스트",2],["조종사","승무원",1],["농부","어부",1],["수의사","동물조련사",2],["트레이너","요가강사",3]],
+place:[["학교","학원",2],["병원","약국",1],["카페","베이커리",3],["호텔","리조트",3],["모텔","펜션",2],["편의점","마트",2],["백화점","아울렛",3],["노래방","PC방",1],["찜질방","목욕탕",3],["영화관","공연장",2],["미술관","박물관",3],["동물원","수족관",2],["놀이공원","워터파크",2],["도서관","독서실",3],["헬스장","수영장",1],["경찰서","소방서",1],["공항","기차역",1],["지하철역","버스터미널",2],["아파트","빌라",3],["원룸","고시원",3],["고깃집","횟집",1],["술집","포차",3],["주유소","세차장",2],["공원","놀이터",3]],
+vehicle:[["버스","지하철",1],["택시","버스",1],["자전거","오토바이",1],["기차","지하철",2],["KTX","SRT",3],["비행기","헬리콥터",1],["여객선","크루즈",3],["요트","보트",3],["트럭","버스",2],["구급차","소방차",2],["경찰차","순찰차",3],["전동킥보드","전기자전거",3],["스케이트보드","킥보드",2],["유모차","휠체어",2],["굴착기","불도저",3],["트랙터","경운기",3],["전기차","하이브리드차",3],["SUV","경차",2],["캠핑카","리무진",2],["카누","카약",3],["잠수함","군함",2],["케이블카","곤돌라",3],["엘리베이터","에스컬레이터",2],["로켓","우주선",3]],
+celeb:[["유재석","강호동",2],["박명수","정준하",3],["아이유","태연",2],["손흥민","이강인",3],["김연아","박세리",2],["지드래곤","태양",3],["백종원","기안84",1],["박나래","장도연",3],["양세형","양세찬",3],["송강호","최민식",3],["봉준호","박찬욱",3],["현빈","공유",2],["전지현","김혜수",2],["차은우","박보검",3],["임영웅","영탁",3],["싸이","비",2],["제니","리사",3],["장원영","안유진",3],["카리나","윈터",3],["페이커","데프트",3],["류현진","김하성",2],["김연경","안세영",2],["신동엽","김구라",2],["이경규","이수근",2]],
+music:[["피아노","전자피아노",3],["기타","일렉기타",3],["바이올린","첼로",2],["드럼","장구",1],["플루트","클라리넷",3],["트럼펫","트롬본",3],["가야금","거문고",3],["대금","단소",3],["발라드","알앤비",3],["힙합","랩",3],["트로트","민요",2],["재즈","블루스",3],["클래식","오페라",2],["뮤지컬","오페라",3],["EDM","테크노",3],["케이팝","제이팝",3],["동요","자장가",2],["캐롤","축가",2],["노래방","콘서트",1],["버스킹","콘서트",2],["오케스트라","밴드",2],["아카펠라","합창",3],["하모니카","우쿨렐레",1],["색소폰","호른",2]]
+};
+let SPY={mode:"spy",n:6,cat:"random",diff:2,special:-1,word:"",wordB:"",cards:[],idx:0,
+  starter:0,voter:0,votes:[],cands:[],recent:[],recentP:[]};
+function spyPanel(id){["Setup","Pass","Card","Start","Discuss","Vote","Result"].forEach(s=>{
+  const e=$("spyPn"+s);if(e)e.style.display=("spyPn"+s===id)?"block":"none";});}
+function spySetMode(m){
+  SPY.mode=m;
+  document.querySelectorAll("#spyModes .cat-pick").forEach(b=>b.classList.toggle("on",b.dataset.m===m));
+  $("spyDiffRow").style.display=(m==="fool")?"block":"none";
+  $("spyModeDesc").innerHTML=(m==="spy")
+    ?"무작위 1명만 <b>스파이</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어."
+    :"무작위 1명만 <b>비슷하지만 다른 제시어</b>를 받아요. 본인은 끝까지 모릅니다 🤫";
+  beep(560,.03,.08,"square");
 }
-function liarBoxSet(main,sub){
-  $("liarBox").innerHTML=`<div class="s-main">${main}</div><div class="s-sub">${sub}</div>`;
+function spySetN(d){
+  SPY.n=Math.max(3,Math.min(10,SPY.n+d));
+  $("spyN").textContent=SPY.n;beep(500,.03,.08,"square");
 }
-function liarTap(){
-  if(!liarRoles.length)return;
-  if(liarIdx>=liarRoles.length){liarBoxSet("✅ 배정 완료","설명 시작! 라이어를 찾아라");return;}
-  if(!liarShown){
-    const r=liarRoles[liarIdx];
-    $("liarBox").className="secret "+(r===null?"liar":"reveal");
-    liarBoxSet(r===null?"🤫 당신이 라이어!":"제시어: "+r, r===null?"아는 척 연기하세요":"기억했으면 탭해서 숨기기");
-    liarShown=true;beep(660,.08,.2);
+function spySetCat(k,el){
+  SPY.cat=k;
+  document.querySelectorAll("#spyCats .cat-pick").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");beep(560,.03,.08,"square");
+}
+function spySetDiff(d,el){
+  SPY.diff=d;
+  document.querySelectorAll("#spyDiffs .cat-pick").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");beep(560,.03,.08,"square");
+}
+function spyCatName(k){const c=SPY_CATS.find(x=>x.k===k);return c?c.n:k;}
+function spyRealCat(){
+  if(SPY.cat!=="random")return SPY.cat;
+  const keys=SPY_CATS.filter(c=>c.k!=="random").map(c=>c.k);
+  return keys[Math.floor(Math.random()*keys.length)];
+}
+/* 최근 출제 단어는 당분간 재출제 안 함 */
+function spyPickWord(cat){
+  const pool=SPY_WORDS[cat]||[];
+  let avail=pool.filter(w=>SPY.recent.indexOf(w)<0);
+  if(!avail.length)avail=pool;
+  const w=avail[Math.floor(Math.random()*avail.length)];
+  SPY.recent.push(w);if(SPY.recent.length>25)SPY.recent.shift();
+  return w;
+}
+function spyPickPair(cat,diff){
+  const all=SPY_PAIRS[cat]||[];
+  const key=p=>p[0]+"|"+p[1];
+  let avail=all.filter(p=>p[2]===diff&&SPY.recentP.indexOf(key(p))<0);
+  if(!avail.length)avail=all.filter(p=>p[2]===diff);
+  if(!avail.length)avail=all.filter(p=>SPY.recentP.indexOf(key(p))<0);
+  if(!avail.length)avail=all;
+  if(!avail.length)return null;
+  const p=avail[Math.floor(Math.random()*avail.length)];
+  SPY.recentP.push(key(p));if(SPY.recentP.length>20)SPY.recentP.shift();
+  return Math.random()<.5?[p[0],p[1]]:[p[1],p[0]];
+}
+function spyStart(){
+  const cat=spyRealCat();
+  SPY.catUsed=cat;
+  SPY.special=Math.floor(Math.random()*SPY.n);
+  SPY.cards=[];
+  if(SPY.mode==="spy"){
+    SPY.word=spyPickWord(cat);SPY.wordB="";
+    for(let i=0;i<SPY.n;i++)SPY.cards.push(i===SPY.special?null:SPY.word);
   }else{
-    liarIdx++;liarShown=false;
-    $("liarBox").className="secret";
-    if(liarIdx>=liarRoles.length){liarBoxSet("✅ 전원 확인 완료","순서대로 한 문장씩 설명 시작!");confetti();}
-    else liarBoxSet("👆 "+(liarIdx+1)+"번 사람이 탭해서 확인","확인 후 다시 탭해서 숨기기");
-    beep(440,.06,.15);
+    const pr=spyPickPair(cat,SPY.diff);
+    if(!pr){alert("이 주제는 바보 모드 단어가 없어요. 다른 주제를 골라주세요!");return;}
+    SPY.word=pr[0];SPY.wordB=pr[1];
+    for(let i=0;i<SPY.n;i++)SPY.cards.push(i===SPY.special?SPY.wordB:SPY.word);
   }
+  SPY.idx=0;SPY.votes=[];SPY.voter=0;
+  logEvent("play","스파이게임-"+(SPY.mode==="spy"?"스파이":"바보"));
+  spyPassRender();
+}
+function spyPassRender(){
+  if(SPY.idx>=SPY.n){
+    SPY.starter=Math.floor(Math.random()*SPY.n);
+    $("spyStartTxt").innerHTML="🎤 <b>PLAYER "+(SPY.starter+1)+"</b> 부터 시작!";
+    $("spyStartCat").textContent="주제: "+spyCatName(SPY.catUsed);
+    spyPanel("spyPnStart");winJingle();confetti();return;
+  }
+  $("spyPassNum").textContent="PLAYER "+(SPY.idx+1);
+  $("spyPassTxt").textContent=SPY.idx===0?"화면을 눌러 제시어 확인":"PLAYER "+(SPY.idx+1)+"에게 휴대폰을 넘겨주세요";
+  spyPanel("spyPnPass");
+}
+function spyShowCard(){
+  const w=SPY.cards[SPY.idx];
+  $("spyCardNum").textContent="PLAYER "+(SPY.idx+1);
+  if(w===null){
+    $("spyCardLabel").textContent="";
+    $("spyCardWord").innerHTML="당신은<br>스파이입니다 🕵️";
+    $("spyCardWord").className="spy-word spy-is";
+    $("spyCardSub").textContent="제시어를 모릅니다 — 눈치껏 아는 척하세요!";
+  }else{
+    $("spyCardLabel").textContent="제시어";
+    $("spyCardWord").textContent=w;
+    $("spyCardWord").className="spy-word";
+    $("spyCardSub").textContent="이 단어를 직접 말하지 말고 힌트를 주세요";
+  }
+  spyPanel("spyPnCard");beep(760,.06,.14,"square");
+}
+function spyCardDone(){SPY.idx++;spyPassRender();}
+function spyToDiscuss(){spyPanel("spyPnDiscuss");}
+function spyToVote(){
+  SPY.voter=0;SPY.votes=[];
+  SPY.cands=Array.from({length:SPY.n},(_,i)=>i);
+  spyVoteRender();
+}
+function spyVoteRender(){
+  if(SPY.voter>=SPY.n){spyTally();return;}
+  $("spyVoteNum").textContent="PLAYER "+(SPY.voter+1)+" 투표";
+  $("spyVoteBtns").innerHTML=SPY.cands.filter(i=>i!==SPY.voter||SPY.cands.length===1)
+    .map(i=>'<button class="quiz-choice" onclick="spyVotePick('+i+')">PLAYER '+(i+1)+'</button>').join("");
+  spyPanel("spyPnVote");
+}
+function spyVotePick(i){
+  SPY.votes.push(i);SPY.voter++;beep(700,.05,.12,"square");spyVoteRender();
+}
+function spyTally(){
+  const t={};SPY.votes.forEach(v=>t[v]=(t[v]||0)+1);
+  let max=0;Object.values(t).forEach(c=>{if(c>max)max=c;});
+  const top=Object.keys(t).filter(k=>t[k]===max).map(Number);
+  if(top.length>1&&SPY.cands.length>top.length){
+    SPY.cands=top;SPY.voter=0;SPY.votes=[];
+    $("spyVoteNote").innerHTML="⚖️ 동점! <b>"+top.map(i=>"PLAYER "+(i+1)).join(", ")+"</b> 중 재투표";
+    spyVoteRender();return;
+  }
+  const accused=top[Math.floor(Math.random()*top.length)];
+  spyResult(accused);
+}
+function spyResult(accused){
+  const sp=SPY.special,caught=(accused===sp);
+  let h='<div class="spy-res-line">🗳 지목된 사람: <b>PLAYER '+(accused+1)+'</b></div>';
+  if(SPY.mode==="spy"){
+    h+='<div class="spy-res-big">🕵️ 스파이는 <b>PLAYER '+(sp+1)+'</b>!</div>';
+    h+='<div class="spy-res-word">제시어 「'+esc(SPY.word)+'」</div>';
+    if(caught){
+      h+='<div class="spy-res-line" style="margin-top:10px">스파이를 잡았어요! 마지막 <b>역전 기회</b>를 줍니다 👇</div>';
+      h+='<div class="hint" style="margin-top:4px">스파이가 제시어를 맞히면 <b>역전승</b>!</div>';
+      h+='<div id="spyGuessBox">'+spyGuessBtns()+'</div>';
+    }else{
+      h+='<div class="spy-res-win">🕵️ 스파이 승리!</div><div class="hint">시민들이 스파이를 못 찾았어요</div>';
+    }
+  }else{
+    h+='<div class="spy-res-big">🤪 바보는 <b>PLAYER '+(sp+1)+'</b> 였습니다!</div>';
+    h+='<div class="spy-res-word">일반 제시어 「'+esc(SPY.word)+'」</div>';
+    h+='<div class="spy-res-word" style="color:#ff7fab">PLAYER '+(sp+1)+'가 받은 제시어 「'+esc(SPY.wordB)+'」</div>';
+    h+=caught?'<div class="spy-res-win">🎉 시민 승리!</div>':'<div class="spy-res-win">🤪 바보 승리!</div>';
+  }
+  $("spyResBox").innerHTML=h;
+  spyPanel("spyPnResult");confetti();winJingle();
+}
+function spyGuessBtns(){
+  const pool=(SPY_WORDS[SPY.catUsed]||[]).filter(w=>w!==SPY.word);
+  const opts=shuffle(pool.slice()).slice(0,3).concat([SPY.word]);
+  return '<div style="margin-top:8px">'+shuffle(opts).map(w=>
+    '<button class="quiz-choice" onclick="spyGuess('+JSON.stringify(w).replace(/"/g,"&quot;")+')">'+esc(w)+'</button>').join("")+'</div>';
+}
+function spyGuess(w){
+  const ok=(w===SPY.word);
+  $("spyGuessBox").innerHTML=ok
+    ?'<div class="spy-res-win">🕵️ 스파이 역전 승리!</div><div class="hint">제시어 「'+esc(SPY.word)+'」를 맞혔습니다</div>'
+    :'<div class="spy-res-win">🎉 시민 승리!</div><div class="hint">스파이의 답 「'+esc(w)+'」 — 정답은 「'+esc(SPY.word)+'」</div>';
+  if(ok){confetti();winJingle();}else{beep(160,.35,.22,"sawtooth");confetti();}
+}
+function spyAgain(){$("spyVoteNote").textContent="";spyStart();}
+function spyReset(){$("spyVoteNote").textContent="";spyPanel("spyPnSetup");}
+function spyBuildUI(){
+  const cats=$("spyCats");if(!cats)return;
+  cats.innerHTML=SPY_CATS.map(c=>'<button class="cat-pick'+(c.k==="random"?" on":"")+
+    '" onclick="spySetCat(\''+c.k+'\',this)">'+c.n+'</button>').join("");
 }
 
 /* ===== mafia assigner ===== */
@@ -3791,6 +4043,7 @@ initAdsense(); /* 애드센스 배너 (설정 시) */
 /* 게임(모임/술/야외) = 리스트 아코디언 · 도구 = 한 화면 하나씩(캐러셀) */
 buildAccordion("pg1");buildAccordion("pg2");buildAccordion("pg4");buildToolList("pg3");
 buildGameIndex(); /* 게임 뽑기 → 설명 연동용 인덱스 */
+spyBuildUI(); /* 스파이게임 주제 버튼 생성 */
 wheelPrepare(); /* 룰렛 휠 초기 렌더 */
 $("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
 function adCancel(){clearInterval(adT);$("adModal").classList.remove("on");document.body.style.overflow="";}
