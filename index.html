@@ -4418,10 +4418,14 @@ const TTS_KEY="aoki_tts_v1";
 /* 고정 사회자 멘트 — key 가 곧 사전 생성 파일명 / Gemini 캐시 키 */
 const MAF_LINES={
   gameStart:"게임을 시작합니다.",
+  roleAssign:"지금부터 역할을 나눠드리겠습니다. 휴대폰을 한 명씩 넘겨가며 본인의 역할만 확인해주세요.",
+  roleAllDone:"모두 역할 확인이 끝났습니다. 휴대폰을 테이블 가운데에 놓아주세요.",
+  nightFallAll:"모두 고개를 숙이고 눈을 감아주세요.",
+  toVote:"휴대폰을 한 명씩 넘겨가며 찬반 투표를 진행해주세요.",
+  nextNight:"다시 밤이 찾아옵니다.",
   nightFall:"밤이 되었습니다.",
-  eyesClose:"모두 눈을 감아주세요.",
   mafiaWake:"마피아는 눈을 떠주세요.",
-  mafiaRecognize:"마피아는 서로의 얼굴을 확인하세요.",
+  mafiaRecognize:"마피아는 고개를 들어 서로의 얼굴을 확인해주세요.",
   mafiaPick:"제거할 사람을 선택하세요.",
   mafiaSleep:"마피아는 다시 눈을 감아주세요.",
   policeWake:"경찰은 눈을 떠주세요.",
@@ -4431,20 +4435,19 @@ const MAF_LINES={
   doctorPick:"치료할 사람을 선택하세요.",
   doctorSleep:"의사는 다시 눈을 감아주세요.",
   pickDone:"선택이 완료되었습니다.",
+  confirmDone:"확인이 끝났습니다.",
   nightEnd:"밤이 끝났습니다.",
   eyesOpen:"모두 눈을 떠주세요.",
   revealIntro:"이번 밤에……",
   revealNone:"…… 아무 일도 일어나지 않았습니다.",
   revealDead:"…… 한 사람이 눈을 감았습니다.",
   revealWho:"바로……",
-  dayBreak:"낮이 되었으니, 토론을 시작합니다.",
   firstNight:"첫날 밤에는 아무도 죽지 않습니다. 서로를 확인한 뒤 토론을 시작하세요.",
-  peaceful:"어젯밤은 아무 일도 일어나지 않았습니다.",
   talkStart:"낮이 되었으니, 토론을 시작합니다.",
   talkEnd:"토론을 종료합니다.",
   nomineeAsk:"처형 후보를 선택해주세요.",
   defenseEnd:"최후 변론을 종료합니다.",
-  voteStart:"찬반 투표를 시작합니다.",
+  voteStart:"지금부터 찬반 투표를 시작합니다.",
   voteDone:"모든 투표가 완료되었습니다. 결과를 공개합니다.",
   noExec:"오늘은 처형 없이 밤으로 넘어갑니다.",
   gameOver:"게임이 종료되었습니다.",
@@ -4547,8 +4550,31 @@ async function geminiTTS(text){
   GEM_CACHE.set(ck,u);
   return u;
 }
+/* iOS Safari 는 사용자 조작 없이 시작한 오디오·음성합성을 막는다.
+   → 재생용 <audio> 를 하나만 두고, 버튼을 누른 그 순간에 무음으로 한 번 재생해 잠금을 푼다. */
+let TTS_AUDIO=null, TTS_UNLOCKED=false;
+function ttsAudio(){
+  if(!TTS_AUDIO){TTS_AUDIO=new Audio();TTS_AUDIO.preload="auto";TTS_AUDIO.setAttribute("playsinline","");}
+  return TTS_AUDIO;
+}
+function ttsUnlock(){
+  try{ac();}catch(e){}
+  if(TTS_UNLOCKED)return;
+  TTS_UNLOCKED=true;
+  try{
+    const a=ttsAudio();
+    /* 0.05초짜리 무음 WAV */
+    a.src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9AAACABAAZGF0YQAAAAA=";
+    const pr=a.play(); if(pr&&pr.catch)pr.catch(()=>{});
+  }catch(e){}
+  try{
+    if(window.speechSynthesis&&window.SpeechSynthesisUtterance){
+      const u=new SpeechSynthesisUtterance(" ");u.volume=0;u.lang="ko-KR";
+      speechSynthesis.speak(u);
+    }
+  }catch(e){}
+}
 const Narrator=(function(){
-  const cache={};
   let queue=Promise.resolve(),koVoice=null,voiceTried=false;
   let lastKey="",lastAt=0;
   function pickVoice(){
@@ -4562,14 +4588,15 @@ const Narrator=(function(){
     return koVoice;
   }
   try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{voiceTried=false;pickVoice();};}catch(e){}
-  function playUrl(url,revoke){
+  function playUrl(url){
     return new Promise(res=>{
       try{
-        const a=cache[url]||(cache[url]=new Audio(url));
-        a.playbackRate=TTSC.rate||1;
-        a.currentTime=0;
-        a.onended=()=>res(true);a.onerror=()=>res(false);
-        const pr=a.play(); if(pr&&pr.catch)pr.catch(()=>res(false));
+        const a=ttsAudio();
+        let done=false;const fin=v=>{if(!done){done=true;a.onended=a.onerror=null;res(v);}};
+        a.onended=()=>fin(true);a.onerror=()=>fin(false);
+        a.src=url;a.playbackRate=TTSC.rate||1;a.currentTime=0;
+        const pr=a.play(); if(pr&&pr.catch)pr.catch(()=>fin(false));
+        setTimeout(()=>fin(false),20000);      /* 재생이 시작되지 않아도 진행이 멈추지 않게 */
       }catch(e){res(false);}
     });
   }
@@ -4847,6 +4874,7 @@ function ttsShowErrTo(boxId,head,status,raw,rawFull){
   box.innerHTML=h;box.style.color="";
 }
 async function ttsTest(){
+  ttsUnlock();
   const txt=($("ttsTestTxt")&&$("ttsTestTxt").value.trim())||"마피아는 눈을 떠주세요.";
   ttsMsg("🔄 생성 중…","var(--orange)");
   try{
@@ -4920,17 +4948,21 @@ function mafBegin(){
     day:1,phase:"ROLE_REVEAL",idx:0,mafiaTarget:null,doctorTarget:null,policeTarget:null,lastHeal:null,
     nominee:null,votes:{execute:0,save:0},voters:[],vi:0,over:false,token:MAF.token,comp:{m:c.m,p:c.p,doc:c.doc}};
   logEvent("play","마피아");sfx("confirm");
+  ttsUnlock();                       /* 첫 사용자 조작 시점에 오디오 잠금 해제 (iOS) */
+  Narrator.say("roleAssign");
   mafPassRender();
 }
 let MAF_PASS_NEXT=null;
 function mafPassRender(){
   if(MAF.idx>=MAF.n){
-    mafPanel("mafPnReady");sfx("success");return;
+    mafPanel("mafPnReady");sfx("success");
+    Narrator.say("roleAllDone");return;
   }
   MAF_PASS_NEXT=null;
   $("mafPassNum").textContent=mafNm(MAF.idx);
   $("mafPassNum2").textContent=mafNm(MAF.idx);
   mafPanel("mafPnPass");
+  Narrator.say(null,mafNm(MAF.idx)+" 님, 휴대폰을 받아주세요.");
 }
 /* '내가 OOO입니다' — 역할 확인 단계면 롱프레스로, 투표 단계면 투표 화면으로 */
 function mafPassOk(){
@@ -4999,10 +5031,12 @@ function mafLockNext(){const f=MAF_LOCK_NEXT;MAF_LOCK_NEXT=null;sfx("tap");if(f)
 /* ---------- 게임 시작 ---------- */
 function mafGameStart(){ mafOnce("start",mafGameStartGo,3000); }
 async function mafGameStartGo(){
-  try{ac();}catch(e){}                     /* iOS Safari AudioContext unlock (본문 93항) */
+  ttsUnlock();                             /* iOS Safari 오디오·음성 잠금 해제 (본문 93항) */
   MAF.phase="NIGHT_START";
   sfx("roundStart");
-  await Narrator.say("gameStart");
+  /* 멘트를 큐에 넣고 바로 밤 화면으로 넘어간다 — 안내가 나오는 동안 화면이 멈춘 것처럼 보이지 않게.
+     Narrator 큐가 FIFO 라 "게임을 시작합니다" → "밤이 되었습니다" 순서는 그대로 유지된다. */
+  Narrator.say("gameStart");
   mafNight();
 }
 
@@ -5021,7 +5055,7 @@ async function mafNight(){
   mafPanel("mafPnNight");
   MaskingAudio.set(MAFS.mask,MAFS.vol);MaskingAudio.start();
   await Narrator.say("nightFall");if(!mafLive(t))return;
-  await Narrator.say("eyesClose");if(!mafLive(t))return;
+  await Narrator.say("nightFallAll");if(!mafLive(t))return;
   await mafWait(700);if(!mafLive(t))return;
   const peace=(MAF.day===1&&MAFS.day1Peace);
   if(MAF.day===1){await mafPhase("recog");if(!mafLive(t))return;}
@@ -5101,7 +5135,7 @@ function mafPhase(kind){
     $("mafNightSub").textContent="";
     const sc=$("mafNightSec");if(sc)sc.textContent="";
     /* 실제로 골랐는지와 무관하게 항상 같은 안내가 나간다 (행동 여부가 새지 않도록) */
-    await Narrator.say("pickDone");if(!mafLive(t))return;
+    await Narrator.say(kind==="recog"?"confirmDone":"pickDone");if(!mafLive(t))return;
     await mafCue("close");if(!mafLive(t))return;
     await Narrator.say(L[1]);if(!mafLive(t))return;
     $("mafNightCue").textContent="모두 눈을 감고 계세요";
@@ -5348,6 +5382,7 @@ async function mafNominate(){
 function mafPickNominee(i){
   if(MAF.nominee===i&&$("mafPnNomOk").style.display!=="none")return;
   MAF.nominee=i;sfx("vote");
+  Narrator.say(null,mafNm(i)+" 님이 처형 후보로 지목되었습니다.");
   $("mafNomName").textContent=mafNm(i);
   $("mafNomName2").textContent=mafNm(i);
   mafPanel("mafPnNomOk");
@@ -5396,6 +5431,7 @@ async function mafDefEndGo(){
 /* ---------- 전원 비밀 찬반투표 ---------- */
 function mafVoteStart(){
   MAF.phase="EXECUTION_VOTE";
+  Narrator.say("voteStart");Narrator.say("toVote");
   MAF.votes={execute:0,save:0};
   MAF.voters=mafAliveIdx();      /* 살아 있는 사람만 투표 (본문 66항) */
   MAF.vi=0;
@@ -5413,6 +5449,7 @@ function mafVotePass(){
     mafPanel("mafPnVote");
   };
   mafPanel("mafPnPass");
+  Narrator.say(null,mafNm(me)+" 님, 투표해주세요.");
 }
 function mafVotePick(v){
   if($("mafPnVote").style.display==="none")return;   /* 이미 넘어간 화면의 잔여 클릭 무시 */
@@ -5460,6 +5497,7 @@ function mafAfterVote(){
   mafOnce("afterVote",()=>{
     sfx("tap");
     if(mafCheckEnd())return;
+    Narrator.say("nextNight");
     MAF.day++;mafNight();
   },2000);
 }
