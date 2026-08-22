@@ -1639,7 +1639,39 @@ body.focus{padding-bottom:0}
     <p class="hint" style="margin:2px 0">🔉 은폐음 볼륨</p>
     <div class="maf-opt" id="mafOptVol"></div>
     <div class="maf-opt" id="mafOptFlags"></div>
+    <button class="big-btn b3" style="font-size:13px;padding:10px 20px;margin-top:8px" onclick="ttsOpen()">🎙 사회자 음성(TTS) 설정</button>
+    <p class="hint" id="mafTtsNow" style="margin:4px 0 0"></p>
     <button class="big-btn" style="font-size:18px;padding:16px 40px;margin-top:10px" onclick="mafBegin()">🃏 역할 배정 시작</button>
+  </div>
+
+  <!-- 음성(TTS) 설정 -->
+  <div id="mafPnTTS" style="display:none">
+    <div class="maf-cue">🎙 사회자 음성 설정</div>
+    <p class="hint" style="margin:2px 0">음성 엔진</p>
+    <div class="maf-opt" id="ttsProv"></div>
+    <div id="ttsGemBox">
+      <p class="hint" style="margin:8px 0 2px">Gemini API 키</p>
+      <input id="ttsKey" class="maf-nm" style="width:min(92%,380px);text-align:left;font-family:monospace"
+             type="password" autocomplete="off" spellcheck="false" placeholder="AIza… (내 기기에만 저장됩니다)"
+             oninput="ttsSetKey(this.value)">
+      <p class="hint" style="margin:4px 0;font-size:11.5px;line-height:1.5">
+        🔒 키는 <b>이 기기의 브라우저</b>에만 저장되고 서버로 전송되지 않습니다.<br>
+        발급: Google AI Studio → API keys · 공용 기기에서는 사용 후 <b>키 지우기</b>를 눌러주세요.</p>
+      <p class="hint" style="margin:8px 0 2px">모델</p>
+      <div class="maf-opt" id="ttsModel"></div>
+      <p class="hint" style="margin:8px 0 2px">목소리</p>
+      <div class="maf-opt" id="ttsVoice"></div>
+    </div>
+    <p class="hint" style="margin:8px 0 2px">말하기 속도</p>
+    <div class="maf-opt" id="ttsRate"></div>
+    <div class="gd-sec">테스트</div>
+    <input id="ttsTestTxt" class="maf-nm" style="width:min(92%,380px);text-align:left"
+           value="마피아는 눈을 떠주세요." maxlength="60">
+    <button class="big-btn b2" onclick="ttsTest()">▶ 이 문장으로 테스트</button>
+    <button class="big-btn b3" onclick="ttsWarm()">⚡ 고정 멘트 24종 미리 만들기</button>
+    <div id="ttsMsg" class="hint" style="min-height:22px;font-weight:800;margin-top:8px"></div>
+    <button class="big-btn" style="margin-top:6px" onclick="ttsClose()">✅ 완료</button>
+    <button class="big-btn b3" style="font-size:12px;padding:9px 16px" onclick="ttsClearKey()">🗑 키 지우기</button>
   </div>
 
   <!-- 이어하기 -->
@@ -1701,6 +1733,7 @@ body.focus{padding-bottom:0}
       <div class="maf-cue" id="mafNightCue">모두 눈을 감아주세요</div>
       <div id="mafNightBody"></div>
       <div class="maf-sub" id="mafNightSub"></div>
+      <div class="maf-sub" id="mafNightSec" style="font-variant-numeric:tabular-nums"></div>
     </div>
     <div class="maf-bar"><i id="mafNightBar"></i></div>
   </div>
@@ -4078,11 +4111,12 @@ const MaskingAudio=(function(){
 })();
 
 /* ---------- 사회자 음성 (TTS) ----------
-   우선순위(본문 20항): ① 사전 생성 음원 → ② 서버리스 TTS → ③ 브라우저 TTS → ④ 화면 텍스트+효과음.
-   Google API Key 는 프론트엔드에 넣지 않는다. 배포 시 아래 두 상수만 채우면 상위 단계가 자동 사용된다. */
-const MAF_TTS_BASE="";      /* 예: "https://cdn.example.com/aoki/tts/" — 사전 생성 mp3 폴더 */
-const MAF_TTS_ENDPOINT="";  /* 예: "https://xxx.functions.supabase.co/tts" — 서버리스 프록시 */
-/* 고정 사회자 멘트 (본문 21항) — key 가 곧 사전 생성 파일명 */
+   제공자 우선순위: Gemini → 사전 생성 음원 → 서버리스 → 브라우저 → 화면 텍스트.
+   API 키는 코드에 넣지 않는다. 사용자가 설정창에서 입력한 값을 그 기기의 localStorage 에만 보관한다. */
+const MAF_TTS_BASE="";      /* 선택: 사전 생성 mp3 폴더 URL */
+const MAF_TTS_ENDPOINT="";  /* 선택: 서버리스 TTS 프록시 URL */
+const TTS_KEY="aoki_tts_v1";
+/* 고정 사회자 멘트 — key 가 곧 사전 생성 파일명 / Gemini 캐시 키 */
 const MAF_LINES={
   gameStart:"게임을 시작합니다.",
   nightFall:"밤이 되었습니다.",
@@ -4099,6 +4133,7 @@ const MAF_LINES={
   doctorSleep:"의사는 다시 눈을 감아주세요.",
   nightEnd:"밤이 끝났습니다.",
   eyesOpen:"모두 눈을 떠주세요.",
+  firstNight:"첫날 밤에는 아무도 죽지 않습니다. 서로를 확인한 뒤 토론을 시작하세요.",
   peaceful:"어젯밤은 아무 일도 일어나지 않았습니다.",
   talkStart:"지금부터 토론을 시작합니다.",
   talkEnd:"토론을 종료합니다.",
@@ -4111,9 +4146,69 @@ const MAF_LINES={
   winCitizen:"시민 팀의 승리입니다.",
   winMafia:"마피아 팀의 승리입니다."
 };
+
+const GEMINI_TTS_URL="https://generativelanguage.googleapis.com/v1beta/models/";
+/* Gemini 프리빌트 음성 — 한국어 지원 (30종 중 성격이 뚜렷한 8종을 노출) */
+const GEMINI_VOICES=[
+  ["Kore","코레 · 단단함"],["Charon","카론 · 차분함"],["Puck","퍽 · 경쾌함"],["Aoede","아오이데 · 부드러움"],
+  ["Fenrir","펜리르 · 묵직함"],["Leda","레다 · 밝음"],["Orus","오루스 · 또렷함"],["Zephyr","제피르 · 가벼움"]
+];
+const GEMINI_MODELS=[
+  ["gemini-2.5-flash-preview-tts","Flash (빠름·저렴)"],
+  ["gemini-2.5-pro-preview-tts","Pro (고품질)"]
+];
+let TTSC=(function(){
+  const d={prov:"auto",key:"",voice:"Kore",model:"gemini-2.5-flash-preview-tts",rate:1,style:"차분하고 또렷한 게임 사회자 말투로"};
+  try{const v=JSON.parse(localStorage.getItem(TTS_KEY)||"null");if(v)Object.assign(d,v);}catch(e){}
+  return d;
+})();
+function ttsSave(){try{localStorage.setItem(TTS_KEY,JSON.stringify(TTSC));}catch(e){}}
+function ttsHasKey(){return !!(TTSC.key&&TTSC.key.trim().length>10);}
+
+/* base64 PCM(s16le mono) → 재생 가능한 WAV Blob URL */
+function pcmToWavUrl(b64,rate){
+  const bin=atob(b64),n=bin.length;
+  const buf=new ArrayBuffer(44+n),v=new DataView(buf),u=new Uint8Array(buf);
+  const W=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  W(0,"RIFF");v.setUint32(4,36+n,true);W(8,"WAVE");W(12,"fmt ");
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  W(36,"data");v.setUint32(40,n,true);
+  for(let i=0;i<n;i++)u[44+i]=bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([buf],{type:"audio/wav"}));
+}
+const GEM_CACHE=new Map();          /* 같은 문장은 한 번만 생성해 재사용 (요금·지연 절약) */
+let GEM_FAIL=0, GEM_LASTERR="";
+async function geminiTTS(text){
+  if(!ttsHasKey())throw new Error("API 키 없음");
+  const ck=TTSC.model+"|"+TTSC.voice+"|"+text;
+  if(GEM_CACHE.has(ck))return GEM_CACHE.get(ck);
+  const url=GEMINI_TTS_URL+encodeURIComponent(TTSC.model)+":generateContent?key="+encodeURIComponent(TTSC.key.trim());
+  const prompt=(TTSC.style?TTSC.style+": ":"")+text;
+  const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      contents:[{parts:[{text:prompt}]}],
+      generationConfig:{responseModalities:["AUDIO"],
+        speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:TTSC.voice}}}}
+    })});
+  if(!res.ok){
+    let msg="HTTP "+res.status;
+    try{const e=await res.json();if(e&&e.error&&e.error.message)msg+=" — "+e.error.message;}catch(_){}
+    throw new Error(msg);
+  }
+  const j=await res.json();
+  const parts=(((j.candidates||[])[0]||{}).content||{}).parts||[];
+  const inl=(parts.find(x=>x&&x.inlineData)||{}).inlineData;
+  if(!inl||!inl.data)throw new Error("음성 데이터 없음");
+  const m=/rate=(\d+)/.exec(inl.mimeType||"");
+  const u=pcmToWavUrl(inl.data,m?+m[1]:24000);
+  GEM_CACHE.set(ck,u);
+  return u;
+}
 const Narrator=(function(){
   const cache={};
   let queue=Promise.resolve(),koVoice=null,voiceTried=false;
+  let lastKey="",lastAt=0;
   function pickVoice(){
     if(voiceTried)return koVoice;
     voiceTried=true;
@@ -4125,11 +4220,13 @@ const Narrator=(function(){
     return koVoice;
   }
   try{if(window.speechSynthesis)speechSynthesis.onvoiceschanged=()=>{voiceTried=false;pickVoice();};}catch(e){}
-  function playUrl(url){
+  function playUrl(url,revoke){
     return new Promise(res=>{
       try{
         const a=cache[url]||(cache[url]=new Audio(url));
-        a.currentTime=0;a.onended=res;a.onerror=()=>res(false);
+        a.playbackRate=TTSC.rate||1;
+        a.currentTime=0;
+        a.onended=()=>res(true);a.onerror=()=>res(false);
         const pr=a.play(); if(pr&&pr.catch)pr.catch(()=>res(false));
       }catch(e){res(false);}
     });
@@ -4139,12 +4236,11 @@ const Narrator=(function(){
       try{
         if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)return res(false);
         const u=new SpeechSynthesisUtterance(text);
-        u.lang="ko-KR";u.rate=0.96;u.pitch=1.0;
+        u.lang="ko-KR";u.rate=0.96*(TTSC.rate||1);u.pitch=1.0;
         const v=pickVoice(); if(v)u.voice=v;
         let done=false;const fin=()=>{if(!done){done=true;res(true);}};
         u.onend=fin;u.onerror=()=>{if(!done){done=true;res(false);}};
         speechSynthesis.cancel();speechSynthesis.speak(u);
-        /* 일부 브라우저가 onend 를 안 주는 경우 대비 */
         setTimeout(fin,Math.min(9000,1200+text.length*140));
       }catch(e){res(false);}
     });
@@ -4154,18 +4250,54 @@ const Narrator=(function(){
     MaskingAudio.duck();
     try{
       let ok=false;
-      if(key&&MAF_TTS_BASE)ok=await playUrl(MAF_TTS_BASE+key+".mp3");
-      if(ok===false&&MAF_TTS_ENDPOINT)
+      const p=TTSC.prov;
+      if(p!=="off"&&p!=="browser"&&ttsHasKey()){
+        try{ ok=await playUrl(await geminiTTS(t)); GEM_FAIL=0; }
+        catch(e){ GEM_FAIL++; GEM_LASTERR=e.message||String(e); ok=false; }
+      }
+      if(ok===false&&p!=="off"&&key&&MAF_TTS_BASE)ok=await playUrl(MAF_TTS_BASE+key+".mp3");
+      if(ok===false&&p!=="off"&&MAF_TTS_ENDPOINT)
         ok=await playUrl(MAF_TTS_ENDPOINT+"?lang=ko-KR&text="+encodeURIComponent(t));
-      if(ok===false&&SND_MODE!=="off")ok=await browserSay(t);
+      if(ok===false&&p!=="off"&&SND_MODE!=="off")ok=await browserSay(t);
+      /* 음성이 전혀 안 나오는 환경에서도 화면 텍스트를 읽을 시간은 확보 */
       if(ok===false)await new Promise(r=>setTimeout(r,Math.min(2600,700+t.length*70)));
     }catch(e){}
     MaskingAudio.restore();
   }
   return {
-    /* key 만 주면 고정 멘트, text 를 주면 동적 멘트(본문 22항) */
-    say(key,text){ queue=queue.then(()=>run(key,text)).catch(()=>{}); return queue; },
-    reset(){ try{speechSynthesis.cancel();}catch(e){} queue=Promise.resolve(); }
+    /* key 만 주면 고정 멘트, text 를 주면 동적 멘트.
+       같은 문장이 2초 안에 다시 들어오면 무시한다 — 버튼 연타로 음성이 겹치는 것을 막는다. */
+    say(key,text){
+      const id=(key||"")+"|"+(text||""), now=Date.now();
+      if(id===lastKey&&now-lastAt<2000)return queue;
+      lastKey=id;lastAt=now;
+      queue=queue.then(()=>{lastAt=Date.now();return run(key,text);}).catch(()=>{});
+      return queue;
+    },
+    /* 설정창 테스트용 — 큐/중복 검사 없이 바로 한 번 재생 */
+    async test(text){
+      if(TTSC.prov==="off")return {ok:false,how:"끔",msg:"음성 사용 안 함으로 설정됨"};
+      if(TTSC.prov!=="browser"&&ttsHasKey()){
+        try{const u=await geminiTTS(text);const ok=await playUrl(u);
+          return ok===false?{ok:false,how:"Gemini",msg:"오디오 재생 실패"}:{ok:true,how:"Gemini ("+TTSC.voice+")"};}
+        catch(e){ return {ok:false,how:"Gemini",msg:e.message||String(e)}; }
+      }
+      const ok=await browserSay(text);
+      return ok?{ok:true,how:"브라우저 TTS"}:{ok:false,how:"브라우저 TTS",msg:"이 브라우저는 한국어 음성을 지원하지 않습니다"};
+    },
+    /* 고정 멘트 24종을 미리 만들어 캐시 — 게임 중 지연 제거 */
+    async warmup(onStep){
+      const keys=Object.keys(MAF_LINES);
+      let done=0,fail=0;
+      for(const k of keys){
+        try{await geminiTTS(MAF_LINES[k]);}catch(e){fail++;}
+        done++; if(onStep)onStep(done,keys.length,fail);
+      }
+      return {done,fail,total:keys.length};
+    },
+    reset(){ try{speechSynthesis.cancel();}catch(e){} queue=Promise.resolve();lastKey="";lastAt=0; },
+    get cacheSize(){return GEM_CACHE.size;},
+    get lastError(){return GEM_LASTERR;}
   };
 })();
 
@@ -4191,7 +4323,7 @@ const MAF_ORDER=["mafia","police","doctor"];
 /* ---------- 설정 ---------- */
 const MAF_SKEY="aoki_maf_v1", MAF_RKEY="aoki_maf_run_v1";
 let MAFS=(function(){
-  const d={talk:180,def:30,mask:"hihat",vol:"mid",revealDead:true,selfHeal:true,noRepeatHeal:false};
+  const d={talk:180,def:30,mask:"hihat",vol:"mid",revealDead:true,selfHeal:true,noRepeatHeal:false,day1Peace:true};
   try{const v=JSON.parse(localStorage.getItem(MAF_SKEY)||"null");if(v)Object.assign(d,v);}catch(e){}
   return d;
 })();
@@ -4207,7 +4339,7 @@ let MAF={n:0,names:[],roles:[],alive:[],day:1,phase:"SETUP",idx:0,
 let MAF_N=6;
 
 function mafPanel(id){
-  ["Setup","Resume","Pass","Hold","Role","Lock","Ready","Night","Morning","Talk","Nom","NomOk","Def","Vote","VoteRes","Result"]
+  ["Setup","TTS","Resume","Pass","Hold","Role","Lock","Ready","Night","Morning","Talk","Nom","NomOk","Def","Vote","VoteRes","Result"]
     .forEach(x=>{const e=$("mafPn"+x);if(e)e.style.display=("mafPn"+x===id)?"block":"none";});
 }
 function mafNm(i){return MAF.names[i]||("플레이어 "+(i+1));}
@@ -4223,6 +4355,15 @@ function mafWipe(){
    .forEach(([id,html])=>{const e=$(id);if(e){if(html)e.innerHTML="";else e.textContent="";}});
   ["mafAlive","mafAlive2"].forEach(id=>{const e=$(id);if(e)e.innerHTML="";});
 }
+/* 버튼 연타 방지 — 같은 단계 전환이 짧은 시간 안에 두 번 실행되면 뒤엣것을 버린다.
+   (전환 중 음성이 큐에 두 번 쌓여 겹쳐 들리던 문제) */
+const MAF_LOCKS={};
+function mafOnce(key,fn,ms){
+  const now=Date.now();
+  if(MAF_LOCKS[key]&&now-MAF_LOCKS[key]<(ms||1500))return false;
+  MAF_LOCKS[key]=now;fn();return true;
+}
+function mafUnlock(key){delete MAF_LOCKS[key];}
 function mafWait(ms){
   const t=MAF.token;
   return new Promise(res=>{setTimeout(()=>{if(t===MAF.token)res();},ms);});
@@ -4291,7 +4432,60 @@ function mafBuildSetup(){
   $("mafOptFlags").innerHTML=
     '<button class="cat-pick'+(MAFS.revealDead?" on":"")+'" onclick="mafToggle(\'revealDead\')">💀 사망 시 역할 공개</button>'+
     '<button class="cat-pick'+(MAFS.selfHeal?" on":"")+'" onclick="mafToggle(\'selfHeal\')">🩺 자기 치료 허용</button>'+
-    '<button class="cat-pick'+(MAFS.noRepeatHeal?" on":"")+'" onclick="mafToggle(\'noRepeatHeal\')">🚫 연속 치료 금지</button>';
+    '<button class="cat-pick'+(MAFS.noRepeatHeal?" on":"")+'" onclick="mafToggle(\'noRepeatHeal\')">🚫 연속 치료 금지</button>'+
+    '<button class="cat-pick'+(MAFS.day1Peace?" on":"")+'" onclick="mafToggle(\'day1Peace\')">🌙 첫날 밤 사망 없음</button>';
+}
+/* ---------- 음성(TTS) 설정 화면 ---------- */
+const TTS_PROV=[["auto","자동 (Gemini→브라우저)"],["gemini","Gemini 전용"],["browser","브라우저 TTS"],["off","음성 없음"]];
+const TTS_RATE=[[0.85,"느리게"],[1,"보통"],[1.15,"빠르게"],[1.3,"매우 빠르게"]];
+function ttsOpen(){ttsBuild();mafPanel("mafPnTTS");sfx("select");}
+function ttsClose(){ttsSave();mafPanel("mafPnSetup");ttsLabel();sfx("confirm");}
+function ttsSetProv(v){TTSC.prov=v;ttsSave();ttsBuild();sfx("select");}
+function ttsSetVoice(v){TTSC.voice=v;ttsSave();ttsBuild();sfx("select");}
+function ttsSetModel(v){TTSC.model=v;ttsSave();ttsBuild();sfx("select");}
+function ttsSetRate(v){TTSC.rate=v;ttsSave();ttsBuild();sfx("select");}
+function ttsSetKey(v){TTSC.key=v;ttsSave();const b=$("ttsMsg");if(b){b.textContent="";b.style.color="";}ttsLabel();}
+function ttsClearKey(){
+  TTSC.key="";ttsSave();
+  const k=$("ttsKey");if(k)k.value="";
+  ttsMsg("키를 지웠습니다. 브라우저 TTS 로 진행합니다.","var(--sub)");ttsBuild();ttsLabel();
+}
+function ttsMsg(t,c){const b=$("ttsMsg");if(b){b.textContent=t;b.style.color=c||"";}}
+function ttsLabel(){
+  const el=$("mafTtsNow");if(!el)return;
+  const p=TTSC.prov;
+  el.textContent="현재 음성: "+(p==="off"?"없음 (화면 안내만)"
+    :p==="browser"?"브라우저 TTS"
+    :ttsHasKey()?("Gemini · "+TTSC.voice):"브라우저 TTS (Gemini 키 미설정)");
+}
+function ttsBuild(){
+  if(!$("ttsProv"))return;
+  mafOptRow("ttsProv",TTS_PROV,TTSC.prov,"ttsSetProv");
+  mafOptRow("ttsModel",GEMINI_MODELS,TTSC.model,"ttsSetModel");
+  mafOptRow("ttsVoice",GEMINI_VOICES,TTSC.voice,"ttsSetVoice");
+  mafOptRow("ttsRate",TTS_RATE,TTSC.rate,"ttsSetRate");
+  const k=$("ttsKey");if(k&&k.value!==TTSC.key)k.value=TTSC.key||"";
+  const box=$("ttsGemBox");if(box)box.style.display=(TTSC.prov==="browser"||TTSC.prov==="off")?"none":"block";
+  ttsLabel();
+}
+async function ttsTest(){
+  const txt=($("ttsTestTxt")&&$("ttsTestTxt").value.trim())||"마피아는 눈을 떠주세요.";
+  ttsMsg("🔄 생성 중…","var(--orange)");
+  try{
+    const r=await Narrator.test(txt);
+    if(r.ok)ttsMsg("✅ 재생 완료 — "+r.how,"var(--mint)");
+    else ttsMsg("❌ "+r.how+" 실패 — "+(r.msg||"알 수 없는 오류"),"#ff7fab");
+  }catch(e){ttsMsg("❌ 오류 — "+(e.message||e),"#ff7fab");}
+}
+async function ttsWarm(){
+  if(!ttsHasKey()){ttsMsg("Gemini 키를 먼저 입력해주세요.","#ff7fab");return;}
+  ttsMsg("🔄 0 / 27 …","var(--orange)");
+  try{
+    const r=await Narrator.warmup((d,t,f)=>ttsMsg("🔄 "+d+" / "+t+(f?"  (실패 "+f+")":""),"var(--orange)"));
+    ttsMsg(r.fail?("⚠️ "+(r.total-r.fail)+"/"+r.total+" 생성 (실패 "+r.fail+") — "+Narrator.lastError)
+                 :("✅ "+r.total+"개 전부 생성 완료 — 이제 지연 없이 진행됩니다"),
+      r.fail?"var(--orange)":"var(--mint)");
+  }catch(e){ttsMsg("❌ "+(e.message||e),"#ff7fab");}
 }
 function mafReadNames(){
   const out=[];
@@ -4305,7 +4499,7 @@ function mafInit(){
   if(!$("mafNDisp"))return;
   if(!MAF.comp||!MAF.comp.m){const c=mafCompOf(MAF_N);MAF.comp={m:c.m,p:c.p,doc:c.doc};}
   MaskingAudio.set(MAFS.mask,MAFS.vol);
-  mafBuildSetup();
+  mafBuildSetup();ttsBuild();
   const saved=mafLoadRun();
   if(saved){
     $("mafResumeInfo").textContent=saved.n+"명 · "+saved.day+"일차 "+(saved.phase||"진행 중");
@@ -4425,7 +4619,8 @@ function mafLock(txt,sub,next){
 function mafLockNext(){const f=MAF_LOCK_NEXT;MAF_LOCK_NEXT=null;sfx("tap");if(f)f();}
 
 /* ---------- 게임 시작 ---------- */
-async function mafGameStart(){
+function mafGameStart(){ mafOnce("start",mafGameStartGo,3000); }
+async function mafGameStartGo(){
   try{ac();}catch(e){}                     /* iOS Safari AudioContext unlock (본문 93항) */
   MAF.phase="NIGHT_START";
   sfx("roundStart");
@@ -4438,7 +4633,8 @@ function mafRand(){return 8000+Math.random()*6999;}   /* 8초 이상 ~ 15초 미
 async function mafNight(){
   const t=MAF.token;
   MAF.phase="NIGHT_START";MAF.night=true;
-  MAF.mafiaTarget=null;MAF.policeTarget=null;MAF.policeResult=null;MAF.doctorTarget=null;
+  MAF.mafiaTarget=null;MAF.policeTarget=null;MAF.policeResult=null;MAF.doctorTarget=null;MAF.pending=null;
+  ["talk","talkEnd","def","defEnd","noExec","afterVote"].forEach(mafUnlock);
   mafSaveRun();
   $("mafDayNo").textContent=MAF.day;
   $("mafNightCue").textContent="모두 눈을 감아주세요";
@@ -4449,10 +4645,19 @@ async function mafNight(){
   await Narrator.say("nightFall");if(!mafLive(t))return;
   await Narrator.say("eyesClose");if(!mafLive(t))return;
   await mafWait(700);if(!mafLive(t))return;
+  const peace=(MAF.day===1&&MAFS.day1Peace);
   if(MAF.day===1){await mafPhase("recog");if(!mafLive(t))return;}
-  await mafPhase("mafia");if(!mafLive(t))return;
-  await mafPhase("police");if(!mafLive(t))return;
-  await mafPhase("doctor");if(!mafLive(t))return;
+  if(peace){
+    /* 첫날 밤은 서로 확인만 하고 아무도 죽지 않는다.
+       능력 단계를 건너뛰어도 은폐음은 밤 내내 유지되므로 누가 눈을 떴는지는 드러나지 않는다. */
+    $("mafNightCue").textContent="첫날 밤 — 아무도 죽지 않습니다";
+    $("mafNightBody").innerHTML="";$("mafNightSub").textContent="";
+    await Narrator.say("firstNight");if(!mafLive(t))return;
+  }else{
+    await mafPhase("mafia");if(!mafLive(t))return;
+    await mafPhase("police");if(!mafLive(t))return;
+    await mafPhase("doctor");if(!mafLive(t))return;
+  }
   $("mafNightCue").textContent="밤이 끝났습니다";
   $("mafNightBody").innerHTML="";$("mafNightSub").textContent="";
   await Narrator.say("nightEnd");if(!mafLive(t))return;
@@ -4488,6 +4693,8 @@ function mafPhase(kind){
       bar=setInterval(()=>{
         const left=Math.max(0,endAt-Date.now());
         const el=$("mafNightBar");if(el)el.style.width=(left/dur*100)+"%";
+        /* 남은 시간은 모든 역할에게 똑같이 보이므로 정체 단서가 되지 않는다 */
+        const sec=$("mafNightSec");if(sec)sec.textContent=Math.ceil(left/1000)+"초";
       },200);
     };
     await mafCue("open");if(!mafLive(t))return;
@@ -4509,9 +4716,12 @@ function mafPhase(kind){
       if(!mafLive(t)){clearInterval(bar);return;}
     }
     clearInterval(bar);
+    /* 확인 단계에서 시간이 끝나면 고르던 대상을 그대로 확정한다 (선택 자체가 사라지지 않게) */
+    if(MAF.pending)try{mafPickOk();}catch(e){MAF.pending=null;}
     const el=$("mafNightBar");if(el)el.style.width="0%";
     $("mafNightBody").innerHTML="";           /* 민감 DOM 제거 */
     $("mafNightSub").textContent="";
+    const sc=$("mafNightSec");if(sc)sc.textContent="";
     await mafCue("close");if(!mafLive(t))return;
     await Narrator.say(L[1]);if(!mafLive(t))return;
     $("mafNightCue").textContent="모두 눈을 감고 계세요";
@@ -4542,7 +4752,26 @@ function mafActionUI(kind){
     '<button class="quiz-choice" onclick="mafNightPick(\''+kind+'\','+i+')">'+esc(mafNm(i))+'</button>').join("");
   $("mafNightSub").textContent="";
 }
+/* 1차 선택 — 바로 확정하지 않고 확인 단계를 거친다 (잘못 눌러도 되돌릴 수 있게) */
 function mafNightPick(kind,i){
+  const body=$("mafNightBody");if(!body)return;
+  MAF.pending={kind:kind,i:i};
+  const verb={mafia:"제거",police:"조사",doctor:"치료"}[kind]||"선택";
+  body.innerHTML=
+    '<div class="maf-cue" style="color:#cfd8ff">'+esc(mafNm(i))+'</div>'+
+    '<div class="maf-sub" style="margin-bottom:10px">'+verb+' 대상으로 선택했습니다</div>'+
+    '<button class="big-btn b2" onclick="mafPickOk()">✅ 이 사람으로 확정</button>'+
+    '<button class="big-btn b3" onclick="mafPickBack()">↩ 다시 고르기</button>';
+  $("mafNightSub").textContent="확정 전까지 몇 번이든 바꿀 수 있어요";
+}
+function mafPickBack(){
+  const pd=MAF.pending;MAF.pending=null;
+  if(pd)mafActionUI(pd.kind);
+}
+function mafPickOk(){
+  const pd=MAF.pending;if(!pd)return;
+  MAF.pending=null;
+  const {kind,i}=pd;
   if(kind==="mafia"){MAF.mafiaTarget=i;mafNightDone("선택 완료");return;}
   if(kind==="doctor"){MAF.doctorTarget=i;MAF.lastHeal=i;mafNightDone("선택 완료");return;}
   /* 경찰 — 결과는 롱프레스로만 확인, TTS·효과음으로 절대 노출하지 않는다 (본문 42항) */
@@ -4610,7 +4839,8 @@ function mafRenderAlive(id){
 /* ---------- 토론 ---------- */
 let MAF_TT=null;
 function mafFmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");}
-async function mafToDiscuss(){
+function mafToDiscuss(){ mafOnce("talk",mafToDiscussGo,2000); }
+async function mafToDiscussGo(){
   const t=MAF.token;
   MAF.phase="DISCUSSION";
   $("mafDayNo3").textContent=MAF.day;
@@ -4652,7 +4882,8 @@ function mafTalkExtend(){
   },1000);
   sfx("roundStart");
 }
-async function mafTalkEnd(){
+function mafTalkEnd(){ mafOnce("talkEnd",mafTalkEndGo,2500); }
+async function mafTalkEndGo(){
   const t=MAF.token;
   if(MAF_TT){clearInterval(MAF_TT);MAF_TT=null;}
   sfx("roundEnd");
@@ -4673,20 +4904,23 @@ async function mafNominate(){
   await Narrator.say("nomineeAsk");
 }
 function mafPickNominee(i){
+  if(MAF.nominee===i&&$("mafPnNomOk").style.display!=="none")return;
   MAF.nominee=i;sfx("vote");
   $("mafNomName").textContent=mafNm(i);
   $("mafNomName2").textContent=mafNm(i);
   mafPanel("mafPnNomOk");
 }
 function mafNomBack(){sfx("cancel");mafNominate();}
-async function mafNoExec(){
+function mafNoExec(){ mafOnce("noExec",mafNoExecGo,2500); }
+async function mafNoExecGo(){
   const t=MAF.token;
   sfx("cancel");
   await Narrator.say("noExec");if(!mafLive(t))return;
   MAF.day++;mafNight();
 }
 /* ---------- 최후 변론 ---------- */
-async function mafDefense(){
+function mafDefense(){ mafOnce("def",mafDefenseGo,2500); }
+async function mafDefenseGo(){
   const t=MAF.token;
   MAF.phase="FINAL_DEFENSE";
   const i=MAF.nominee;
@@ -4705,7 +4939,8 @@ async function mafDefense(){
     if(left<=0){clearInterval(MAF_TT);MAF_TT=null;mafDefEnd();}
   },1000);
 }
-async function mafDefEnd(){
+function mafDefEnd(){ mafOnce("defEnd",mafDefEndGo,2500); }
+async function mafDefEndGo(){
   const t=MAF.token;
   if(MAF_TT){clearInterval(MAF_TT);MAF_TT=null;}
   sfx("roundEnd");
@@ -4736,6 +4971,8 @@ function mafVotePass(){
   mafPanel("mafPnPass");
 }
 function mafVotePick(v){
+  if($("mafPnVote").style.display==="none")return;   /* 이미 넘어간 화면의 잔여 클릭 무시 */
+  mafPanel("mafPnLock");
   if(v)MAF.votes.execute++;else MAF.votes.save++;
   MAF.vi++;sfx("vote");
   /* 어느 쪽을 골랐는지 화면에 남기지 않는다 (본문 65항) */
@@ -4776,9 +5013,11 @@ async function mafVoteTally(){
   mafSaveRun();
 }
 function mafAfterVote(){
-  sfx("tap");
-  if(mafCheckEnd())return;
-  MAF.day++;mafNight();
+  mafOnce("afterVote",()=>{
+    sfx("tap");
+    if(mafCheckEnd())return;
+    MAF.day++;mafNight();
+  },2000);
 }
 /* ---------- 승리 조건 (본문 81·82항) ---------- */
 function mafCheckEnd(){
@@ -4828,7 +5067,9 @@ function mafReplayRoles(){
 }
 /* 도구를 닫으면 진행 중인 밤/타이머/음성/은폐음을 즉시 정지 */
 function mafStop(){
-  MAF.night=false;mafBump();
+  MAF.night=false;MAF.pending=null;
+  Object.keys(MAF_LOCKS).forEach(mafUnlock);
+  mafBump();
   if(MAF_TT){clearInterval(MAF_TT);MAF_TT=null;}
   if(!MAF.over)mafWipe();
 }
