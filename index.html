@@ -4161,9 +4161,44 @@ const GEMINI_VOICES=[
   ["Fenrir","펜리르 · 묵직함"],["Leda","레다 · 밝음"],["Orus","오루스 · 또렷함"],["Zephyr","제피르 · 가벼움"]
 ];
 const GEMINI_MODELS=[
-  ["gemini-2.5-flash-preview-tts","Flash (빠름·저렴)"],
-  ["gemini-2.5-pro-preview-tts","Pro (고품질)"]
+  ["gemini-2.5-flash-preview-tts","Flash (무료 한도 O)"],
+  ["gemini-2.5-pro-preview-tts","Pro (결제 필요)"]
 ];
+/* 구글이 돌려주는 영문 오류를 원인·해결책으로 번역한다.
+   TTS 는 대부분 코드가 아니라 키/프로젝트 설정 문제라서, 무엇을 눌러야 하는지까지 알려준다. */
+function ttsDiag(status,msg){
+  const m=msg||"";
+  if(status===403&&/has not been used in project|is disabled/i.test(m)){
+    const pid=(/project (\d+)/.exec(m)||[])[1]||"";
+    return {ko:"이 키의 구글 프로젝트에서 Gemini API 가 아직 켜져 있지 않습니다",
+      fix:"Google Cloud 콘솔에서 <b>Generative Language API</b> 를 «사용 설정(Enable)» 하고 1~2분 뒤 다시 시도하세요."+
+          (pid?"<br>프로젝트 번호: <b>"+pid+"</b>":"")+
+          "<br>더 간단한 방법: <b>AI Studio 에서 키를 새로 발급</b>하면 API 가 자동으로 켜진 상태로 만들어집니다."};
+  }
+  if(status===403&&/are blocked|blocked/i.test(m))
+    return {ko:"키에 걸린 제한(restriction) 때문에 이 요청이 차단됐습니다",
+      fix:"Google Cloud 콘솔 → 사용자 인증 정보 → 해당 키 →<br>"+
+          "· <b>API 제한</b>: 「Generative Language API」 를 허용 목록에 추가<br>"+
+          "· <b>애플리케이션 제한</b>: 「없음」 으로 두거나 이 사이트 주소를 허용<br>"+
+          "가장 빠른 해결은 <b>제한 없는 키를 새로 발급</b>하는 것입니다."};
+  if(status===403) return {ko:"권한이 거부됐습니다 (키 또는 프로젝트 설정)",
+      fix:"AI Studio 에서 <b>키를 새로 발급</b>해 다시 넣어보세요."};
+  if(status===429&&/limit: 0/i.test(m))
+    return {ko:"이 모델은 <b>무료 한도가 0</b> 입니다 (결제 등록 필요)",
+      fix:"모델을 <b>Flash</b> 로 바꾸면 무료 한도로 쓸 수 있습니다. Pro 를 쓰려면 결제를 등록해야 합니다.",
+      act:"flash"};
+  if(status===429){
+    const w=(/retry in ([\d.]+)s/i.exec(m)||[])[1];
+    return {ko:"호출 한도를 초과했습니다"+(w?" (약 "+Math.ceil(+w)+"초 뒤 가능)":""),
+      fix:"무료 등급은 분당·하루 호출 수가 매우 적습니다. 잠시 뒤 다시 시도하거나, 결제를 등록하세요."};
+  }
+  if(status===400&&/API key not valid|API_KEY_INVALID/i.test(m))
+    return {ko:"API 키가 올바르지 않습니다",fix:"AI Studio → Get API key 에서 받은 <b>AIza…</b> 키인지 확인하세요."};
+  if(status===404) return {ko:"이 모델을 찾을 수 없습니다",fix:"모델을 <b>Flash</b> 로 바꿔서 시도해보세요.",act:"flash"};
+  if(status===0||/Failed to fetch|NetworkError|network/i.test(m))
+    return {ko:"네트워크에 연결하지 못했습니다",fix:"와이파이/데이터 연결과 사내망 차단 여부를 확인하세요."};
+  return null;
+}
 let TTSC=(function(){
   const d={prov:"auto",key:"",voice:"Kore",model:"gemini-2.5-flash-preview-tts",rate:1,style:"차분하고 또렷한 게임 사회자 말투로"};
   try{const v=JSON.parse(localStorage.getItem(TTS_KEY)||"null");if(v)Object.assign(d,v);}catch(e){}
@@ -4199,9 +4234,11 @@ async function geminiTTS(text){
         speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:TTSC.voice}}}}
     })});
   if(!res.ok){
-    let msg="HTTP "+res.status;
-    try{const e=await res.json();if(e&&e.error&&e.error.message)msg+=" — "+e.error.message;}catch(_){}
-    throw new Error(msg);
+    let raw="";
+    try{const e=await res.json();if(e&&e.error&&e.error.message)raw=e.error.message;}catch(_){}
+    const err=new Error("HTTP "+res.status+(raw?" — "+raw:""));
+    err.status=res.status; err.raw=raw;
+    throw err;
   }
   const j=await res.json();
   const parts=(((j.candidates||[])[0]||{}).content||{}).parts||[];
@@ -4287,20 +4324,29 @@ const Narrator=(function(){
       if(TTSC.prov!=="browser"&&ttsHasKey()){
         try{const u=await geminiTTS(text);const ok=await playUrl(u);
           return ok===false?{ok:false,how:"Gemini",msg:"오디오 재생 실패"}:{ok:true,how:"Gemini ("+TTSC.voice+")"};}
-        catch(e){ return {ok:false,how:"Gemini",msg:e.message||String(e)}; }
+        catch(e){ return {ok:false,how:"Gemini",msg:e.message||String(e),status:e.status,raw:e.raw}; }
       }
       const ok=await browserSay(text);
       return ok?{ok:true,how:"브라우저 TTS"}:{ok:false,how:"브라우저 TTS",msg:"이 브라우저는 한국어 음성을 지원하지 않습니다"};
     },
     /* 고정 멘트 24종을 미리 만들어 캐시 — 게임 중 지연 제거 */
-    async warmup(onStep){
+    /* 고정 멘트 미리 생성.
+       무료 등급은 분당 호출 수가 적어 연속 요청하면 곧바로 429 가 난다.
+       → 호출 사이에 간격을 두고, 한도에 걸리면 그 자리에서 멈춰 진행 상황을 그대로 알려준다. */
+    async warmup(onStep,gapMs){
       const keys=Object.keys(MAF_LINES);
-      let done=0,fail=0;
+      let done=0,fail=0,stop=null;
       for(const k of keys){
-        try{await geminiTTS(MAF_LINES[k]);}catch(e){fail++;}
+        try{ await geminiTTS(MAF_LINES[k]); }
+        catch(e){
+          fail++;
+          if(e.status===429||e.status===403){
+            stop={status:e.status,raw:e.raw,message:e.message};break;}
+        }
         done++; if(onStep)onStep(done,keys.length,fail);
+        if(done<keys.length)await new Promise(r=>setTimeout(r,gapMs==null?1200:gapMs));
       }
-      return {done,fail,total:keys.length};
+      return {done,fail,total:keys.length,stop:stop};
     },
     reset(){ try{speechSynthesis.cancel();}catch(e){} queue=Promise.resolve();lastKey="";lastAt=0; },
     get cacheSize(){return GEM_CACHE.size;},
@@ -4472,7 +4518,7 @@ function ttsClearKey(){
   ttsKeyHint();
   ttsMsg("키를 지웠습니다. 브라우저 TTS 로 진행합니다.","var(--sub)");ttsBuild();ttsLabel();
 }
-function ttsMsg(t,c){const b=$("ttsMsg");if(b){b.textContent=t;b.style.color=c||"";}}
+function ttsMsg(t,c){const b=$("ttsMsg");if(b){b.innerHTML="";b.textContent=t;b.style.color=c||"";}}
 function ttsLabel(){
   const el=$("mafTtsNow");if(!el)return;
   const p=TTSC.prov;
@@ -4491,24 +4537,42 @@ function ttsBuild(){
   const box=$("ttsGemBox");if(box)box.style.display=(TTSC.prov==="browser"||TTSC.prov==="off")?"none":"block";
   ttsLabel();
 }
+function ttsShowErr(head,status,raw,rawFull){
+  const d=ttsDiag(status,raw||rawFull||"");
+  const box=$("ttsMsg");if(!box)return;
+  let h='<div style="color:#ff7fab">❌ '+esc(head)+'</div>';
+  if(d){
+    h+='<div style="color:#ffd7e4;font-size:13px;margin-top:6px">'+d.ko+'</div>';
+    h+='<div class="hint" style="text-align:left;margin-top:6px;line-height:1.6">'+d.fix+'</div>';
+    if(d.act==="flash")h+='<button class="big-btn b2" style="font-size:13px;padding:10px 18px;margin-top:8px" '+
+      'onclick="ttsSetModel(\'gemini-2.5-flash-preview-tts\');ttsTest()">⚡ Flash 로 바꿔서 다시 시도</button>';
+  }
+  h+='<details style="margin-top:8px"><summary class="hint" style="cursor:pointer">원문 오류 보기</summary>'+
+     '<div class="hint" style="text-align:left;font-size:11px;word-break:break-all">'+esc(rawFull||raw||"")+'</div></details>';
+  box.innerHTML=h;box.style.color="";
+}
 async function ttsTest(){
   const txt=($("ttsTestTxt")&&$("ttsTestTxt").value.trim())||"마피아는 눈을 떠주세요.";
   ttsMsg("🔄 생성 중…","var(--orange)");
   try{
     const r=await Narrator.test(txt);
-    if(r.ok)ttsMsg("✅ 재생 완료 — "+r.how,"var(--mint)");
-    else ttsMsg("❌ "+r.how+" 실패 — "+(r.msg||"알 수 없는 오류"),"#ff7fab");
-  }catch(e){ttsMsg("❌ 오류 — "+(e.message||e),"#ff7fab");}
+    if(r.ok){ttsMsg("✅ 재생 완료 — "+r.how,"var(--mint)");return;}
+    ttsShowErr(r.how+" 실패",r.status,r.raw,r.msg);
+  }catch(e){ttsShowErr("오류",e.status,e.raw,e.message||String(e));}
 }
 async function ttsWarm(){
   if(!ttsHasKey()){ttsMsg("Gemini 키를 먼저 입력해주세요.","#ff7fab");return;}
-  ttsMsg("🔄 0 / 27 …","var(--orange)");
+  ttsMsg("🔄 준비 중… (무료 등급은 호출 간격이 필요해 1~2분 걸립니다)","var(--orange)");
   try{
     const r=await Narrator.warmup((d,t,f)=>ttsMsg("🔄 "+d+" / "+t+(f?"  (실패 "+f+")":""),"var(--orange)"));
-    ttsMsg(r.fail?("⚠️ "+(r.total-r.fail)+"/"+r.total+" 생성 (실패 "+r.fail+") — "+Narrator.lastError)
+    if(r.stop){
+      ttsShowErr(r.done+"/"+r.total+" 까지 만들고 중단",r.stop.status,r.stop.raw,r.stop.message);
+      return;
+    }
+    ttsMsg(r.fail?("⚠️ "+(r.total-r.fail)+"/"+r.total+" 생성 (실패 "+r.fail+")")
                  :("✅ "+r.total+"개 전부 생성 완료 — 이제 지연 없이 진행됩니다"),
       r.fail?"var(--orange)":"var(--mint)");
-  }catch(e){ttsMsg("❌ "+(e.message||e),"#ff7fab");}
+  }catch(e){ttsShowErr("미리 만들기 실패",e.status,e.raw,e.message||String(e));}
 }
 function mafReadNames(){
   const out=[];
