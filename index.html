@@ -661,6 +661,15 @@ body.focus{padding-bottom:0}
 .maf-bar{height:6px;border-radius:4px;background:#161628;overflow:hidden;max-width:420px;margin:12px auto 0}
 .maf-bar>i{display:block;height:100%;width:100%;background:#2f4a8a;transition:width .2s linear}
 .maf-lock{font-size:clamp(19px,5vmin,26px);font-weight:900;color:#6f7aa0;margin:10px 0}
+.maf-news{font-size:clamp(18px,5vmin,26px);font-weight:900;margin:12px 0;min-height:3.2em;
+  display:flex;flex-direction:column;justify-content:center;gap:6px;line-height:1.45}
+.maf-news .nw-1{color:var(--sub);font-size:.82em}
+.maf-news .nw-2{color:#ffd79a}
+.maf-news .nw-hit{color:#ff5f8f;font-size:1.12em}
+.maf-news .nw-safe{color:var(--mint)}
+.maf-news .nw-fake{color:#8a93b8;font-size:.78em;font-weight:800}
+@keyframes nwIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.maf-news>div{animation:nwIn .35s ease}
 .maf-timer{font-size:clamp(40px,14vmin,86px);font-weight:900;line-height:1.1;
   font-variant-numeric:tabular-nums;margin:8px 0}
 .maf-timer.warn{color:var(--orange)}
@@ -1759,9 +1768,10 @@ body.focus{padding-bottom:0}
   <!-- 아침 -->
   <div id="mafPnMorning" style="display:none">
     <div class="maf-phase maf-day">☀️ <span id="mafDayNo2">1</span>번째 낮</div>
-    <div id="mafDayNews" style="font-size:clamp(18px,5vmin,26px);font-weight:900;margin:12px 0"></div>
+    <div id="mafDayNews" class="maf-news"></div>
     <div id="mafAlive" class="maf-list"></div>
-    <button class="big-btn" onclick="mafToDiscuss()">🗣 토론 시작</button>
+    <button class="big-btn b3" id="mafSkip" style="font-size:12.5px;padding:9px 18px" onclick="mafSkipReveal()">⏭ 발표 건너뛰기</button>
+    <button class="big-btn" id="mafToTalk" style="display:none" onclick="mafToDiscuss()">🗣 토론 시작</button>
   </div>
 
   <!-- 토론 -->
@@ -4420,11 +4430,17 @@ const MAF_LINES={
   doctorWake:"의사는 눈을 떠주세요.",
   doctorPick:"치료할 사람을 선택하세요.",
   doctorSleep:"의사는 다시 눈을 감아주세요.",
+  pickDone:"선택이 완료되었습니다.",
   nightEnd:"밤이 끝났습니다.",
   eyesOpen:"모두 눈을 떠주세요.",
+  revealIntro:"이번 밤에……",
+  revealNone:"…… 아무 일도 일어나지 않았습니다.",
+  revealDead:"…… 한 사람이 눈을 감았습니다.",
+  revealWho:"바로……",
+  dayBreak:"낮이 되었으니, 토론을 시작합니다.",
   firstNight:"첫날 밤에는 아무도 죽지 않습니다. 서로를 확인한 뒤 토론을 시작하세요.",
   peaceful:"어젯밤은 아무 일도 일어나지 않았습니다.",
-  talkStart:"지금부터 토론을 시작합니다.",
+  talkStart:"낮이 되었으니, 토론을 시작합니다.",
   talkEnd:"토론을 종료합니다.",
   nomineeAsk:"처형 후보를 선택해주세요.",
   defenseEnd:"최후 변론을 종료합니다.",
@@ -5084,6 +5100,8 @@ function mafPhase(kind){
     $("mafNightBody").innerHTML="";           /* 민감 DOM 제거 */
     $("mafNightSub").textContent="";
     const sc=$("mafNightSec");if(sc)sc.textContent="";
+    /* 실제로 골랐는지와 무관하게 항상 같은 안내가 나간다 (행동 여부가 새지 않도록) */
+    await Narrator.say("pickDone");if(!mafLive(t))return;
     await mafCue("close");if(!mafLive(t))return;
     await Narrator.say(L[1]);if(!mafLive(t))return;
     $("mafNightCue").textContent="모두 눈을 감고 계세요";
@@ -5174,23 +5192,85 @@ function mafNightDone(txt){
 function mafDeadLabel(i){
   return MAFS.revealDead?(esc(mafNm(i))+" — "+MAF_ROLE[MAF.roles[i]].n):esc(mafNm(i));
 }
+/* 결과 발표용 훼이크 대사 — 사망·무사망 양쪽에 똑같이 등장해야 연출이 단서가 되지 않는다 */
+const MAF_FAKE=[
+  "…… 아무 일도 없었습니다.|…… 라고 말하려 했습니다.",
+  "…… 마을은 평화로웠습니다.|…… 그럴 리가 없죠.",
+  "…… 모두 무사히 아침을 맞았습니다.|…… 아니, 잠깐만요.",
+  "…… 비명 소리가 들렸습니다.|…… 옆집 고양이였습니다.",
+  "…… 한 사람이 쓰러졌습니다.|…… 라고 하면 믿으시겠어요?"
+];
+let MAF_SKIP=false;
+function mafSkipReveal(){MAF_SKIP=true;sfx("tap");}
+function mafRWait(ms){ return MAF_SKIP?Promise.resolve():mafWait(ms); }
+function mafRSay(key,text){ return MAF_SKIP?Promise.resolve():Narrator.say(key,text); }
+function mafNewsAdd(cls,html){
+  const box=$("mafDayNews");if(!box)return;
+  const d=document.createElement("div");d.className=cls;d.innerHTML=html;box.appendChild(d);
+}
 async function mafMorning(){
   const t=MAF.token;
-  MAF.phase="MORNING";
+  MAF.phase="MORNING";MAF_SKIP=false;
   const kill=MAF.mafiaTarget,save=MAF.doctorTarget;
-  let news,dead=-1;
-  if(kill!=null&&kill===save){news="☀️ 아무도 죽지 않았습니다.";}
-  else if(kill!=null){dead=kill;MAF.alive[kill]=false;news="💀 "+mafDeadLabel(kill)+" 사망";}
-  else news="☀️ 아무도 죽지 않았습니다.";
+  const dead=(kill!=null&&kill!==save)?kill:-1;
+  if(dead>=0)MAF.alive[dead]=false;
   $("mafDayNo2").textContent=MAF.day;
-  $("mafDayNews").innerHTML=news;
-  mafRenderAlive("mafAlive");
+  $("mafDayNews").innerHTML="";
+  $("mafAlive").innerHTML="";
+  $("mafSkip").style.display="";
+  $("mafToTalk").style.display="none";
   mafPanel("mafPnMorning");
   mafSaveRun();
-  if(dead>=0){sfx("fail");await Narrator.say(null,"어젯밤 "+mafNm(dead)+"님이 사망했습니다.");}
-  else{sfx("success");await Narrator.say("peaceful");}   /* 치료 성공 사실은 공개하지 않음 (51항) */
+
+  /* ① 뜸들이기 */
+  mafNewsAdd("nw-1","이번 밤에……");
+  sfx("suspense");
+  await mafRSay("revealIntro");if(!mafLive(t))return;
+  await mafRWait(900);if(!mafLive(t))return;
+
+  /* ② 훼이크 (약 45% 확률, 결과와 무관하게 발동) */
+  if(Math.random()<0.45){
+    const f=MAF_FAKE[Math.floor(Math.random()*MAF_FAKE.length)].split("|");
+    mafNewsAdd("nw-fake",esc(f[0]));
+    await mafRSay(null,f[0]);if(!mafLive(t))return;
+    await mafRWait(800);if(!mafLive(t))return;
+    mafNewsAdd("nw-fake",esc(f[1]));
+    await mafRSay(null,f[1]);if(!mafLive(t))return;
+    await mafRWait(700);if(!mafLive(t))return;
+  }
+
+  if(dead<0){
+    /* ③-A 아무도 죽지 않음 — 의사가 살렸는지는 끝까지 공개하지 않는다 */
+    mafNewsAdd("nw-safe","☀️ 아무 일도 일어나지 않았습니다.");
+    sfx("success");
+    await mafRSay("revealNone");
+  }else{
+    /* ③-B 사망 — 이름 → (설정 시) 역할 순으로 한 번 더 끊어서 공개 */
+    mafNewsAdd("nw-2","…… 한 사람이 눈을 감았습니다.");
+    await mafRSay("revealDead");if(!mafLive(t))return;
+    await mafRWait(900);if(!mafLive(t))return;
+    mafNewsAdd("nw-1","바로……");
+    await mafRSay("revealWho");if(!mafLive(t))return;
+    await mafRWait(1100);if(!mafLive(t))return;
+    mafNewsAdd("nw-hit","💀 "+esc(mafNm(dead))+" 님입니다.");
+    sfx("fail");
+    await mafRSay(null,mafNm(dead)+" 님입니다.");if(!mafLive(t))return;
+    if(MAFS.revealDead){
+      await mafRWait(800);if(!mafLive(t))return;
+      const r=MAF.roles[dead];
+      const KO={mafia:"마피아였습니다!",citizen:"선량한 시민이었습니다.",police:"경찰이었습니다.",doctor:"의사였습니다."};
+      const say="…… "+(KO[r]||MAF_ROLE[r].n+"였습니다.");
+      mafNewsAdd(r==="mafia"?"nw-hit":"nw-2",esc(MAF_ROLE[r].n.split(" ")[0]+" "+say));
+      sfx(r==="mafia"?"correct":"wrong");
+      await mafRSay(null,mafNm(dead)+" 님은 "+say.replace(/^…… /,""));
+    }
+  }
   if(!mafLive(t))return;
-  mafCheckEnd();
+  mafRenderAlive("mafAlive");
+  $("mafSkip").style.display="none";
+  $("mafToTalk").style.display="";
+  if(mafCheckEnd())return;
+  await mafRWait(400);
 }
 function mafRenderAlive(id){
   const el=$(id);if(!el)return;
@@ -5292,6 +5372,8 @@ async function mafDefenseGo(){
   mafPanel("mafPnDef");
   await Narrator.say(null,mafNm(i)+"님의 최후 변론을 시작합니다.");
   if(!mafLive(t))return;
+  /* 안내 음성이 끝나기 전에 변론이 종료됐다면 타이머를 시작하지 않는다 */
+  if(MAF.phase!=="FINAL_DEFENSE"||$("mafPnDef").style.display==="none")return;
   if(MAF_TT){clearInterval(MAF_TT);MAF_TT=null;}
   MAF_TT=setInterval(()=>{
     if(!mafLive(t)){clearInterval(MAF_TT);MAF_TT=null;return;}
