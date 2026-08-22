@@ -1564,6 +1564,8 @@ body.focus{padding-bottom:0}
     <p class="hint" id="spyModeDesc">무작위 1명만 <b>라이어</b> — 제시어를 모른 채 아는 척! 나머지는 같은 제시어.</p>
     <div class="spy-sec">인원</div>
     <div class="pcount-mini"><button onclick="spySetN(-1)">−</button><span class="pm-n"><span id="spyN">6</span>명</span><button onclick="spySetN(1)">+</button></div>
+    <div class="spy-sec">참가자 이름 <span style="font-weight:600;color:var(--sub)">(비워두면 PLAYER 1·2…)</span></div>
+    <div class="maf-roster" id="spyRoster"></div>
     <div class="spy-sec">주제</div>
     <div class="cat-picks" id="spyCats"></div>
     <div id="spyDiffRow" style="display:none">
@@ -2177,7 +2179,10 @@ function openToolPopup(card){
   toolPopAnchor=null;
   toolPop=card;card.classList.add("in-pop");
   body.innerHTML="";body.appendChild(card);
-  if(card.id==="toolSpy"&&typeof spyBuildUI==="function"&&!card.querySelector("#spyCats .cat-pick"))spyBuildUI();
+  if(card.id==="toolSpy"&&typeof spyBuildUI==="function"){
+    if(!card.querySelector("#spyCats .cat-pick"))spyBuildUI();
+    else rosterRender("spyRoster",SPY.n,"PLAYER ",true);   /* 저장된 공용 명단 다시 반영 */
+  }
   if(card.id==="toolMafia"&&typeof mafInit==="function")mafInit();
   if(card.id==="toolAI"&&typeof genBuild==="function")genBuild();
   if(typeof syncModalSnd==="function")syncModalSnd();
@@ -3910,8 +3915,33 @@ vehicle:[["버스","지하철",1],["택시","버스",1],["자전거","오토바�
 celeb:[["유재석","강호동",2],["박명수","정준하",3],["아이유","태연",2],["손흥민","이강인",3],["김연아","박세리",2],["지드래곤","태양",3],["백종원","기안84",1],["박나래","장도연",3],["양세형","양세찬",3],["송강호","최민식",3],["봉준호","박찬욱",3],["현빈","공유",2],["전지현","김혜수",2],["차은우","박보검",3],["임영웅","영탁",3],["싸이","비",2],["제니","리사",3],["장원영","안유진",3],["카리나","윈터",3],["페이커","데프트",3],["류현진","김하성",2],["김연경","안세영",2],["신동엽","김구라",2],["이경규","이수근",2]],
 music:[["피아노","전자피아노",3],["기타","일렉기타",3],["바이올린","첼로",2],["드럼","장구",1],["플루트","클라리넷",3],["트럼펫","트롬본",3],["가야금","거문고",3],["대금","단소",3],["발라드","알앤비",3],["힙합","랩",3],["트로트","민요",2],["재즈","블루스",3],["클래식","오페라",2],["뮤지컬","오페라",3],["EDM","테크노",3],["케이팝","제이팝",3],["동요","자장가",2],["캐롤","축가",2],["노래방","콘서트",1],["버스킹","콘서트",2],["오케스트라","밴드",2],["아카펠라","합창",3],["하모니카","우쿨렐레",1],["색소폰","호른",2]]
 };
-let SPY={mode:"spy",n:6,cat:"random",diff:2,special:-1,word:"",wordB:"",cards:[],idx:0,
+/* ===== 참가자 명단 (라이어게임 · 마피아 공용) =====
+   한 번 입력하면 두 게임에서 같이 쓰고 다음에 열어도 남아 있다. */
+const ROSTER_KEY="aoki_roster_v1";
+let ROSTER=(function(){try{const v=JSON.parse(localStorage.getItem(ROSTER_KEY)||"[]");
+  return Array.isArray(v)?v.filter(x=>typeof x==="string").slice(0,12):[];}catch(e){return [];}})();
+function rosterSave(){try{localStorage.setItem(ROSTER_KEY,JSON.stringify(ROSTER));}catch(e){}}
+/* 입력칸 렌더 — 이미 적어둔 이름이 있으면 그대로 채운다 */
+function rosterRender(boxId,n,ph,fresh){
+  const box=$(boxId);if(!box)return;
+  const cur=[];
+  if(!fresh)box.querySelectorAll(".maf-nm").forEach(e=>cur.push(e.value));
+  box.innerHTML=Array.from({length:n},(_,i)=>
+    '<input class="maf-nm" maxlength="8" placeholder="'+(ph||"플레이어 ")+(i+1)+'" value="'+
+    esc(cur[i]||ROSTER[i]||"")+'">').join("");
+}
+/* 입력값을 읽어 공용 명단에 저장하고, 비워둔 칸은 기본 이름으로 채워 돌려준다 */
+function rosterRead(boxId,n,ph){
+  const box=$(boxId),out=[];
+  if(box)box.querySelectorAll(".maf-nm").forEach(e=>out.push((e.value||"").trim()));
+  while(out.length<n)out.push("");
+  const filled=out.slice(0,n);
+  if(filled.some(x=>x)){ROSTER=filled.slice();rosterSave();}
+  return filled.map((v,i)=>v||((ph||"플레이어 ")+(i+1)));
+}
+let SPY={mode:"spy",n:6,names:[],cat:"random",diff:2,special:-1,word:"",wordB:"",cards:[],idx:0,
   starter:0,voter:0,votes:[],cands:[],recent:[],recentP:[]};
+function spyNm(i){return (SPY.names&&SPY.names[i])||("PLAYER "+(i+1));}
 function spyPanel(id){["Setup","Pass","Card","Start","Discuss","Vote","Result"].forEach(s=>{
   const e=$("spyPn"+s);if(e)e.style.display=("spyPn"+s===id)?"block":"none";});}
 function spySetMode(m){
@@ -3925,7 +3955,9 @@ function spySetMode(m){
 }
 function spySetN(d){
   SPY.n=Math.max(3,Math.min(10,SPY.n+d));
-  $("spyN").textContent=SPY.n;beep(500,.03,.08,"square");
+  $("spyN").textContent=SPY.n;
+  rosterRender("spyRoster",SPY.n,"PLAYER ");
+  sfx("select");
 }
 function spySetCat(k,el){
   SPY.cat=k;
@@ -3978,6 +4010,7 @@ function spyStart(){
     SPY.word=pr[0];SPY.wordB=pr[1];
     for(let i=0;i<SPY.n;i++)SPY.cards.push(i===SPY.special?SPY.wordB:SPY.word);
   }
+  SPY.names=rosterRead("spyRoster",SPY.n,"PLAYER ");
   SPY.idx=0;SPY.votes=[];SPY.voter=0;
   logEvent("play","라이어게임-"+(SPY.mode==="spy"?"라이어":"바보"));sfx("confirm");
   spyPassRender();
@@ -3986,18 +4019,18 @@ function spyPassRender(){
   if(!$("spyPassNum"))return;   /* 지연 렌더로 도구 노드가 아직 없을 때 방어 */
   if(SPY.idx>=SPY.n){
     SPY.starter=Math.floor(Math.random()*SPY.n);
-    $("spyStartTxt").innerHTML="🎤 <b>PLAYER "+(SPY.starter+1)+"</b> 부터 시작!";
+    $("spyStartTxt").innerHTML="🎤 <b>"+esc(spyNm(SPY.starter))+"</b> 부터 시작!";
     $("spyStartCat").textContent="주제: "+spyCatName(SPY.catUsed);
     spyPanel("spyPnStart");winJingle();confetti();return;
   }
-  $("spyPassNum").textContent="PLAYER "+(SPY.idx+1);
-  $("spyPassTxt").textContent=SPY.idx===0?"화면을 눌러 제시어 확인":"PLAYER "+(SPY.idx+1)+"에게 휴대폰을 넘겨주세요";
+  $("spyPassNum").textContent=spyNm(SPY.idx);
+  $("spyPassTxt").textContent=SPY.idx===0?"화면을 눌러 제시어 확인":spyNm(SPY.idx)+"에게 휴대폰을 넘겨주세요";
   spyPanel("spyPnPass");
 }
 function spyShowCard(){
   if(!$("spyCardWord"))return;
   const w=SPY.cards[SPY.idx];
-  $("spyCardNum").textContent="PLAYER "+(SPY.idx+1);
+  $("spyCardNum").textContent=spyNm(SPY.idx);
   if(w===null){
     $("spyCardLabel").textContent="";
     $("spyCardWord").innerHTML="당신은<br>라이어입니다 🕵️";
@@ -4021,9 +4054,9 @@ function spyToVote(){
 function spyVoteRender(){
   if(!$("spyVoteBtns"))return;
   if(SPY.voter>=SPY.n){spyTally();return;}
-  $("spyVoteNum").textContent="PLAYER "+(SPY.voter+1)+" 투표";
+  $("spyVoteNum").textContent=spyNm(SPY.voter)+" 투표";
   $("spyVoteBtns").innerHTML=SPY.cands.filter(i=>i!==SPY.voter||SPY.cands.length===1)
-    .map(i=>'<button class="quiz-choice" onclick="spyVotePick('+i+')">PLAYER '+(i+1)+'</button>').join("");
+    .map(i=>'<button class="quiz-choice" onclick="spyVotePick('+i+')">'+esc(spyNm(i))+'</button>').join("");
   spyPanel("spyPnVote");
 }
 function spyVotePick(i){
@@ -4035,7 +4068,7 @@ function spyTally(){
   const top=Object.keys(t).filter(k=>t[k]===max).map(Number);
   if(top.length>1&&SPY.cands.length>top.length){
     SPY.cands=top;SPY.voter=0;SPY.votes=[];
-    $("spyVoteNote").innerHTML="⚖️ 동점! <b>"+top.map(i=>"PLAYER "+(i+1)).join(", ")+"</b> 중 재투표";
+    $("spyVoteNote").innerHTML="⚖️ 동점! <b>"+top.map(i=>esc(spyNm(i))).join(", ")+"</b> 중 재투표";
     spyVoteRender();return;
   }
   const accused=top[Math.floor(Math.random()*top.length)];
@@ -4044,9 +4077,9 @@ function spyTally(){
 function spyResult(accused){
   if(!$("spyResBox"))return;
   const sp=SPY.special,caught=(accused===sp);
-  let h='<div class="spy-res-line">🗳 지목된 사람: <b>PLAYER '+(accused+1)+'</b></div>';
+  let h='<div class="spy-res-line">🗳 지목된 사람: <b>'+esc(spyNm(accused))+'</b></div>';
   if(SPY.mode==="spy"){
-    h+='<div class="spy-res-big">🕵️ 라이어는 <b>PLAYER '+(sp+1)+'</b>!</div>';
+    h+='<div class="spy-res-big">🕵️ 라이어는 <b>'+esc(spyNm(sp))+'</b>!</div>';
     h+='<div class="spy-res-word">제시어 「'+esc(SPY.word)+'」</div>';
     if(caught){
       h+='<div class="spy-res-line" style="margin-top:10px">라이어를 잡았어요! 마지막 <b>역전 기회</b>를 줍니다 👇</div>';
@@ -4056,9 +4089,9 @@ function spyResult(accused){
       h+='<div class="spy-res-win">🕵️ 라이어 승리!</div><div class="hint">시민들이 라이어를 못 찾았어요</div>';
     }
   }else{
-    h+='<div class="spy-res-big">🤪 바보는 <b>PLAYER '+(sp+1)+'</b> 였습니다!</div>';
+    h+='<div class="spy-res-big">🤪 바보는 <b>'+esc(spyNm(sp))+'</b> 였습니다!</div>';
     h+='<div class="spy-res-word">일반 제시어 「'+esc(SPY.word)+'」</div>';
-    h+='<div class="spy-res-word" style="color:#ff7fab">PLAYER '+(sp+1)+'가 받은 제시어 「'+esc(SPY.wordB)+'」</div>';
+    h+='<div class="spy-res-word" style="color:#ff7fab">'+esc(spyNm(sp))+' 님이 받은 제시어 「'+esc(SPY.wordB)+'」</div>';
     h+=caught?'<div class="spy-res-win">🎉 시민 승리!</div>':'<div class="spy-res-win">🤪 바보 승리!</div>';
   }
   $("spyResBox").innerHTML=h;
@@ -4080,6 +4113,7 @@ function spyGuess(w){
 function spyAgain(){$("spyVoteNote").textContent="";spyStart();}
 function spyReset(){$("spyVoteNote").textContent="";spyPanel("spyPnSetup");}
 function spyBuildUI(){
+  rosterRender("spyRoster",SPY.n,"PLAYER ",true);
   const cats=$("spyCats");if(!cats)return;
   cats.innerHTML=SPY_CATS.map(c=>'<button class="cat-pick'+(c.k==="random"?" on":"")+
     '" onclick="spySetCat(\''+c.k+'\',this)">'+c.n+'</button>').join("");
@@ -4708,12 +4742,8 @@ function mafCompOk(){
 function mafBuildSetup(){
   const nd=$("mafNDisp");if(!nd)return;
   nd.textContent=MAF_N;
-  /* 참가자 이름 (비워두면 '플레이어 N') */
-  const prev=[];
-  document.querySelectorAll("#mafRoster .maf-nm").forEach(inp=>prev.push(inp.value));
-  const ros=$("mafRoster");
-  ros.innerHTML=Array.from({length:MAF_N},(_,i)=>
-    '<input class="maf-nm" maxlength="8" placeholder="플레이어 '+(i+1)+'" value="'+esc(prev[i]||"")+'">').join("");
+  /* 참가자 이름 — 라이어게임과 같은 명단을 공유한다 */
+  rosterRender("mafRoster",MAF_N,"플레이어 ",MAF_FRESH);MAF_FRESH=false;
   /* 역할 수동 조정 */
   const rows=[["m","🔪 마피아"],["p","👮 경찰"],["doc","🩺 의사"]];
   $("mafRoleRows").innerHTML=rows.map(r=>
@@ -4823,16 +4853,12 @@ async function ttsWarm(){
       r.fail?"var(--orange)":"var(--mint)");
   }catch(e){ttsShowErr("미리 만들기 실패",e.status,e.raw,e.message||String(e));}
 }
-function mafReadNames(){
-  const out=[];
-  document.querySelectorAll("#mafRoster .maf-nm").forEach((inp,i)=>{
-    const v=(inp.value||"").trim();out.push(v||("플레이어 "+(i+1)));});
-  while(out.length<MAF_N)out.push("플레이어 "+(out.length+1));
-  return out.slice(0,MAF_N);
-}
+function mafReadNames(){ return rosterRead("mafRoster",MAF_N,"플레이어 "); }
 /* 도구가 열릴 때 초기화 */
+let MAF_FRESH=false;
 function mafInit(){
   if(!$("mafNDisp"))return;
+  MAF_FRESH=true;
   if(!MAF.comp||!MAF.comp.m){const c=mafCompOf(MAF_N);MAF.comp={m:c.m,p:c.p,doc:c.doc};}
   MaskingAudio.set(MAFS.mask,MAFS.vol);
   mafBuildSetup();ttsBuild();
@@ -5395,10 +5421,8 @@ function mafReplaySame(){
 function mafReplayRoles(){
   mafBump();mafClearRun();mafWipe();
   MAF_N=MAF.n||MAF_N;
+  if(MAF.names&&MAF.names.length){ROSTER=MAF.names.slice();rosterSave();}
   mafBuildSetup();
-  /* 이전 이름 복원 */
-  document.querySelectorAll("#mafRoster .maf-nm").forEach((inp,i)=>{
-    if(MAF.names[i])inp.value=MAF.names[i];});
   mafPanel("mafPnSetup");
 }
 /* 도구를 닫으면 진행 중인 밤/타이머/음성/은폐음을 즉시 정지 */
