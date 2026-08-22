@@ -23,6 +23,12 @@
   --pink:#ff5f8f;--orange:#ffb340;--mint:#3ce8b0;--sky:#4fc3ff;--purple:#a78bfa;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* 더블탭 확대 차단 — 빠르게 연타하는 게임이라 의도치 않게 화면이 커지는 걸 막는다.
+   manipulation 은 '더블탭 줌'만 끄고 스크롤·핀치 확대는 그대로 두므로 접근성은 유지된다.
+   (iOS Safari 는 user-scalable=no 를 무시하지만 touch-action 은 따른다) */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body,button,input,select,textarea,label,a,.g,.t-card,.t-tile,.cat-pick,.quiz-choice,
+.spy-pass,.spy-card,.maf-p,.bnav-i,.rl-chip,.lot,.gcard{touch-action:manipulation}
 body{font-family:-apple-system,'Pretendard','Noto Sans KR',sans-serif;
  background:radial-gradient(120% 90% at 50% 0%,var(--bg2) 0%,var(--bg1) 45%,var(--bg3) 100%);
  color:var(--txt);min-height:100vh;padding-bottom:90px}

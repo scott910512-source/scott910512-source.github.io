@@ -1321,3 +1321,31 @@ iOS Safari 는 **사용자 조작 없이 시작한 오디오·음성합성을 �
 ### 검증
 `maf_narr.js` **29/29 ✅** — 전 구간 완주하며 멘트 순서를 기록해 23개 지점 전수 확인 + 멘트 71개 빈 문구 0 + `MAF_LINES` 36개 전부 참조 + 오디오 잠금 해제 3종
 전체 회귀 23개 스위트 · **전부 통과 · 실패 0 · JS 에러 0**
+
+---
+
+## 더블탭 확대 차단
+
+빠르게 연타하는 게임이라 더블탭이 확대로 인식돼 화면이 커지는 문제.
+
+### 방식
+`touch-action: manipulation` 을 `html` 과 모든 상호작용 요소에 적용.
+기존에는 마피아 롱프레스 버튼 한 곳에만 걸려 있었다.
+
+```css
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+body,button,input,select,textarea,label,a,.g,.t-card,.t-tile,.cat-pick,.quiz-choice,
+.spy-pass,.spy-card,.maf-p,.bnav-i,.rl-chip,.lot,.gcard{touch-action:manipulation}
+```
+
+### 왜 viewport 로 막지 않았나
+- `user-scalable=no` / `maximum-scale=1` 은 **iOS Safari 가 접근성 이유로 무시**한다 → 효과 없음
+- 반대로 `touch-action` 은 iOS Safari 도 따른다
+- `manipulation` 은 **더블탭 줌만** 끄고 **스크롤·핀치 확대는 그대로 둔다** → 눈이 불편한 사용자가 직접 확대하는 건 계속 가능
+
+### 검증 (`touch.js` 15/15 ✅ — 터치 지원 모바일 에뮬레이션)
+- html·body·네비·카드·버튼·칩·입력칸·투표 버튼 전부 `manipulation` 적용
+- **더블탭 3회 반복 → `visualViewport.scale` 1 → 1 (변화 없음)**
+- 버튼 6연타 → 확대 없음 + 동작 정상
+- 세로 스크롤 정상 · 탭으로 도구 열기 정상 · 가로 스크롤 0
+- viewport 에 `user-scalable=no` / `maximum-scale` 없음 (핀치 확대 유지)
