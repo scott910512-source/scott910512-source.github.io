@@ -1394,3 +1394,44 @@ MY 탭 → `🔒 이 기기 관리자 모드` 에서 PIN 으로 켜고 끈다 (�
 · PIN 오입력 거부 · PIN 승인 · 새로고침 후 유지 · 룰렛 항목 저장·복구 · 통계 삭제 · JS 에러 0
 `pb_test` 에 **로컬 PIN 이 서버 권한을 주지 않는지** 검사 추가
 전체 회귀 25개 스위트 · 실패 0
+
+---
+
+## Supabase 완전 제거 — 서버 없는 단일 파일 앱
+
+Supabase 프로젝트를 삭제함에 따라 백엔드 의존을 **전부 걷어냈다.** 이제 계정·로그인 개념이 없다.
+
+### 삭제한 것
+- Supabase SDK 로더(`<script src=...supabase-js@2>`), `SB_URL` / `SB_KEY`, 클라이언트 생성
+- **로그인 게이트** 화면 전체 (로그인·회원가입·아이디 찾기·비밀번호 재설정)
+- 계정 카드(`#authLogin` / `#authUser`), 등급(일반·VIP·관리자) 배지, VIP 연출 CSS
+- **후원 시스템**과 후원 광고 모달(`#adModal`, `sponsorWatch`, `adFinish`, `adCancel`)
+- 서버 함수 20여 개: `sbSignIn/SignUp/SignOut/Restore`, `loadProfile`, `roleOf`, `effRole`,
+  `setRole`, `renderSponsor`, `nickToEmail`, `doSignup`, `doFindId`, `doResetPw`, `gateShow`, `updateGate`, …
+- 4개 테이블 접근 코드 (`profiles` / `events` / `ideas` / `roulette_items`)
+- 서버 감지 코드(`sbPing` / `SB_OK` / `sbLive` / `renderNet`) — 감지할 서버가 없으므로 불필요
+
+**총 488줄 삭제 · 29KB 감소** (487KB → 458KB)
+
+### 남은 것 (전부 이 기기 저장)
+| 기능 | 저장 위치 |
+|---|---|
+| 플레이 통계 | `aoki_stat_v1` (최대 3,000건) |
+| 의견함 | `aoki_feedback_v1` |
+| 룰렛 항목 | `aoki_rl_v1` |
+| 관리자 모드 | `aoki_ladmin_v1` (PIN) |
+| 참가자 명단 · TTS 설정 · AI 생성 문제 · 즐겨찾기 · 최근 플레이 · 효과음 | 기존 키 그대로 |
+
+- 계정 탭 → **「📊 플레이 통계」** 로 변경 (로그인 UI 없음)
+- 관리자 권한은 `isAdminNow()` 하나로 단순화 (기기 PIN)
+- `renderAuth()` 는 초기 렌더 진입점으로만 유지 (통계·의견함·룰렛 복구)
+
+### 검증
+`nosb.js` **29/29 ✅**
+- **소스에 Supabase·계정 잔재 0** (16개 키워드 전수 검색)
+- **외부 스크립트는 애드센스 하나뿐**, 실행 중 외부 요청 0건 (광고 제외)
+- 로그인 화면 없이 즉시 진입 · 게임 55개 · 도구 28개 · 라이어 · 마피아 정상
+- 통계 기록·집계·영속·삭제 / 의견 작성·목록·관리자 삭제 / 룰렛 추가·제거·복구
+- PIN 오입력 거부 · PIN 승인 · 새로고침 후 유지 · MY 탭에 "로그인" 문구 0
+
+전체 회귀 25개 스위트 · **실패 0 · JS 에러 0**
