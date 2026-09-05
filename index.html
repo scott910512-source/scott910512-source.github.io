@@ -2348,6 +2348,7 @@ function addSwipe(el,pageId){
 }
 function closeGame(){
   const m=$("gameModal");if(!m)return;
+  if(m.classList.contains("on"))stopAllPlay();
   /* 팝업으로 옮겨온 도구 노드를 원래 자리로 복귀 */
   if(toolPop){
     toolPop.classList.remove("in-pop");
@@ -2362,18 +2363,43 @@ function closeGame(){
 }
 
 /* ===== P1: Hash Router + 화면 이탈 cleanup (부록 Core-6 / D-6) ===== */
-const IVS=new Set(),TOS=new Set();
+const IVS=new Set(),TOS=new Set(),RAFS=new Set();
+let PLAY_TOKEN=0;
 (function(){const si=window.setInterval,ci=window.clearInterval,st=window.setTimeout,ct=window.clearTimeout;
  window.setInterval=function(){const id=si.apply(window,arguments);IVS.add(id);return id;};
  window.clearInterval=function(id){IVS.delete(id);return ci.call(window,id);};
- window.setTimeout=function(){const id=st.apply(window,arguments);TOS.add(id);return id;};
+ window.setTimeout=function(fn,delay,...args){
+   const id=st.call(window,function(){TOS.delete(id);if(typeof fn==="function")fn.apply(window,args);else window.eval(fn);},delay);
+   TOS.add(id);return id;
+ };
  window.clearTimeout=function(id){TOS.delete(id);return ct.call(window,id);};
- window.__ci=ci;window.__ct=ct;})();
+ const raf=window.requestAnimationFrame,caf=window.cancelAnimationFrame;
+ window.requestAnimationFrame=function(fn){const id=raf.call(window,t=>{RAFS.delete(id);fn(t);});RAFS.add(id);return id;};
+ window.cancelAnimationFrame=function(id){RAFS.delete(id);return caf.call(window,id);};
+ window.__ci=ci;window.__ct=ct;window.__caf=caf;})();
 function stopAllPlay(){
+  PLAY_TOKEN++;
+  RAFS.forEach(id=>window.__caf.call(window,id));RAFS.clear();
   IVS.forEach(id=>window.__ci.call(window,id));IVS.clear();
   TOS.forEach(id=>window.__ct.call(window,id));TOS.clear();
   try{rolling=false;}catch(e){}
-  try{bombOn=false;}catch(e){}
+  try{bottleSpinning=false;}catch(e){}
+  try{ytBusy=false;songBusy=false;ytCurId=null;sgCurId=null;
+    [ytPlayer,sgPlayer].forEach(p=>{if(p){try{p.stopVideo();}catch(e){}try{p.destroy();}catch(e){}}});
+    ytPlayer=sgPlayer=null;
+    ["ytHolder","sgHolder","ytRevealBox","songEmbed"].forEach(id=>{const el=$(id);if(el)el.replaceChildren();});
+  }catch(e){}
+  try{if(tmState==="run"){tmState="ready";tmRAF=0;
+    $("tmMain").textContent="▶️ "+(tmNum+1)+"번 선수 START";$("tmMain").className="big-btn b2";
+    $("tmPlayer").textContent="측정이 중단됐어요. 다시 시작하세요.";
+  }}catch(e){}
+  try{if(silentT){silentT=null;$("silentFail").style.display="none";$("silentStart").style.display="inline-block";
+    $("silentMsg").textContent="타이머가 중단됐어요. 다시 시작하세요.";
+  }}catch(e){}
+  document.body.style.background="";
+  document.querySelectorAll(".confetti").forEach(el=>el.remove());
+  try{if(bombOn){$("bombBtn").style.display="inline-block";$("bombFace").textContent="💣";$("bombFace").style.transform="";
+    $("bombMsg").textContent="게임이 중단됐어요. 다시 점화하세요.";}bombOn=false;}catch(e){}
   try{introOn=false;}catch(e){}
   try{charRolling=false;}catch(e){}
   try{personRolling=false;}catch(e){}
@@ -2408,6 +2434,7 @@ function routeApply(){
   showRoute(head||"home");
 }
 window.addEventListener("hashchange",routeApply);
+window.addEventListener("pagehide",stopAllPlay);
 /* 팝업 ✕: 노드 복귀 + 해시 정합성 유지 */
 /* Focus Mode 상단바의 효과음 표시 갱신 (기본/최소/끔) */
 function syncModalSnd(){
@@ -2634,11 +2661,16 @@ function lsGet(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 let RECENT=[],FAVS=[],SETUP={n:6,loc:"any",mood:"any",drink:"any",prep:"any"};
 function loadPrefs(){
-  RECENT=lsGet(LSK.recent,[]).filter(id=>GAMES.some(g=>g.id===id)).slice(0,5);
-  FAVS=lsGet(LSK.fav,[]).filter(id=>GAMES.some(g=>g.id===id));
+  const recent=lsGet(LSK.recent,[]),fav=lsGet(LSK.fav,[]);
+  RECENT=(Array.isArray(recent)?recent:[]).filter(id=>GAMES.some(g=>g.id===id)).slice(0,5);
+  FAVS=[...new Set((Array.isArray(fav)?fav:[]).filter(id=>GAMES.some(g=>g.id===id)))];
   const s=lsGet(LSK.setup,null);
-  if(s&&typeof s==="object")SETUP=Object.assign(SETUP,s);
-  HOME_N=SETUP.n||6;
+  if(s&&typeof s==="object"&&!Array.isArray(s)){
+    const n=Number(s.n);if(Number.isFinite(n))SETUP.n=Math.max(2,Math.min(20,Math.round(n)));
+    const allowed={loc:["any","indoor","outdoor"],mood:["any","funny","psychology","competition","conversation","quick"],drink:["any","yes","no"],prep:["any","none"]};
+    for(const k of Object.keys(allowed))if(allowed[k].includes(s[k]))SETUP[k]=s[k];
+  }
+  HOME_N=SETUP.n;
 }
 function pushRecent(id){
   if(!GAMES.some(g=>g.id===id))return;
@@ -3748,7 +3780,7 @@ function tmMain(){
       const sec=Math.floor(el/1000);
       if(sec>lastSec){lastSec=sec;
         /* 목표 3초 전부터 tick 강조 (본문 35항) */
-        const left=(tmTargetV||0)-sec;
+        const left=Math.ceil((tmTargetV||0)/1000)-sec;
         if(tmTargetV&&left<=3&&left>0)sfx("countdown");
         else if(tmTargetV&&left===0)sfx("countdownFinal");
         else sfx("timerTick");}
@@ -5521,9 +5553,11 @@ function ytParse(u){
   return m?m[1]:null;
 }
 function ytLoad(cb,fail){
+  const token=PLAY_TOKEN,ready=cb,failed=fail;
+  cb=()=>{if(token===PLAY_TOKEN)ready();};fail=()=>{if(token===PLAY_TOKEN)failed();};
   if(window.YT&&window.YT.Player){cb();return;}
   let done=false;
-  window.onYouTubeIframeAPIReady=()=>{done=true;cb();};
+  window.onYouTubeIframeAPIReady=()=>{if(done)return;done=true;cb();};
   const s=document.createElement("script");
   s.src="https://www.youtube.com/iframe_api";
   s.onerror=()=>{if(!done){done=true;fail();}};
@@ -5545,6 +5579,7 @@ function ytClipFallback(id,sec,start){
   },sec*1000+700);
 }
 function ytClip(sec){
+  const token=PLAY_TOKEN;
   if(ytBusy)return;
   const id=ytParse($("ytUrl").value.trim());
   if(!id){$("ytRes").textContent="⚠️ 유튜브 링크를 먼저 붙여넣으세요";return;}
@@ -5554,6 +5589,7 @@ function ytClip(sec){
   const start=$("ytRand").checked?15+Math.floor(Math.random()*90):0;
   ytLoad(()=>{
     const go=()=>{
+      if(token!==PLAY_TOKEN)return;
       ytPlayer.seekTo(start,true);ytPlayer.playVideo();
       $("ytRes").textContent="🔊 재생 중... ("+sec+"초)";
       setTimeout(()=>{
@@ -5836,8 +5872,9 @@ function songFull(){
 }
 /* 자동정지 없이 전체 재생 (숨김 플레이어로 오디오만) */
 function sgPlayFull(id,start){
+  const token=PLAY_TOKEN;
   ytLoad(()=>{
-    const go=()=>{try{sgPlayer.seekTo(start,true);sgPlayer.playVideo();}catch(e){}clearTimeout(sgStopT);};
+    const go=()=>{if(token!==PLAY_TOKEN)return;try{sgPlayer.seekTo(start,true);sgPlayer.playVideo();}catch(e){}clearTimeout(sgStopT);};
     if(sgPlayer&&sgCurId===id){go();}
     else{
       if(sgPlayer){try{sgPlayer.destroy();}catch(e){}sgPlayer=null;}
@@ -5870,8 +5907,10 @@ function sgFallback(id,sec,start,after){
   sgStopT=setTimeout(()=>{h.innerHTML="";after&&after();},sec*1000+400);
 }
 function sgPlayAt(id,start,sec,after){
+  const token=PLAY_TOKEN;
   ytLoad(()=>{
     const go=()=>{
+      if(token!==PLAY_TOKEN)return;
       try{sgPlayer.seekTo(start,true);sgPlayer.playVideo();}catch(e){}
       clearTimeout(sgStopT);
       sgStopT=setTimeout(()=>{try{sgPlayer.pauseVideo();}catch(e){}after&&after();},sec*1000);
@@ -6119,7 +6158,7 @@ let fourList=[],fourIdx=0;
 function fourStart(){
   logEvent("play","글자 맞추기");
   const pool=gp("word",FOUR.concat(FIVE)).filter(x=>{const n=[...x.w].length;return n>=4&&n<=5;});
-  fourList=pool.slice().sort(()=>Math.random()-0.5).slice(0,10);
+  fourList=shuffle(pool.slice()).slice(0,10);
   fourIdx=0;fourRender();beep(880,.1,.25);
 }
 function fourRender(){
@@ -6395,6 +6434,7 @@ let photoName=null,photoBusy=false;
 const P_HIST=["세종대왕","이순신","안중근","김구","유관순","신사임당","장영실","정약용","이황","이이","고종","흥선대원군","나폴레옹","링컨","간디","클레오파트라","진시황","칭기즈 칸","레오나르도 다빈치","콜럼버스","잔 다르크","율리우스 카이사르","소크라테스","아리스토텔레스","공자","뉴턴","아인슈타인","베토벤","모차르트","마리 퀴리"];
 async function photoQuiz(mode){
   if(photoBusy)return;photoBusy=true;
+  const token=PLAY_TOKEN;
   const pool=mode==="kr"?P_KR:mode==="gl"?P_GL:mode==="hist"?P_HIST:P_KR.concat(P_GL);
   const modeLabel=mode==="kr"?"🇰🇷 한국인":mode==="gl"?"🌍 외국인":mode==="hist"?"🏛 역사인물":"🎲 랜덤";
   $("photoStat").textContent="⏳ 위키백과에서 사진 찾는 중...";
@@ -6405,8 +6445,10 @@ async function photoQuiz(mode){
     const title=WIKI_KO[name]||name;
     try{
       const res=await fetch("https://ko.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title));
+      if(token!==PLAY_TOKEN)return;
       if(!res.ok)continue;
       const j=await res.json();
+      if(token!==PLAY_TOKEN)return;
       const thumb=j.thumbnail&&j.thumbnail.source;
       const orig=j.originalimage&&j.originalimage.source;
       if(!thumb&&!orig)continue;
@@ -6415,19 +6457,21 @@ async function photoQuiz(mode){
       photoName=name;
       let stage=0;
       el.onerror=()=>{
+        if(token!==PLAY_TOKEN)return;
         if(stage===0&&thumb&&el.src!==thumb){stage=1;el.src=thumb;}
         else if(stage<=1&&orig&&el.src!==orig){stage=2;el.src=orig;}
         else{el.onerror=null;$("photoBox").style.display="none";
           $("photoStat").textContent="😢 이 사진은 로딩 실패 — '사진으로 출제' 한 번 더!";}
       };
-      el.onload=()=>{$("photoBox").style.display="block";};
+      el.onload=()=>{if(token===PLAY_TOKEN)$("photoBox").style.display="block";};
       $("photoAns").style.display="none";$("photoAns").textContent="";
       const tg=$("photoTgl");if(tg)tg.textContent="👁 정답 공개";
       $("photoStat").textContent="이 사람 누구게? ("+modeLabel+")";
       el.removeAttribute("src");el.src=big||thumb||orig;
       beep(880,.1,.25);photoBusy=false;return;
     }catch(e){
-      $("photoStat").textContent="⚠️ 연결 차단됨 — 사파리/크롬 브라우저로 열어야 작동해요";
+      if(token!==PLAY_TOKEN)return;
+      $("photoStat").textContent="⚠️ 사진을 불러오지 못했어요. 연결을 확인하고 다시 시도하세요.";
       photoBusy=false;return;
     }
   }
@@ -6574,8 +6618,8 @@ try{setSndMode(SND_MODE);}catch(e){}
 loadPrefs();renderHomeExtras();renderRecs();
 try{$("homeN").textContent=HOME_N;}catch(e){}
 routeApply(); /* 초기 라우트 적용 */
-$("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeGame();});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeGame();}
+$("gameModal").addEventListener("click",e=>{if(e.target.id==="gameModal")closeOverlay();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeOverlay();}
   else if(e.key==="ArrowLeft"||e.key==="ArrowRight"){const on=document.querySelector(".page.on");if(on&&CAR[on.id])cStep(on.id,e.key==="ArrowRight"?1:-1);}});
 </script>
 </body>
